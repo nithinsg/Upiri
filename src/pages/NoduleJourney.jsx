@@ -1,6 +1,6 @@
 import { Clock, Microscope, Phone, ScanLine, ShieldCheck, Sparkles, Stethoscope, Users } from "lucide-react";
 import { C, waLink } from "../config.js";
-import { Btn, Card, Chip, BackBar, Banner } from "../components/ui.jsx";
+import { Btn, Chip, BackBar, Banner } from "../components/ui.jsx";
 import { useReveal } from "../hooks.js";
 
 const JOURNEY = [
