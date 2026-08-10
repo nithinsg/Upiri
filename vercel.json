@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": "public",
+  "redirects": [
+    { "source": "/upiri-2.0.html", "destination": "/", "permanent": false }
+  ]
+}
