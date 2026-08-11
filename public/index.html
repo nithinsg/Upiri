@@ -6,7 +6,7 @@
 <title>ŪPIRI 2.0 — Precision Pulmonary Care</title>
 <meta name="description" content="ŪPIRI Precision Pulmonary Care: lung risk check, breath score, nodule journey, Rendo Ūpiri quit challenge, condition clubs, symptom triage and altitude readiness.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script src="./support.js"></script>
+<script src="/support.js"></script>
 </head>
 <body>
 <x-dc>
@@ -65,6 +65,11 @@ input,select{font-family:inherit;color:#1D1B4B}
   x-dc [data-r="nav-pill"]{flex-wrap:wrap;row-gap:6px;border-radius:24px !important;padding:8px 10px !important}
   x-dc [data-r="nav-sep"]{display:none !important}
   x-dc [data-r="nav-links"]{order:3;width:100%;flex:1 0 100% !important;overflow-x:auto;scrollbar-width:none}
+}
+@media (max-width:1180px){
+  x-dc [data-r="nav-links"]{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  x-dc [data-r="nav-links"]::-webkit-scrollbar{display:none}
+  x-dc [data-r="nav-links"]>button{flex:0 0 auto;padding:8px 10px !important;font-size:13px !important}
   x-dc [data-r="nav-links"]::-webkit-scrollbar{display:none}
   x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   x-dc [data-r="nav-pill"]>button svg{width:26px;height:26px}
@@ -105,15 +110,17 @@ input,select{font-family:inherit;color:#1D1B4B}
     <div data-r="nav-pill" style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.74);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.9);border-radius:999px;padding:8px 10px 8px 16px;box-shadow:0 18px 50px -18px rgba(29,27,75,0.38);max-width:1150px;width:100%">
       <button onClick="{{ goHome }}" aria-label="ŪPIRI home" style="display:flex;align-items:center;gap:10px;background:transparent;border:none;cursor:pointer;padding:2px 6px 2px 0">
         <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true" style="color:#2C2A6B"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M46 5v18c0 6-3 9-7 12"></path><path d="M54 5v18c0 6 3 9 7 12"></path><path d="M44 40c-2-9-9-13-17-8C16 39 8 57 9 73c1 12 8 19 18 17 10-2 16-11 17-24v-26z"></path><path d="M56 40c2-9 9-13 17-8 11 7 19 25 18 41-1 12-8 19-18 17-10-2-16-11-17-24v-26z"></path><path d="M39 35c-1 6-3 11-7 15" stroke-width="3.2"></path><path d="M36 43l-8 4" stroke-width="3.2"></path><path d="M32 50c-1 5-3 9-6 12" stroke-width="3.2"></path><path d="M61 35c1 6 3 11 7 15" stroke-width="3.2"></path><path d="M64 43l8 4" stroke-width="3.2"></path><path d="M68 50c1 5 3 9 6 12" stroke-width="3.2"></path></g><g fill="#F5821F"><path d="M35 32c-2-5-1-9 3-12 2 5 1 9-3 12z"></path><path d="M27 49c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M25 64c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M65 32c2-5 1-9-3-12-2 5-1 9 3 12z"></path><path d="M73 49c5 2 9 1 12-3-5-2-9-1-12 3z"></path><path d="M75 64c5 2 9 1 12-3-5-2-9-1-12 3z"></path></g></svg>
-        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#1D1B4B">ŪPIRI <span style="font-family:'Noto Sans Telugu',sans-serif;font-size:13px;font-weight:600;color:#F5821F">ఊపిరి</span></span>
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;white-space:nowrap;color:#1D1B4B">ŪPIRI <span style="font-family:'Noto Sans Telugu',sans-serif;font-size:13px;font-weight:600;color:#F5821F">ఊపిరి</span></span>
       </button>
       <div data-r="nav-sep" style="width:1px;height:24px;background:rgba(44,42,107,0.14);margin:0 8px"></div>
       <div data-r="nav-links" style="display:flex;align-items:center;gap:2px;flex:1">
-        <button onClick="{{ goRisk }}" style="padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Risk Check</button>
-        <button onClick="{{ goBreath }}" style="padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Lung Age</button>
-        <button onClick="{{ goClubs }}" style="padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Clubs</button>
-        <button onClick="{{ goJourney }}" style="padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Nodule Journey</button>
-        <button onClick="{{ goRendo }}" style="padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Rendo Ūpiri</button>
+        <button onClick="{{ goRisk }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Risk Check</button>
+        <button onClick="{{ goBreath }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Lung Age</button>
+        <button onClick="{{ goClubs }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Clubs</button>
+        <button onClick="{{ goJourney }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Nodule Journey</button>
+        <button onClick="{{ goRendo }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Rendo Ūpiri</button>
+        <button onClick="{{ goKnowledge }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Knowledge Hub</button>
+        <button onClick="{{ goAlumni }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Clinical Network</button>
       </div>
       <select data-r="nav-space" value="{{ spaceValue }}" onChange="{{ pickSpace }}" aria-label="Choose your ŪPIRI space" style="appearance:none;-webkit-appearance:none;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;color:#2C2A6B;cursor:pointer;outline:none">
         <option value="people">People · ప్రజలు</option>
@@ -1797,6 +1804,486 @@ input,select{font-family:inherit;color:#1D1B4B}
   </div>
   </sc-if>
 
+  <!-- ============ ŪPIRI CLINICAL NETWORK ============ -->
+  <sc-if value="{{ isAlumni }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Clinical Network" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:1150px;margin:0 auto">
+
+      <!-- A. HERO -->
+      <section style="display:flex;align-items:center;gap:16px;margin-bottom:8px">
+        <button onClick="{{ goHome }}" aria-label="Back" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.8);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateX(-3px)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        </button>
+        <span style="font-size:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#B35A08">For doctors</span>
+      </section>
+      <section style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:48px;align-items:center;margin-bottom:64px">
+        <div style="animation:fadeUp .5s ease both">
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px,4.2vw,48px);letter-spacing:-0.025em;line-height:1.08;color:#1D1B4B;margin:0;text-wrap:balance">ŪPIRI Clinical Network</h1>
+          <p style="font-size:17px;line-height:1.6;color:#4A4880;margin:16px 0 0;max-width:560px;text-wrap:pretty">A community of doctors connected by learning, collaboration and better patient care.</p>
+          <p style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;line-height:1.55;color:#2C2A6B;margin:20px 0 0;max-width:560px">Learn together. Discuss difficult cases. Access advanced expertise. Refer when your patient needs more.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:30px">
+            <a href="{{ wa.netJoin }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border-radius:999px;font-size:15.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px) scale(1.02);color:#fff">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+              Join the Network
+            </a>
+            <button onClick="{{ goKnowledge }}" style="display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border-radius:999px;font-size:15.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.85);border:2px solid rgba(44,42,107,0.14);cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+              Explore Clinical Resources
+            </button>
+          </div>
+        </div>
+        <div aria-hidden="true" style="display:flex;align-items:center;justify-content:center;animation:fadeUp .5s ease .2s both">
+          <svg width="100%" viewBox="0 0 320 300" style="max-width:400px" role="img" aria-label="A network of connected clinicians around a shared clinical hub">
+            <g stroke="rgba(44,42,107,0.18)" stroke-width="1.5" fill="none">
+              <path d="M160 150 L70 70 M160 150 L250 70 M160 150 L44 160 M160 150 L276 160 M160 150 L86 240 M160 150 L234 240"></path>
+              <path d="M70 70 L250 70 M44 160 L86 240 M276 160 L234 240" stroke-dasharray="3 8"></path>
+            </g>
+            <circle cx="160" cy="150" r="42" fill="rgba(44,42,107,0.06)" stroke="#2C2A6B" stroke-width="2"></circle>
+            <circle cx="160" cy="150" r="58" fill="none" stroke="rgba(245,130,31,0.5)" stroke-width="1.5" style="animation:breatheSlow 4.5s ease-in-out infinite;transform-origin:160px 150px"></circle>
+            <g fill="#2C2A6B"><circle cx="70" cy="70" r="16"></circle><circle cx="250" cy="70" r="16"></circle><circle cx="44" cy="160" r="13"></circle><circle cx="276" cy="160" r="13"></circle></g>
+            <g fill="#F5821F"><circle cx="86" cy="240" r="14"></circle><circle cx="234" cy="240" r="14"></circle></g>
+            <text x="160" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2A6B" font-family="Bricolage Grotesque, sans-serif">ŪPIRI</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- B. NETWORK OVERVIEW -->
+      <section style="margin-bottom:60px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">Who the network brings together</h2>
+        <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px;max-width:680px">One community, several routes in. Everyone who has learned or worked with Yashoda Pulmonology belongs here.</p>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <li style="padding:22px 24px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.7);backdrop-filter:blur(14px);font-size:14.5px;font-weight:600;color:#2C2A6B">Fellowship alumni</li>
+          <li style="padding:22px 24px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.7);backdrop-filter:blur(14px);font-size:14.5px;font-weight:600;color:#2C2A6B">Workshop participants</li>
+          <li style="padding:22px 24px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.7);backdrop-filter:blur(14px);font-size:14.5px;font-weight:600;color:#2C2A6B">Observership &amp; trainee doctors</li>
+          <li style="padding:22px 24px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.7);backdrop-filter:blur(14px);font-size:14.5px;font-weight:600;color:#2C2A6B">CME participants</li>
+          <li style="padding:22px 24px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.7);backdrop-filter:blur(14px);font-size:14.5px;font-weight:600;color:#2C2A6B">Doctors who have collaborated with Yashoda Pulmonology</li>
+        </ul>
+      </section>
+
+      <!-- C. WHY JOIN -->
+      <section style="margin-bottom:60px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 24px">Why join?</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <sc-for list="{{ netWhy }}" as="c" hint-placeholder-count="12">
+            <article style="display:flex;flex-direction:column;gap:10px;padding:26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3)">
+              <span style="width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#FDEBD9;color:#B35A08">
+                <svg width="20" height="20" viewBox="{{ c.vb }}" fill="none" stroke="currentColor" stroke-width="{{ c.sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <sc-for list="{{ c.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+                </svg>
+              </span>
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#2C2A6B;margin:0">{{ c.t }}</h3>
+              <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">{{ c.d }}</p>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- D. KNOW WHEN TO REFER -->
+      <section style="margin-bottom:60px;padding:38px 40px;border-radius:30px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Know when to refer</h2>
+        <p style="font-size:16px;font-weight:700;color:#2C2A6B;margin:12px 0 0;max-width:720px">Recognise when a patient needs a higher level of pulmonary care.</p>
+        <p style="font-size:14.5px;line-height:1.6;color:#4A4880;margin:10px 0 26px;max-width:720px">This network is not about moving patients. It is about knowing the point at which a patient benefits from subspecialty input — and having somewhere to send them when that point arrives.</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <sc-for list="{{ referTriggers }}" as="r" hint-placeholder-count="8">
+            <article style="padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1);box-shadow:0 14px 34px -22px rgba(29,27,75,0.35)">
+              <span style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ r.tag }}</span>
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;color:#1D1B4B;margin:10px 0 6px">{{ r.t }}</h3>
+              <p style="font-size:13px;line-height:1.55;color:#4A4880;margin:0">{{ r.d }}</p>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- E. REFER → COLLABORATE → RETURN -->
+      <section style="margin-bottom:60px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">Refer → Collaborate → Return</h2>
+        <p style="font-size:15px;color:#6C6A9E;margin:0 0 26px;max-width:720px">Patients can access advanced Yashoda expertise when required while maintaining continuity with their referring physician wherever clinically appropriate.</p>
+        <ol style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <li style="padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3)">
+            <span style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F5821F,#FFA452);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px">1</span>
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#2C2A6B;margin:14px 0 6px">Refer</h3>
+            <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">You identify that the patient needs subspecialty pulmonary input and send them with your clinical question attached.</p>
+          </li>
+          <li style="padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3)">
+            <span style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F5821F,#FFA452);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px">2</span>
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#2C2A6B;margin:14px 0 6px">Collaborate</h3>
+            <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">The assessment, investigation or procedure is done and discussed with you — you stay part of the decision, not downstream of it.</p>
+          </li>
+          <li style="padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3)">
+            <span style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F5821F,#FFA452);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px">3</span>
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#2C2A6B;margin:14px 0 6px">Return</h3>
+            <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">Wherever clinically appropriate, the patient returns to you for continuing care with a clear plan they and you both understand.</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- F. CASE RESCUE -->
+      <section style="margin-bottom:60px;padding:40px 44px;border-radius:30px;background:linear-gradient(145deg,#2C2A6B,#1D1B4B);color:#fff;box-shadow:0 30px 70px -30px rgba(29,27,75,0.6)">
+        <div style="display:grid;grid-template-columns:1.3fr 0.7fr;gap:32px;align-items:center">
+          <div>
+            <span style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;padding:5px 13px;border-radius:999px;background:rgba(245,130,31,0.22);color:#FFB067">ŪPIRI Case Rescue</span>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3vw,32px);letter-spacing:-0.02em;color:#fff;margin:14px 0 0">Have a difficult pulmonary case?</h2>
+            <p style="font-size:15px;line-height:1.65;color:#C9D2E6;margin:12px 0 0;max-width:620px">Submit a case that is not behaving the way you expected and it goes to a specialist for discussion — imaging, physiology, the treatment already tried and what to consider next. This is clinical collaboration between colleagues, not a route to move the patient.</p>
+          </div>
+          <div>
+            <a href="{{ wa.netCase }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border-radius:999px;font-size:15.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px) scale(1.02);color:#fff">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg>
+              Discuss a Case
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- G. CLINICAL COUNCIL -->
+      <section style="margin-bottom:60px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">ŪPIRI Clinical Council</h2>
+        <p style="font-size:15px;line-height:1.6;color:#6C6A9E;margin:0 0 8px;max-width:720px">A standing group of 15–25 members who shape the network's academic direction — what gets taught, which cases get discussed, and where the network puts its effort.</p>
+        <p style="font-size:13px;color:#B35A08;background:#FDEBD9;display:inline-block;padding:7px 16px;border-radius:999px;font-weight:700;margin:0 0 24px">Placeholder — council members to be confirmed</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <sc-for list="{{ councilRoles }}" as="c" hint-placeholder-count="5">
+            <article style="display:flex;gap:16px;align-items:flex-start;padding:24px;border-radius:24px;border:1px dashed rgba(44,42,107,0.25);background:rgba(255,255,255,0.6)">
+              <span aria-hidden="true" style="flex:0 0 auto;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px">{{ c.initials }}</span>
+              <div>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#2C2A6B;margin:0">{{ c.r }}</h3>
+                <p style="font-size:13px;line-height:1.55;color:#4A4880;margin:6px 0 0">{{ c.d }}</p>
+                <p style="font-size:11.5px;color:#8A88B8;margin:8px 0 0">Name to be added</p>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+        <div style="margin-top:20px">
+          <a href="{{ wa.netCouncil }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.85);border:2px solid rgba(44,42,107,0.14);transition:transform .18s ease" style-hover="transform:translateY(-2px);color:#2C2A6B">Ask about the Clinical Council</a>
+        </div>
+      </section>
+
+      <!-- H. ALUMNI ENGAGEMENT -->
+      <section style="margin-bottom:60px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 24px">How the network stays active</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <sc-for list="{{ alumniEngage }}" as="e" hint-placeholder-count="7">
+            <article style="padding:24px 26px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);box-shadow:0 20px 50px -26px rgba(29,27,75,0.3)">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;color:#2C2A6B;margin:0 0 6px">{{ e.t }}</h3>
+              <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">{{ e.d }}</p>
+            </article>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:22px">
+          <a href="{{ wa.netCme }}" target="_blank" rel="noreferrer" style="padding:11px 22px;border-radius:999px;font-size:13.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.85);border:1.5px solid rgba(44,42,107,0.14)" style-hover="color:#2C2A6B;transform:translateY(-1px)">CME &amp; Grand Rounds list</a>
+          <a href="{{ wa.netMentor }}" target="_blank" rel="noreferrer" style="padding:11px 22px;border-radius:999px;font-size:13.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.85);border:1.5px solid rgba(44,42,107,0.14)" style-hover="color:#2C2A6B;transform:translateY(-1px)">Mentorship</a>
+          <a href="{{ wa.netFellow }}" target="_blank" rel="noreferrer" style="padding:11px 22px;border-radius:999px;font-size:13.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.85);border:1.5px solid rgba(44,42,107,0.14)" style-hover="color:#2C2A6B;transform:translateY(-1px)">Fellowship &amp; observership</a>
+        </div>
+      </section>
+
+      <!-- I. CTA -->
+      <section style="text-align:center;padding:46px 30px;border-radius:30px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(20px);box-shadow:0 28px 66px -28px rgba(29,27,75,0.35)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,3vw,32px);letter-spacing:-0.02em;color:#1D1B4B;margin:0;text-wrap:balance">Become part of the ŪPIRI Clinical Network</h2>
+        <p style="font-size:15px;color:#4A4880;margin:12px auto 24px;max-width:560px">Membership is free. Tell us who you are and how you know the department, and we will add you to the network.</p>
+        <a href="{{ wa.netJoin }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:10px;padding:15px 32px;border-radius:999px;font-size:15.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px) scale(1.02);color:#fff">Join the Network</a>
+      </section>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ YASHODA KNOWLEDGE HUB — INDEX ============ -->
+  <sc-if value="{{ isKnowledge }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Knowledge Hub" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:1150px;margin:0 auto">
+
+      <!-- A. HERO + SEARCH -->
+      <section style="margin-bottom:44px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px">
+          <button onClick="{{ goHome }}" aria-label="Back" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.8);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateX(-3px)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+          </button>
+          <div>
+            <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,3.8vw,42px);letter-spacing:-0.025em;line-height:1.1;color:#1D1B4B;margin:0">Yashoda Knowledge Hub</h1>
+            <p style="font-size:13.5px;color:#F5821F;font-weight:700;margin:4px 0 0">Trusted pulmonary knowledge from Yashoda experts.</p>
+          </div>
+        </div>
+        <p style="font-size:16px;line-height:1.6;color:#4A4880;margin:0 0 24px;max-width:760px;text-wrap:pretty">Explore trusted information, expert insights, clinical cases, videos and resources across pulmonary medicine.</p>
+
+        <div style="position:relative;max-width:680px">
+          <span aria-hidden="true" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#8A88B8;display:flex">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          </span>
+          <input value="{{ khQuery }}" onChange="{{ onKhQuery }}" type="search" aria-label="Search the Knowledge Hub" placeholder="Search a disease, condition or question..." style="width:100%;border-radius:999px;padding:17px 22px 17px 52px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:15.5px;outline-color:#F5821F;box-shadow:0 18px 44px -26px rgba(29,27,75,0.4)">
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
+          <sc-for list="{{ khTabs }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.pick }}" style="{{ t.st }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- SEARCH RESULTS -->
+      <sc-if value="{{ khHasQuery }}" hint-placeholder-val="{{ false }}">
+        <section style="margin-bottom:60px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#1D1B4B;margin:0 0 18px">{{ khResultCount }}</h2>
+          <sc-if value="{{ khNoResults }}" hint-placeholder-val="{{ false }}">
+            <p style="font-size:15px;color:#4A4880;padding:28px;border-radius:22px;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.9)">Nothing matched that. Try a condition name such as “asthma”, “nodule” or “fibrosis” — or <a href="{{ wa.khAsk }}" target="_blank" rel="noreferrer" style="font-weight:700;text-decoration:underline">ask us directly</a>.</p>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+            <sc-for list="{{ khHits }}" as="h" hint-placeholder-count="6">
+              <button onClick="{{ h.open }}" style="text-align:left;display:flex;flex-direction:column;gap:6px;padding:20px 24px;border-radius:22px;border:1px solid rgba(44,42,107,0.1);background:#fff;cursor:pointer;box-shadow:0 14px 34px -24px rgba(29,27,75,0.35);transition:transform .15s ease" style-hover="transform:translateY(-2px)">
+                <span style="font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#B35A08">{{ h.kind }}</span>
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#2C2A6B">{{ h.t }}</span>
+                <span style="font-size:13px;color:#4A4880">{{ h.d }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- B. TOPIC LIBRARY -->
+      <sc-if value="{{ khShowTopics }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-bottom:60px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">Conditions &amp; topics</h2>
+          <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px">Start with a condition. Each topic covers what it is, how it is diagnosed, how it is treated and when to seek specialist care.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+            <sc-for list="{{ khTopicCards }}" as="t" hint-placeholder-count="18">
+              <article style="display:flex;flex-direction:column;padding:26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3)">
+                <span aria-hidden="true" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B;margin-bottom:14px">
+                  <svg width="22" height="22" viewBox="{{ t.vb }}" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round">
+                    <sc-for list="{{ t.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+                  </svg>
+                </span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#2C2A6B;margin:0 0 8px">{{ t.n }}</h3>
+                <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0 0 16px;flex:1">{{ t.blurb }}</p>
+                <button onClick="{{ t.open }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">
+                  Explore {{ t.n }}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- D. FEATURED -->
+      <sc-if value="{{ khShowFeatured }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-bottom:60px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 24px">Featured</h2>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+            <sc-for list="{{ khFeatured }}" as="f" hint-placeholder-count="4">
+              <button onClick="{{ f.open }}" style="text-align:left;display:flex;flex-direction:column;gap:8px;padding:24px;border-radius:24px;border:1px solid rgba(44,42,107,0.1);background:linear-gradient(160deg,rgba(231,231,244,0.85),rgba(255,255,255,0.9));cursor:pointer;box-shadow:0 20px 46px -26px rgba(29,27,75,0.35);transition:transform .15s ease" style-hover="transform:translateY(-2px)">
+                <span style="font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#B35A08">{{ f.kind }}</span>
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.35;color:#2C2A6B">{{ f.t }}</span>
+                <span style="font-size:12.5px;color:#6C6A9E">{{ f.topicName }}</span>
+                <span style="font-size:11px;color:#8A88B8">Placeholder — to be replaced</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- G. ARTICLE LIBRARY -->
+      <sc-if value="{{ khShowArticles }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-bottom:60px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 24px">Articles &amp; guides</h2>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+            <sc-for list="{{ khArticles }}" as="a" hint-placeholder-count="12">
+              <article style="display:flex;flex-direction:column;padding:24px 26px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 20px 50px -26px rgba(29,27,75,0.3)">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                  <span style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:#FDEBD9;color:#B35A08">{{ a.cat }}</span>
+                  <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ a.topicName }}</span>
+                </div>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.35;color:#2C2A6B;margin:0 0 10px">{{ a.t }}</h3>
+                <p style="font-size:12.5px;color:#8A88B8;margin:0 0 14px">{{ a.read }} read · Date to be added</p>
+                <sc-if value="{{ a.placeholder }}" hint-placeholder-val="{{ true }}">
+                  <p style="font-size:11px;color:#8A88B8;margin:0 0 14px">Placeholder — article text to be added</p>
+                </sc-if>
+                <button onClick="{{ a.open }}" style="align-self:flex-start;margin-top:auto;padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">Read more</button>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- F. VIDEO LIBRARY -->
+      <sc-if value="{{ khShowVideos }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-bottom:60px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">Expert video library</h2>
+          <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px">Short explanations from the Yashoda pulmonology team.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+            <sc-for list="{{ khVideos }}" as="v" hint-placeholder-count="9">
+              <article style="border-radius:24px;overflow:hidden;background:#fff;border:1px solid rgba(44,42,107,0.1);box-shadow:0 20px 50px -26px rgba(29,27,75,0.35)">
+                <div aria-hidden="true" style="position:relative;height:132px;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,#2C2A6B,#3B3888)">
+                  <span style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,0.25)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2A6B" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
+                  </span>
+                  <span style="position:absolute;right:10px;bottom:10px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,0.55);color:#fff">--:--</span>
+                </div>
+                <div style="padding:18px 20px">
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.35;color:#2C2A6B;margin:0 0 8px">{{ v.t }}</h3>
+                  <p style="font-size:12.5px;color:#6C6A9E;margin:0">{{ v.topicName }} · Expert name to be added</p>
+                  <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ true }}">
+                    <p style="font-size:11px;color:#8A88B8;margin:8px 0 0">Placeholder — video URL to be added</p>
+                  </sc-if>
+                  <button onClick="{{ v.open }}" style="margin-top:12px;padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">Open topic</button>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- H. CLINICAL CASES -->
+      <sc-if value="{{ khShowCases }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-bottom:60px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">ŪPIRI Clinical Cases</h2>
+          <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px">Teaching cases for doctors, built around decisions rather than answers.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+            <sc-for list="{{ khCases }}" as="c" hint-placeholder-count="6">
+              <article style="display:flex;flex-direction:column;padding:24px 26px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 20px 50px -26px rgba(29,27,75,0.3)">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                  <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ c.topicName }}</span>
+                  <span style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:#FDEBD9;color:#B35A08">{{ c.lvl }}</span>
+                </div>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.35;color:#2C2A6B;margin:0 0 8px">{{ c.t }}</h3>
+                <p style="font-size:13px;line-height:1.55;color:#4A4880;margin:0 0 14px;flex:1">{{ c.d }}</p>
+                <sc-if value="{{ c.placeholder }}" hint-placeholder-val="{{ true }}">
+                  <p style="font-size:11px;color:#8A88B8;margin:0 0 12px">Placeholder — full case to be added</p>
+                </sc-if>
+                <button onClick="{{ c.open }}" style="align-self:flex-start;padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">Explore case</button>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <section style="text-align:center;padding:40px 30px;border-radius:30px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(20px,2.6vw,28px);color:#1D1B4B;margin:0">Are you a doctor?</h2>
+        <p style="font-size:15px;color:#4A4880;margin:10px auto 20px;max-width:560px">The ŪPIRI Clinical Network adds case discussion, CME and direct specialist access on top of everything here.</p>
+        <button onClick="{{ goAlumni }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">Visit the Clinical Network</button>
+      </section>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ KNOWLEDGE HUB — TOPIC DETAIL ============ -->
+  <sc-if value="{{ isTopic }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Knowledge Topic" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:900px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:26px">
+        <button onClick="{{ backToHub }}" aria-label="Back to the Knowledge Hub" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.8);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateX(-3px)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        </button>
+        <span aria-hidden="true" style="width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B">
+          <svg width="24" height="24" viewBox="{{ tpVb }}" fill="none" stroke="currentColor" stroke-width="{{ tpSw }}" stroke-linecap="round" stroke-linejoin="round">
+            <sc-for list="{{ tpPaths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+          </svg>
+        </span>
+        <div>
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px,3.4vw,38px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">{{ tpName }}</h1>
+          <p style="font-size:12.5px;color:#8A88B8;margin:4px 0 0">Yashoda Knowledge Hub · Draft, pending clinical review</p>
+        </div>
+      </div>
+
+      <article style="padding:34px 38px;border-radius:30px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.8);backdrop-filter:blur(20px);box-shadow:0 28px 66px -28px rgba(29,27,75,0.35);animation:popIn .35s ease both">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:0 0 10px">Overview</h2>
+        <p style="font-size:15.5px;line-height:1.7;color:#4A4880;margin:0">{{ tpOv }}</p>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:30px 0 10px">Symptoms</h2>
+        <ul style="margin:0;padding-left:20px;font-size:14.5px;line-height:1.75;color:#4A4880">
+          <sc-for list="{{ tpSym }}" as="x" hint-placeholder-count="4"><li>{{ x.t }}</li></sc-for>
+        </ul>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:30px 0 10px">Diagnosis</h2>
+        <ul style="margin:0;padding-left:20px;font-size:14.5px;line-height:1.75;color:#4A4880">
+          <sc-for list="{{ tpDx }}" as="x" hint-placeholder-count="4"><li>{{ x.t }}</li></sc-for>
+        </ul>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:30px 0 10px">Treatment</h2>
+        <ul style="margin:0;padding-left:20px;font-size:14.5px;line-height:1.75;color:#4A4880">
+          <sc-for list="{{ tpTx }}" as="x" hint-placeholder-count="4"><li>{{ x.t }}</li></sc-for>
+        </ul>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px">
+          <section style="padding:22px 24px;border-radius:22px;background:#FBF1DC;border:1px solid rgba(201,138,0,0.25)">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16.5px;color:#8A6300;margin:0 0 10px">When to see a specialist</h2>
+            <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#6B5200">
+              <sc-for list="{{ tpSpec }}" as="x" hint-placeholder-count="3"><li>{{ x.t }}</li></sc-for>
+            </ul>
+          </section>
+          <section style="padding:22px 24px;border-radius:22px;background:#FBE7E5;border:1px solid rgba(206,68,56,0.25)">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16.5px;color:#A6362C;margin:0 0 10px">When to seek advanced care</h2>
+            <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#8A2E26">
+              <sc-for list="{{ tpAdv }}" as="x" hint-placeholder-count="2"><li>{{ x.t }}</li></sc-for>
+            </ul>
+          </section>
+        </div>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:30px 0 10px">Relevant Yashoda services</h2>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;gap:10px;flex-wrap:wrap">
+          <sc-for list="{{ tpSvc }}" as="x" hint-placeholder-count="3">
+            <li style="font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ x.t }}</li>
+          </sc-for>
+        </ul>
+      </article>
+
+      <sc-if value="{{ tpHasArticles }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:34px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related articles</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ tpArticles }}" as="a" hint-placeholder-count="2">
+              <article style="padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <span style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#B35A08">{{ a.cat }}</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ a.t }}</h3>
+                <p style="font-size:12px;color:#8A88B8;margin:0">{{ a.read }} read · Placeholder</p>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ tpHasVideos }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:34px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related videos</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ tpVideos }}" as="v" hint-placeholder-count="2">
+              <article style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <span aria-hidden="true" style="flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:#2C2A6B;display:flex;align-items:center;justify-content:center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
+                </span>
+                <div>
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.35;color:#2C2A6B;margin:0">{{ v.t }}</h3>
+                  <p style="font-size:12px;color:#8A88B8;margin:4px 0 0">Expert name and video URL to be added</p>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ tpHasCases }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:34px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related clinical cases</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ tpCases }}" as="c" hint-placeholder-count="2">
+              <article style="padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <span style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#B35A08">{{ c.lvl }}</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ c.t }}</h3>
+                <p style="font-size:12.5px;line-height:1.5;color:#4A4880;margin:0">{{ c.d }}</p>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <section style="margin-top:34px;padding:28px 32px;border-radius:26px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1);display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <p style="font-size:14.5px;line-height:1.6;color:#4A4880;margin:0;max-width:520px">This page is general education, not a diagnosis. If something here matches what you are experiencing, speak to a doctor.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 12px 30px -10px rgba(245,130,31,0.65)" style-hover="transform:translateY(-2px);color:#fff">Book a consult</a>
+          <button onClick="{{ backToHub }}" style="padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">All topics</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+  </sc-if>
+
   <!-- FOOTER -->
   <footer style="background:linear-gradient(160deg,#232159,#1D1B4B)">
     <div style="max-width:1150px;margin:0 auto;padding:56px 24px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:36px;font-size:14px;color:#C9D2E6">
@@ -1814,6 +2301,11 @@ input,select{font-family:inherit;color:#1D1B4B}
         <p style="margin:0;font-size:12px;line-height:1.7">AI detection (Qure.ai qXR) → risk assessment → EBUS · radial EBUS · Archimedes BTPNA · cone-beam CT biopsy · cryobiopsy → MDT treatment planning → surveillance. From shadow to answer — in days, not months.</p>
       </div>
       <div>
+        <div style="font-weight:700;color:#fff;margin-bottom:10px">Explore</div>
+        <nav aria-label="ŪPIRI sections" style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;font-size:12px">
+          <a href="/knowledge-hub" onClick="{{ goKnowledge }}" style="color:#C9D2E6;text-decoration:underline">Yashoda Knowledge Hub — pulmonary conditions, articles and expert videos</a>
+          <a href="/alumni" onClick="{{ goAlumni }}" style="color:#C9D2E6;text-decoration:underline">ŪPIRI Clinical Network — for doctors: case discussion, CME and mentorship</a>
+        </nav>
         <div style="font-weight:700;color:#fff;margin-bottom:10px">Important</div>
         <p style="margin:0;font-size:12px;line-height:1.7">The tools here are awareness and self-management aids, not medical diagnosis; they are pending final clinical validation and medico-legal sign-off by the Yashoda Hospitals pulmonology department. In an emergency (severe breathlessness, chest pain, blue lips), call 105910 or go to the nearest emergency department immediately. AI reads assist — a qualified radiologist and pulmonologist make every clinical decision.</p>
       </div>
@@ -1840,7 +2332,8 @@ class Component extends DCLogic {
       copd: { sym: null, doses: [1, 1, 0], val: '', today: null },
       ild: { sym: null, doses: [2, 1, 0], val: '', today: null }
     },
-    alSel: new Date().getMonth()
+    alSel: new Date().getMonth(),
+    khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics'
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -2011,7 +2504,7 @@ class Component extends DCLogic {
   }
 
   /* ---- clubs ---- */
-  goClub(id) { this.setState({ route: 'club', clubId: id, clubTab: 'diary' }); window.scrollTo({ top: 0 }); }
+  goClub(id) { this.setState({ route: 'club', clubId: id, clubTab: 'diary', khTopic: null }); this.syncUrl('club', null); window.scrollTo({ top: 0 }); }
   cdPatch(patch) { const cd = { ...this.state.cd }; cd[this.state.clubId] = { ...cd[this.state.clubId], ...patch }; this.setState({ cd }); }
   dosePick(mi, di) {
     const cs = this.state.cd[this.state.clubId];
@@ -2032,12 +2525,342 @@ class Component extends DCLogic {
     return 'M ' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ' A ' + r + ' ' + r + ' 0 ' + (a1 - a0 > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2);
   }
 
+  /* ============ ŪPIRI CLINICAL NETWORK (/alumni) ============ */
+  NET_WHY = [
+    { i: 'talk', t: 'Clinical Case Discussions', d: 'Regular structured discussion of real pulmonary cases with peers and Yashoda specialists.' },
+    { i: 'help', t: 'Ask a Specialist', d: 'Put a focused clinical question to a subspecialist and get a considered reply, not a referral form.' },
+    { i: 'rescue', t: 'Difficult Case / Case Rescue', d: 'Bring a case that is not behaving as expected for a second set of experienced eyes.' },
+    { i: 'team', t: 'Multidisciplinary Case Discussions', d: 'Pulmonology, radiology, pathology, thoracic surgery and oncology around the same case.' },
+    { i: 'book', t: 'CME & Grand Rounds', d: 'Accredited teaching sessions and clinical grand rounds open to network members.' },
+    { i: 'lib', t: 'Advanced Clinical Resources', d: 'Protocols, algorithms and reference material curated by the pulmonology department.' },
+    { i: 'flask', t: 'Research Collaboration', d: 'Opportunities to participate in departmental research and multi-centre work.' },
+    { i: 'mentor', t: 'Mentorship', d: 'Structured mentorship between senior pulmonologists and doctors earlier in their careers.' },
+    { i: 'grad', t: 'Fellowship & Observership', d: 'Information and access routes for fellowship and observership placements.' },
+    { i: 'mic', t: 'Academic & Conference Opportunities', d: 'Speaking, teaching faculty and conference participation opportunities as they arise.' },
+    { i: 'scan', t: 'Access to Yashoda Clinical Expertise', d: 'A direct line into subspecialty pulmonary services when a patient needs more.' },
+    { i: 'link', t: 'Professional Networking', d: 'Meet the pulmonary community across the region — colleagues, not competitors.' }
+  ];
+  REFER_TRIGGERS = [
+    { t: 'Severe asthma', d: 'Still symptomatic on high-dose inhaled therapy, repeated oral steroid courses, or an ICU/ED visit for asthma.', tag: 'Asthma' },
+    { t: 'ILD / pulmonary fibrosis', d: 'Unexplained progressive breathlessness with crackles, or interstitial changes on imaging needing pattern review.', tag: 'ILD' },
+    { t: 'Lung nodules', d: 'Any nodule needing characterisation, growth assessment, or a tissue diagnosis pathway.', tag: 'Nodule' },
+    { t: 'Complex COPD', d: 'Frequent exacerbations, hypoxaemia, or a patient who may be a candidate for volume reduction.', tag: 'COPD' },
+    { t: 'Pulmonary hypertension', d: 'Breathlessness with echocardiographic signs of raised pulmonary pressures needing confirmation and phenotyping.', tag: 'PH' },
+    { t: 'Interventional pulmonology', d: 'Sampling or airway intervention beyond routine bronchoscopy — EBUS, navigation, cryobiopsy, stenting.', tag: 'IP' },
+    { t: 'Advanced pulmonary diagnostics', d: 'Full lung function, CPET, or specialised testing not available locally.', tag: 'Diagnostics' },
+    { t: 'Lung transplantation', d: 'Advanced disease where transplant assessment should be considered before the patient is too unwell.', tag: 'Transplant' }
+  ];
+  COUNCIL_ROLES = [
+    { r: 'Senior pulmonologists', d: 'Consultants with established subspecialty practice.' },
+    { r: 'Fellowship alumni', d: 'Doctors who trained with the department and now practise independently.' },
+    { r: 'Academic leaders', d: 'Members active in teaching, examination and curriculum work.' },
+    { r: 'Emerging pulmonologists', d: 'Recently qualified members bringing current training perspective.' },
+    { r: 'Regional representatives', d: 'Members representing practice outside the metro, where access differs.' }
+  ];
+  ALUMNI_ENGAGE = [
+    { t: 'Annual ŪPIRI Alumni Summit', d: 'A yearly gathering of the network for teaching, case discussion and reconnecting.' },
+    { t: 'Clinical Grand Rounds', d: 'Recurring rounds open to members, built around real cases and their outcomes.' },
+    { t: 'Case Rescue', d: 'Year-round access to specialist discussion for difficult cases.' },
+    { t: 'Mentorship', d: 'Pairing between experienced and early-career members.' },
+    { t: 'Research collaborations', d: 'Departmental and multi-centre projects members can join.' },
+    { t: 'Awards & recognition', d: 'Recognition for teaching, research and clinical contribution to the network.' },
+    { t: 'Fellowship opportunities', d: 'Fellowship and observership routes shared with the network first.' }
+  ];
+
+  /* ============ YASHODA KNOWLEDGE HUB (/knowledge-hub) ============ */
+  /* Shared stroke icons, reused across topics rather than one bespoke glyph each. */
+  KH_ICONS = {
+    lung: ['M44 40c-2-9-9-13-17-8C16 39 8 57 9 73c1 12 8 19 18 17 10-2 16-11 17-24v-26z', 'M56 40c2-9 9-13 17-8 11 7 19 25 18 41-1 12-8 19-18 17-10-2-16-11-17-24v-26z'],
+    wind: ['M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2', 'M9.6 4.6A2 2 0 1 1 11 8H2', 'M12.6 19.4A2 2 0 1 0 14 16H2'],
+    scan: ['M3 7V5a2 2 0 0 1 2-2h2', 'M17 3h2a2 2 0 0 1 2 2v2', 'M21 17v2a2 2 0 0 1-2 2h-2', 'M7 21H5a2 2 0 0 1-2-2v-2', 'M12 8v8', 'M8 12h8'],
+    pulse: ['M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2'],
+    micro: ['M6 18h8', 'M3 22h18', 'M14 22a7 7 0 1 0 0-14h-1', 'M9 14h2', 'M9 12a2 2 0 0 1-2-2V6h4v4a2 2 0 0 1-2 2Z', 'M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3'],
+    moon: ['M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'],
+    shield: ['M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'],
+    flame: ['M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z']
+  };
+  iconOf(key) {
+    const paths = (this.KH_ICONS[key] || this.KH_ICONS.lung).map(d => ({ d }));
+    const big = key === 'lung';
+    return { paths, vb: big ? '0 0 100 100' : '0 0 24 24', sw: big ? 5 : 2 };
+  }
+  KH_TOPICS = [
+    {
+      id: 'asthma', n: 'Asthma', ic: 'wind', blurb: 'A common, treatable airway disease — well controlled for most people on the right inhaler, taken the right way.',
+      ov: 'Asthma is chronic inflammation of the airways causing variable narrowing. Symptoms come and go, often with clear triggers, and most people reach good control with regular inhaled therapy and correct technique.',
+      sym: ['Wheeze or a whistling chest', 'Cough, often worse at night or early morning', 'Chest tightness', 'Breathlessness with exertion, cold air, dust or smoke'],
+      dx: ['Clinical history of variable symptoms and triggers', 'Spirometry with reversibility testing', 'Peak flow diary over one to two weeks', 'Allergy assessment where an allergic trigger is suspected'],
+      tx: ['Regular inhaled corticosteroid-containing controller therapy', 'A reliever inhaler for symptoms', 'Inhaler technique training and a spacer where appropriate', 'A written asthma action plan and trigger reduction at home'],
+      spec: ['Symptoms despite regular controller therapy', 'More than one oral steroid course in a year', 'Uncertainty about the diagnosis'],
+      adv: ['Severe asthma assessment and biologic therapy consideration', 'Any ED attendance or hospital admission for asthma'],
+      svc: ['ŪPIRI Asthma Club', 'Severe Asthma & Biologics Centre', 'Pulmonary function testing']
+    },
+    {
+      id: 'severe-asthma', n: 'Severe Asthma', ic: 'wind', blurb: 'Asthma that stays symptomatic despite correct high-dose treatment — a distinct condition with distinct options.',
+      ov: 'Severe asthma is asthma that remains uncontrolled despite high-dose inhaled therapy taken correctly, or that needs oral steroids to stay controlled. It needs a systematic reassessment before treatment is escalated.',
+      sym: ['Ongoing daily symptoms despite maximal inhaled therapy', 'Repeated courses of oral steroids', 'Frequent reliever use', 'Exacerbations requiring emergency care'],
+      dx: ['Confirming the diagnosis and excluding mimics', 'Checking adherence and inhaler technique first', 'Blood eosinophils, IgE and FeNO for phenotyping', 'Assessment of comorbidities such as reflux, rhinosinusitis and obesity'],
+      tx: ['Optimising the basics before escalating', 'Phenotype-directed biologic therapy where criteria are met', 'Structured steroid-sparing strategy', 'Ongoing specialist follow-up'],
+      spec: ['Any asthma needing oral steroids more than twice a year', 'Persistent symptoms on high-dose therapy'],
+      adv: ['Biologic therapy assessment', 'Recurrent admissions or any ICU admission for asthma'],
+      svc: ['Severe Asthma & Biologics Centre', 'ŪPIRI Asthma Club']
+    },
+    {
+      id: 'copd', n: 'COPD', ic: 'lung', blurb: 'Persistent airflow limitation, usually from smoking or long-term exposure — progression can be slowed.',
+      ov: 'COPD is persistent, largely irreversible airflow limitation from long-term exposure to smoke, biomass fuel or occupational dust. Stopping the exposure and pulmonary rehabilitation change the course more than any single drug.',
+      sym: ['Breathlessness that worsens over years', 'Chronic cough, often with sputum', 'Frequent winter chest infections', 'Reduced exercise tolerance'],
+      dx: ['Post-bronchodilator spirometry confirming airflow limitation', 'Symptom and exacerbation history', 'Chest imaging to exclude other causes', 'Oxygen saturation assessment'],
+      tx: ['Stopping smoking or biomass exposure — the single largest intervention', 'Long-acting bronchodilator therapy, inhaled steroids where indicated', 'Pulmonary rehabilitation', 'Influenza and pneumococcal vaccination'],
+      spec: ['Frequent exacerbations despite therapy', 'Disproportionate breathlessness or rapid decline', 'Diagnostic uncertainty'],
+      adv: ['Assessment for bronchoscopic lung volume reduction', 'Home oxygen assessment', 'Consideration of transplant referral in advanced disease'],
+      svc: ['ŪPIRI COPD Club', 'Rendo Ūpiri quit-smoking programme', 'Pulmonary rehabilitation']
+    },
+    {
+      id: 'ild', n: 'ILD', ic: 'lung', blurb: 'A family of diseases affecting the lung tissue itself — accurate pattern diagnosis changes treatment completely.',
+      ov: 'Interstitial lung disease covers many conditions affecting the lung interstitium. Distinguishing between them — inflammatory, fibrotic, exposure-related or connective-tissue related — determines whether treatment is immunosuppression, antifibrotics or exposure removal.',
+      sym: ['Progressive breathlessness on exertion', 'Persistent dry cough', 'Fine crackles on examination', 'Fatigue and reduced exercise capacity'],
+      dx: ['High-resolution CT of the chest', 'Full lung function including gas transfer', 'Autoimmune and exposure screening', 'Multidisciplinary discussion, with biopsy only where it changes management'],
+      tx: ['Treatment directed by the specific ILD pattern', 'Antifibrotic therapy in progressive fibrotic disease', 'Immunosuppression in inflammatory disease', 'Pulmonary rehabilitation and oxygen where needed'],
+      spec: ['Any unexplained progressive breathlessness with crackles', 'Interstitial change reported on imaging'],
+      adv: ['Multidisciplinary ILD review', 'Transplant assessment in progressive disease'],
+      svc: ['ŪPIRI ILD Club', 'ILD multidisciplinary clinic', 'Pulmonary function testing']
+    },
+    {
+      id: 'pulmonary-fibrosis', n: 'Pulmonary Fibrosis', ic: 'lung', blurb: 'Scarring of lung tissue. Early recognition matters — antifibrotic therapy works best started early.',
+      ov: 'Pulmonary fibrosis is scarring of the lung interstitium. Idiopathic pulmonary fibrosis is the best known form, but a progressive fibrotic course can occur in several ILDs. Antifibrotic therapy slows decline rather than reversing scarring, which is why timing matters.',
+      sym: ['Breathlessness that has worsened over months', 'Dry cough', 'Velcro-like crackles at the lung bases', 'Finger clubbing in some patients'],
+      dx: ['High-resolution CT pattern assessment', 'Serial lung function to establish trajectory', 'Exclusion of exposure and autoimmune causes', 'Multidisciplinary consensus diagnosis'],
+      tx: ['Antifibrotic therapy where indicated', 'Structured side-effect management', 'Oxygen assessment and pulmonary rehabilitation', 'Vaccination and comorbidity management'],
+      spec: ['Suspected fibrosis on any imaging', 'Declining lung function on repeat testing'],
+      adv: ['Antifibrotic initiation and monitoring', 'Transplant assessment before the patient is too unwell'],
+      svc: ['ŪPIRI ILD Club', 'ILD multidisciplinary clinic']
+    },
+    {
+      id: 'lung-cancer', n: 'Lung Cancer', ic: 'scan', blurb: 'Outcomes depend heavily on stage at diagnosis — which is why a suspicious shadow should never wait.',
+      ov: 'Lung cancer found early is a different disease from lung cancer found late. The pathway that matters is prompt imaging, prompt tissue diagnosis, accurate staging and a multidisciplinary treatment plan.',
+      sym: ['Cough lasting more than three weeks', 'Blood in sputum, even once', 'Unexplained weight loss', 'Persistent chest pain or hoarseness'],
+      dx: ['Chest imaging, then CT', 'Tissue diagnosis by the least invasive adequate route', 'PET-CT and staging investigations', 'Molecular and biomarker testing where relevant'],
+      tx: ['Multidisciplinary treatment planning', 'Surgery, radiotherapy, systemic therapy or a combination by stage and type', 'Supportive and symptom care alongside treatment'],
+      spec: ['Any red-flag respiratory symptom', 'Any abnormal chest imaging needing explanation'],
+      adv: ['Nodule and cancer multidisciplinary board review', 'Advanced diagnostic sampling'],
+      svc: ['AI Lung Nodule Clinic', 'Nodule Board (MDT)', 'Interventional pulmonology']
+    },
+    {
+      id: 'lung-nodules', n: 'Lung Nodules', ic: 'scan', blurb: 'Most nodules are benign. The job is to answer the question quickly rather than to worry slowly.',
+      ov: 'A lung nodule is a small rounded shadow on imaging. The large majority turn out to be benign — old infection, tuberculosis scarring or a small lymph node. Structured assessment decides between surveillance and sampling.',
+      sym: ['Usually none — most are found incidentally', 'Occasionally cough or symptoms from another cause that prompted the scan'],
+      dx: ['Comparison with any previous imaging', 'CT characterisation of size, density and margins', 'Risk assessment combining imaging and patient factors', 'Interval scanning or tissue sampling as indicated'],
+      tx: ['Surveillance imaging on a defined schedule for low-risk nodules', 'Tissue diagnosis where risk or growth warrants it', 'Definitive treatment if malignancy is confirmed'],
+      spec: ['Any newly reported nodule', 'A nodule that has grown or changed'],
+      adv: ['Navigation bronchoscopy, EBUS or cone-beam CT guided biopsy', 'Multidisciplinary nodule board review'],
+      svc: ['AI Lung Nodule Clinic', 'ŪPIRI Nodule Journey', 'Nodule Board (MDT)']
+    },
+    {
+      id: 'pulmonary-hypertension', n: 'Pulmonary Hypertension', ic: 'pulse', blurb: 'Raised pressure in the lung circulation — often missed, and treatable once the type is identified.',
+      ov: 'Pulmonary hypertension is raised blood pressure in the pulmonary circulation. It has several distinct groups with entirely different treatments, so confirming the type is the central diagnostic task.',
+      sym: ['Breathlessness on exertion out of proportion to other findings', 'Fatigue', 'Light-headedness or fainting on exertion', 'Ankle swelling in later stages'],
+      dx: ['Echocardiography as the screening test', 'Assessment for underlying lung and heart disease', 'Ventilation-perfusion imaging for chronic thromboembolic disease', 'Right heart catheterisation for confirmation and classification'],
+      tx: ['Treatment of the underlying cause where one exists', 'Group-specific targeted therapy in pulmonary arterial hypertension', 'Anticoagulation and intervention in chronic thromboembolic disease', 'Supervised exercise and oxygen where indicated'],
+      spec: ['Echo suggesting raised pulmonary pressures', 'Unexplained exertional breathlessness or syncope'],
+      adv: ['Right heart catheterisation and classification', 'Specialist pulmonary hypertension therapy'],
+      svc: ['Pulmonary hypertension assessment', 'CPET / exercise testing']
+    },
+    {
+      id: 'lung-transplantation', n: 'Lung Transplantation', ic: 'shield', blurb: 'An option in advanced lung disease. The commonest mistake is referring too late, not too early.',
+      ov: 'Lung transplantation is considered for selected patients with advanced lung disease and limited life expectancy despite maximal treatment. Assessment is a long process, so referral is a conversation to start early rather than late.',
+      sym: ['Advanced breathlessness limiting daily life despite optimal therapy', 'Declining lung function or oxygen requirement', 'Repeated hospital admissions'],
+      dx: ['Assessment of disease trajectory and prognosis', 'Detailed physiological and imaging assessment', 'Comorbidity, nutritional and psychosocial evaluation', 'Multidisciplinary transplant assessment'],
+      tx: ['Optimisation of the underlying disease and rehabilitation while under assessment', 'Listing decision by the transplant team', 'Lifelong follow-up and immunosuppression after transplant'],
+      spec: ['Advanced COPD, ILD or pulmonary hypertension despite therapy'],
+      adv: ['Formal transplant assessment — earlier rather than later'],
+      svc: ['Advanced lung disease clinic', 'Pulmonary rehabilitation']
+    },
+    {
+      id: 'interventional-pulmonology', n: 'Interventional Pulmonology', ic: 'micro', blurb: 'Minimally invasive diagnosis and airway treatment — often replacing surgical approaches.',
+      ov: 'Interventional pulmonology uses bronchoscopic and pleural techniques to diagnose and treat chest disease with minimal invasiveness — reaching lesions, sampling lymph nodes, opening airways and managing pleural disease.',
+      sym: ['Not a symptom-defined area — relevant when a lesion needs sampling or an airway needs treatment'],
+      dx: ['Endobronchial ultrasound for mediastinal staging', 'Radial EBUS and navigation for peripheral lesions', 'Cryobiopsy for parenchymal disease', 'Cone-beam CT guided sampling'],
+      tx: ['Airway stenting and tumour debulking', 'Bronchoscopic lung volume reduction in selected emphysema', 'Pleural drainage and pleurodesis', 'Management of airway stenosis'],
+      spec: ['Any lesion needing tissue where the route is not straightforward'],
+      adv: ['Referral to an interventional pulmonology service'],
+      svc: ['Interventional pulmonology', 'Nodule Board (MDT)']
+    },
+    {
+      id: 'bronchoscopy', n: 'Bronchoscopy', ic: 'micro', blurb: 'A camera test of the airways — usually a day procedure under sedation.',
+      ov: 'Bronchoscopy passes a thin flexible camera into the airways to look, sample and sometimes treat. Most diagnostic bronchoscopy is a day-case procedure performed under sedation with local anaesthetic.',
+      sym: ['Not symptom-defined — a procedure used to investigate cough, haemoptysis, infection or a lesion'],
+      dx: ['Direct airway inspection', 'Washings, brushings and lavage', 'Transbronchial and endobronchial biopsy', 'EBUS-guided lymph node sampling'],
+      tx: ['Removal of secretions or foreign bodies', 'Treatment of bleeding', 'Therapeutic airway procedures where indicated'],
+      spec: ['Persistent unexplained cough, haemoptysis or an unexplained lesion'],
+      adv: ['Advanced sampling techniques where standard bronchoscopy is non-diagnostic'],
+      svc: ['Interventional pulmonology', 'Diagnostic bronchoscopy service']
+    },
+    {
+      id: 'pulmonary-function-testing', n: 'Pulmonary Function Testing', ic: 'pulse', blurb: 'The objective numbers behind breathlessness — how much, how fast, how well gas transfers.',
+      ov: 'Pulmonary function testing measures how much air the lungs hold, how quickly it moves and how well oxygen transfers into the blood. It converts a symptom into a measurement that can be tracked over time.',
+      sym: ['Used to investigate breathlessness, cough, wheeze and occupational exposure'],
+      dx: ['Spirometry, with reversibility where indicated', 'Lung volumes', 'Gas transfer (DLCO)', 'Bronchial challenge testing in selected cases'],
+      tx: ['Not a treatment — results guide diagnosis, treatment choice and monitoring'],
+      spec: ['Breathlessness without a clear cause', 'Monitoring of known lung disease'],
+      adv: ['Full physiology including gas transfer and challenge testing'],
+      svc: ['Pulmonary function laboratory', 'ŪPIRI Lung Age']
+    },
+    {
+      id: 'cpet', n: 'CPET / Exercise Testing', ic: 'pulse', blurb: 'Measures what actually happens when you exert — where resting tests cannot look.',
+      ov: 'Cardiopulmonary exercise testing measures heart, lung and muscle performance together under controlled exertion. It is used when breathlessness is unexplained, before major surgery, and to assess fitness for altitude or occupation.',
+      sym: ['Used for unexplained exertional breathlessness and exercise limitation'],
+      dx: ['Measured oxygen uptake and ventilatory response', 'Identification of cardiac, ventilatory, gas-exchange or deconditioning limitation', 'Objective exercise capacity for risk assessment'],
+      tx: ['Not a treatment — informs diagnosis, prehabilitation and rehabilitation prescription'],
+      spec: ['Breathlessness that resting tests do not explain'],
+      adv: ['Pre-operative risk assessment', 'Altitude and occupational fitness assessment'],
+      svc: ['CPET laboratory', 'ŪPIRI Shikhar altitude assessment']
+    },
+    {
+      id: 'allergy', n: 'Allergy & Respiratory Allergy', ic: 'wind', blurb: 'Nose and chest are one airway — treating allergy often improves asthma control.',
+      ov: 'Respiratory allergy causes allergic rhinitis, conjunctivitis and allergic asthma. Upper and lower airway disease travel together, so identifying and reducing the trigger frequently improves chest symptoms too.',
+      sym: ['Sneezing, blocked or runny nose', 'Itchy or watering eyes', 'Cough or wheeze on exposure', 'Seasonal or clearly situational symptoms'],
+      dx: ['Detailed exposure and seasonal history', 'Skin prick testing or specific IgE where it will change management', 'Assessment of coexisting asthma'],
+      tx: ['Allergen avoidance measures at home and work', 'Intranasal steroids and antihistamines', 'Asthma controller therapy where the chest is involved', 'Immunotherapy in selected patients'],
+      spec: ['Allergy that persists despite standard treatment', 'Allergy triggering asthma attacks'],
+      adv: ['Immunotherapy assessment', 'Severe asthma assessment where allergy drives exacerbations'],
+      svc: ['ŪPIRI Allergy Calendar', 'Allergy & immunology clinic']
+    },
+    {
+      id: 'sleep-medicine', n: 'Sleep Medicine', ic: 'moon', blurb: 'Loud snoring with daytime sleepiness is not just snoring — and it is very treatable.',
+      ov: 'Sleep-disordered breathing, most commonly obstructive sleep apnoea, causes repeated interruptions in breathing during sleep. It contributes to daytime sleepiness, hypertension and cardiovascular risk, and responds well to treatment.',
+      sym: ['Loud habitual snoring', 'Witnessed pauses in breathing', 'Daytime sleepiness and poor concentration', 'Morning headache, unrefreshing sleep'],
+      dx: ['Symptom and sleepiness assessment', 'Overnight sleep study — home or laboratory', 'Assessment of contributing factors including weight and nasal obstruction'],
+      tx: ['Positive airway pressure therapy where indicated', 'Weight and lifestyle measures', 'Positional therapy or oral devices in selected patients', 'Treatment of nasal obstruction'],
+      spec: ['Snoring with daytime sleepiness', 'Witnessed apnoeas', 'Sleepiness affecting driving or work safety'],
+      adv: ['Complex sleep-disordered breathing including overlap with lung disease'],
+      svc: ['Sleep laboratory', 'Sleep medicine clinic']
+    },
+    {
+      id: 'respiratory-infections', n: 'Respiratory Infections', ic: 'shield', blurb: 'Most settle. The skill is recognising the ones that will not.',
+      ov: 'Respiratory infections range from self-limiting viral illness to pneumonia and tuberculosis. Most recover with simple care; the clinical task is recognising who needs imaging, antibiotics, admission or tuberculosis assessment.',
+      sym: ['Fever, cough and sputum', 'Breathlessness', 'Chest pain on breathing', 'Cough persisting beyond three weeks — always assess further'],
+      dx: ['Clinical assessment and oxygen saturation', 'Chest imaging where the illness is significant or persistent', 'Sputum testing including tuberculosis assessment where indicated'],
+      tx: ['Supportive care for viral illness', 'Antibiotics where bacterial infection is likely', 'Full tuberculosis treatment where confirmed', 'Vaccination to prevent recurrence'],
+      spec: ['Cough beyond three weeks', 'Repeated infections in the same area of the lung', 'Failure to improve as expected'],
+      adv: ['Bronchoscopic sampling for non-resolving or atypical infection'],
+      svc: ['Pulmonology OPD', 'ŪPIRI Symptom Checker']
+    },
+    {
+      id: 'smoking-cessation', n: 'Smoking Cessation', ic: 'flame', blurb: 'The single most effective thing anyone can do for their lungs — at any age.',
+      ov: 'Stopping smoking improves outcomes at any age and in any lung condition. Success rates rise substantially with structured support and pharmacotherapy compared with willpower alone.',
+      sym: ['Relevant to anyone who smokes cigarettes or beedis, or who uses tobacco in any form'],
+      dx: ['Assessment of dependence and previous quit attempts', 'Identification of triggers and routines', 'Baseline lung function where relevant'],
+      tx: ['Structured behavioural support and follow-up', 'Nicotine replacement or prescribed pharmacotherapy where appropriate', 'Relapse planning around high-risk situations'],
+      spec: ['Repeated unsuccessful quit attempts', 'Smoking alongside established lung disease'],
+      adv: ['Combined cessation support with lung health assessment'],
+      svc: ['Rendo Ūpiri quit-smoking programme', 'ŪPIRI Lung Age']
+    },
+    {
+      id: 'occupational-lung-disease', n: 'Occupational Lung Disease', ic: 'shield', blurb: 'What people breathe at work matters — and much of this disease is preventable.',
+      ov: 'Occupational lung disease results from workplace exposure to dust, fumes, gases and fibres — including silica in stone and construction work, which is a significant regional concern. Exposure history is the diagnostic key.',
+      sym: ['Breathlessness or cough that improves away from work', 'Symptoms starting after a change in job or process', 'Chest findings in someone with known dusty work'],
+      dx: ['Detailed occupational and exposure history', 'Chest imaging appropriate to the exposure', 'Lung function testing', 'Workplace assessment where possible'],
+      tx: ['Exposure control and removal — the definitive intervention', 'Treatment of the resulting lung disease', 'Surveillance of similarly exposed co-workers'],
+      spec: ['Any respiratory symptom in a dust or fume exposed worker'],
+      adv: ['Specialist assessment for pneumoconiosis and occupational asthma'],
+      svc: ['ŪPIRI@Work occupational screening', 'Pulmonary function testing']
+    }
+  ];
+  /* Placeholder library entries — replace `placeholder: true` items with real content. */
+  KH_ARTICLES = [
+    { t: 'Using your inhaler correctly: the mistakes we see every week', topic: 'asthma', cat: 'Patient Guides', read: '5 min', placeholder: true },
+    { t: 'Understanding your spirometry report', topic: 'pulmonary-function-testing', cat: 'Patient Guides', read: '6 min', placeholder: true },
+    { t: 'A lung nodule was found. What happens next?', topic: 'lung-nodules', cat: 'Patient Guides', read: '7 min', placeholder: true },
+    { t: 'Antifibrotics in progressive fibrosing ILD: practical prescribing', topic: 'pulmonary-fibrosis', cat: 'Expert Insights', read: '9 min', placeholder: true },
+    { t: 'When breathlessness is not the lungs', topic: 'pulmonary-hypertension', cat: 'Expert Insights', read: '8 min', placeholder: true },
+    { t: 'Pulmonary rehabilitation: what it is and who it helps', topic: 'copd', cat: 'Articles', read: '6 min', placeholder: true },
+    { t: 'Silica exposure in stone and construction work', topic: 'occupational-lung-disease', cat: 'Articles', read: '7 min', placeholder: true },
+    { t: 'Sleep apnoea and the heart', topic: 'sleep-medicine', cat: 'Articles', read: '5 min', placeholder: true },
+    { t: 'Quitting: what actually works', topic: 'smoking-cessation', cat: 'Patient Guides', read: '6 min', placeholder: true },
+    { t: 'Biologics in severe asthma: who qualifies', topic: 'severe-asthma', cat: 'Expert Insights', read: '10 min', placeholder: true },
+    { t: 'Allergic rhinitis and asthma: one airway', topic: 'allergy', cat: 'Articles', read: '5 min', placeholder: true },
+    { t: 'Staging lung cancer: why it decides everything', topic: 'lung-cancer', cat: 'Expert Insights', read: '9 min', placeholder: true }
+  ];
+  KH_VIDEOS = [
+    { t: 'Inhaler technique, step by step', topic: 'asthma', placeholder: true },
+    { t: 'Reading a peak flow diary', topic: 'asthma', placeholder: true },
+    { t: 'Pursed-lip breathing demonstration', topic: 'copd', placeholder: true },
+    { t: 'What happens during a bronchoscopy', topic: 'bronchoscopy', placeholder: true },
+    { t: 'EBUS explained for referring physicians', topic: 'interventional-pulmonology', placeholder: true },
+    { t: 'Home oxygen: practical guidance', topic: 'ild', placeholder: true },
+    { t: 'Preparing for a CPET', topic: 'cpet', placeholder: true },
+    { t: 'Setting up CPAP at home', topic: 'sleep-medicine', placeholder: true },
+    { t: 'Lung nodule surveillance explained', topic: 'lung-nodules', placeholder: true }
+  ];
+  KH_CASES = [
+    { t: 'Persistent wheeze in a young adult', topic: 'asthma', lvl: 'Foundation', d: 'A case built around diagnostic confirmation and inhaler technique before escalation.', placeholder: true },
+    { t: 'Breathlessness with a normal chest X-ray', topic: 'pulmonary-hypertension', lvl: 'Advanced', d: 'Working through exertional breathlessness when initial imaging is unremarkable.', placeholder: true },
+    { t: 'Incidental 8 mm nodule on a pre-employment scan', topic: 'lung-nodules', lvl: 'Intermediate', d: 'Risk assessment and the choice between surveillance and sampling.', placeholder: true },
+    { t: 'Progressive fibrosis despite immunosuppression', topic: 'pulmonary-fibrosis', lvl: 'Advanced', d: 'Recognising a progressive fibrotic phenotype and changing direction.', placeholder: true },
+    { t: 'Frequent exacerbator with severe emphysema', topic: 'copd', lvl: 'Intermediate', d: 'Optimising therapy and assessing volume reduction candidacy.', placeholder: true },
+    { t: 'Occupational asthma in a spray painter', topic: 'occupational-lung-disease', lvl: 'Intermediate', d: 'Linking symptom pattern to workplace exposure and acting on it.', placeholder: true }
+  ];
+  KH_TABS = ['All', 'Articles', 'Videos', 'Clinical Cases', 'Patient Guides', 'Expert Insights'];
+
+  /* ---- URL routing: every screen has a real path, so refresh and deep links work ---- */
+  ROUTES = {
+    home: '/', risk: '/risk-check', breath: '/lung-age', journey: '/nodule-journey', rendo: '/rendo-upiri',
+    triage: '/symptom-checker', clubs: '/clubs', club: '/clubs/member', allergy: '/allergy-calendar',
+    case: '/case-of-the-month', shikhar: '/shikhar', doctors: '/for-doctors', corporates: '/for-corporates',
+    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub'
+  };
+  META = {
+    alumni: ['ŪPIRI Clinical Network — Yashoda Pulmonology', 'A community of doctors connected by learning, collaboration and better patient care. Case discussions, CME, mentorship and access to advanced pulmonary expertise.'],
+    knowledge: ['Yashoda Knowledge Hub — Pulmonary Medicine', 'Trusted pulmonary knowledge from Yashoda experts: conditions, articles, expert videos, clinical cases and patient guides across pulmonary medicine.'],
+    home: ['ŪPIRI 2.0 — Precision Pulmonary Care', 'ŪPIRI Precision Pulmonary Care: lung risk check, breath score, nodule journey, Rendo Ūpiri quit challenge, condition clubs, symptom triage and altitude readiness.']
+  };
+  pathFor(route, topic) {
+    if (route === 'knowledge' && topic) return '/knowledge-hub/' + topic;
+    return this.ROUTES[route] || '/';
+  }
+  routeFromPath(path) {
+    const clean = ('/' + String(path || '').replace(/^\/+|\/+$/g, '')).replace(/\/index\.html$/, '/');
+    const kh = clean.match(/^\/knowledge-hub\/(.+)$/);
+    if (kh) {
+      const t = this.KH_TOPICS.find(x => x.id === kh[1]);
+      return { route: 'knowledge', khTopic: t ? t.id : null };
+    }
+    const hit = Object.keys(this.ROUTES).find(k => this.ROUTES[k] === clean);
+    return { route: hit || 'home', khTopic: null };
+  }
+  syncUrl(route, topic, replace) {
+    const url = this.pathFor(route, topic) + location.search;
+    try {
+      if (replace) history.replaceState({ route }, '', url);
+      else if (location.pathname !== this.pathFor(route, topic)) history.pushState({ route }, '', url);
+    } catch (e) { /* file:// has no history API origin — navigation still works in-app */ }
+    this.applyMeta(route, topic);
+  }
+  applyMeta(route, topic) {
+    const t = topic && this.KH_TOPICS.find(x => x.id === topic);
+    const pair = t
+      ? [t.n + ' — Yashoda Knowledge Hub', t.ov.slice(0, 155)]
+      : (this.META[route] || this.META.home);
+    document.title = pair[0];
+    let m = document.querySelector('meta[name="description"]');
+    if (!m) { m = document.createElement('meta'); m.setAttribute('name', 'description'); document.head.appendChild(m); }
+    m.setAttribute('content', pair[1]);
+  }
+
   componentDidMount() {
     const patch = { qd: new Date().toISOString().slice(0, 10) };
     const start = this.props.startScreen;
+    const fromUrl = this.routeFromPath(location.pathname);
     if (start && start !== 'home') patch.route = start;
+    else if (fromUrl.route !== 'home' || fromUrl.khTopic) { patch.route = fromUrl.route; patch.khTopic = fromUrl.khTopic; }
     try { const d = JSON.parse(localStorage.getItem('upiri2:rendo')); if (d) patch.rd = d; } catch (e) { }
     this.setState(patch);
+    this.syncUrl(patch.route || 'home', patch.khTopic, true);
+    window.addEventListener('popstate', () => {
+      const r = this.routeFromPath(location.pathname);
+      this.setState({ route: r.route, khTopic: r.khTopic });
+      this.applyMeta(r.route, r.khTopic);
+    });
   }
 
   lerp(a, b, t) {
@@ -2049,7 +2872,9 @@ class Component extends DCLogic {
     const t = 1 - Math.max(0, Math.min(1, health));
     return { base: this.lerp('#F2989F', '#787D89', t), deep: this.lerp('#DE6E7A', '#565B66', t), light: this.lerp('#FBC7CC', '#9CA3AF', t) };
   }
-  go = (r) => { this.setState({ route: r }); window.scrollTo({ top: 0 }); };
+  go = (r) => { this.setState({ route: r, khTopic: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
+  goTopic = (id) => { this.setState({ route: 'knowledge', khTopic: id }); this.syncUrl('knowledge', id); window.scrollTo({ top: 0 }); };
+  backToHub = () => { this.setState({ khTopic: null }); this.syncUrl('knowledge', null); window.scrollTo({ top: 0 }); };
   countUp(key, target, dur) {
     dur = dur || 1300;
     if (this._raf) cancelAnimationFrame(this._raf);
@@ -2381,6 +3206,13 @@ class Component extends DCLogic {
       champClaim: this.wal("I'm a Rendo Ūpiri Champion — 90 days smoke-free! I'd like to claim my discounted health screening package and free anniversary Ūpiri check. Name: " + ((rd && rd.name) || '(on file)')),
       refer: this.wal("Physician referral: I'm Dr. ___ referring a patient with a lung nodule/finding. Please arrange a 48–72h fast-track Nodule Clinic slot."),
       refLine: this.wal("I'm a physician. Please add me to the ŪPIRI referring-physician WhatsApp line."),
+      netJoin: this.wal("I'd like to join the ŪPIRI Clinical Network. Name: Dr. ___ · Speciality: ___ · Hospital/clinic: ___"),
+      netCase: this.wal("ŪPIRI Case Rescue: I'd like to discuss a difficult pulmonary case with a specialist. Name: Dr. ___ · Brief summary: ___"),
+      netCouncil: this.wal("I'd like to know more about the ŪPIRI Clinical Council. Name: Dr. ___"),
+      netCme: this.wal("Please add me to the ŪPIRI CME and Clinical Grand Rounds invite list. Name: Dr. ___"),
+      netMentor: this.wal("I'm interested in ŪPIRI Clinical Network mentorship. Name: Dr. ___"),
+      netFellow: this.wal("Please share ŪPIRI fellowship and observership details. Name: Dr. ___"),
+      khAsk: this.wal("I have a question about a pulmonary condition after reading the Yashoda Knowledge Hub."),
       board: this.wal("I'm a physician. Please add me to the quarterly Nodule Board invite list."),
       corp: this.wal("Hi, I'm from HR/admin. Please share the ŪPIRI@Work corporate proposal and a pilot date."),
       parents: this.wal("Hi, I'd like details of the Protect Your Parents corporate add-on for ŪPIRI@Work."),
@@ -2399,6 +3231,52 @@ class Component extends DCLogic {
       quiz: this.wal("I'm a resident. Please enrol me in this month's ŪPIRI Residents' Quiz (observership opportunity)."),
       library: this.wal('Please share the ŪPIRI research library — the list of papers and journals published by the department.')
     };
+
+    /* ---- knowledge hub: one filtered/searched dataset feeding every card list ---- */
+    const topicName = id => { const t = this.KH_TOPICS.find(x => x.id === id); return t ? t.n : ''; };
+    const khQ = s.khQuery.trim().toLowerCase();
+    const matches = (...parts) => parts.filter(Boolean).join(' ').toLowerCase().includes(khQ);
+    const tp = s.khTopic ? this.KH_TOPICS.find(x => x.id === s.khTopic) : null;
+
+    const khTopicCards = this.KH_TOPICS.map(t => ({
+      id: t.id, n: t.n, blurb: t.blurb,
+      ...this.iconOf(t.ic),
+      open: () => this.goTopic(t.id)
+    }));
+
+    const catInTab = c => s.khTab === 'All' || s.khTab === 'Articles' || c === s.khTab;
+    const khArticles = this.KH_ARTICLES
+      .filter(a => catInTab(a.cat))
+      .map(a => ({ t: a.t, cat: a.cat, read: a.read, topicId: a.topic, topicName: topicName(a.topic), placeholder: !!a.placeholder }));
+    const khVideos = this.KH_VIDEOS.map(v => ({ t: v.t, topicId: v.topic, topicName: topicName(v.topic), placeholder: !!v.placeholder }));
+    const khCases = this.KH_CASES.map(c => ({ t: c.t, d: c.d, lvl: c.lvl, topicId: c.topic, topicName: topicName(c.topic), placeholder: !!c.placeholder }));
+
+    /* client-side search across topics, articles, videos and cases */
+    const khHits = !khQ ? [] : [].concat(
+      this.KH_TOPICS.filter(t => matches(t.n, t.blurb, t.ov)).map(t => ({
+        kind: 'Condition', t: t.n, d: t.blurb, open: () => this.goTopic(t.id)
+      })),
+      this.KH_ARTICLES.filter(a => matches(a.t, a.cat, topicName(a.topic))).map(a => ({
+        kind: a.cat, t: a.t, d: topicName(a.topic) + ' · ' + a.read + ' read', open: () => this.goTopic(a.topic)
+      })),
+      this.KH_VIDEOS.filter(v => matches(v.t, topicName(v.topic))).map(v => ({
+        kind: 'Video', t: v.t, d: topicName(v.topic), open: () => this.goTopic(v.topic)
+      })),
+      this.KH_CASES.filter(c => matches(c.t, c.d, topicName(c.topic))).map(c => ({
+        kind: 'Clinical case', t: c.t, d: topicName(c.topic) + ' · ' + c.lvl, open: () => this.goTopic(c.topic)
+      }))
+    ).slice(0, 40);
+
+    const feat = (list, kind) => {
+      const x = list[0];
+      return x ? { kind, t: x.t, topicName: topicName(x.topic), open: () => this.goTopic(x.topic) } : null;
+    };
+    const khFeatured = [
+      feat(this.KH_ARTICLES.filter(a => a.cat === 'Articles' || a.cat === 'Expert Insights'), 'Featured article'),
+      feat(this.KH_VIDEOS, 'Featured expert video'),
+      feat(this.KH_CASES, 'Featured clinical case'),
+      feat(this.KH_ARTICLES.filter(a => a.cat === 'Patient Guides'), 'Featured patient guide')
+    ].filter(Boolean);
 
     return {
       isHome: s.route === 'home', isRisk: s.route === 'risk', isBreath: s.route === 'breath', isJourney: s.route === 'journey', isRendo: s.route === 'rendo',
@@ -2456,6 +3334,51 @@ class Component extends DCLogic {
       isChamp: days >= 90, champOpen: s.champOpen, openChamp: this.openChamp, closeChamp: this.closeChamp, printCert: this.printCert,
       checkinLabel: days >= 90 ? 'Claim certificate + free check' : 'Book CO test check-in',
       certName: (rd && rd.name) || 'Friend of ŪPIRI', certQuit: rd ? this.dShort(rd.quitDate) : '', awarded,
+      /* ---- clinical network (/alumni) ---- */
+      isAlumni: s.route === 'alumni',
+      goAlumni: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('alumni'); },
+      netWhy: this.NET_WHY.map(c => ({ t: c.t, d: c.d, ...this.iconOf(({ talk: 'wind', help: 'pulse', rescue: 'shield', team: 'lung', book: 'micro', lib: 'scan', flask: 'micro', mentor: 'pulse', grad: 'shield', mic: 'wind', scan: 'scan', link: 'lung' })[c.i]) })),
+      referTriggers: this.REFER_TRIGGERS.map(r => ({ t: r.t, d: r.d, tag: r.tag })),
+      councilRoles: this.COUNCIL_ROLES.map(c => ({ r: c.r, d: c.d, initials: c.r.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() })),
+      alumniEngage: this.ALUMNI_ENGAGE.map(e => ({ t: e.t, d: e.d })),
+
+      /* ---- knowledge hub (/knowledge-hub) ---- */
+      isKnowledge: s.route === 'knowledge' && !s.khTopic,
+      isTopic: s.route === 'knowledge' && !!s.khTopic,
+      goKnowledge: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('knowledge'); },
+      backToHub: this.backToHub,
+      khQuery: s.khQuery,
+      onKhQuery: (e) => this.setState({ khQuery: e.target.value }),
+      clearKhQuery: () => this.setState({ khQuery: '' }),
+      khHasQuery: khQ.length > 0,
+      khNoResults: khQ.length > 0 && khHits.length === 0,
+      khResultCount: khHits.length + (khQ ? ' result' + (khHits.length === 1 ? '' : 's') + ' for “' + s.khQuery.trim() + '”' : ''),
+      khHits,
+      khTabs: this.KH_TABS.map(t => ({ label: t, pick: () => this.setState({ khTab: t }), st: this.pillSt(s.khTab === t) })),
+      khTopicCards: khTopicCards,
+      khShowTopics: !khQ && (s.khTab === 'All'),
+      khArticles: khArticles.map(a => ({ ...a, open: () => this.goTopic(a.topicId) })),
+      khVideos: khVideos.map(v => ({ ...v, open: () => this.goTopic(v.topicId) })),
+      khCases: khCases.map(c => ({ ...c, open: () => this.goTopic(c.topicId) })),
+      khShowArticles: !khQ && (s.khTab === 'All' || s.khTab === 'Articles' || s.khTab === 'Patient Guides' || s.khTab === 'Expert Insights'),
+      khShowVideos: !khQ && (s.khTab === 'All' || s.khTab === 'Videos'),
+      khShowCases: !khQ && (s.khTab === 'All' || s.khTab === 'Clinical Cases'),
+      khShowFeatured: !khQ && s.khTab === 'All',
+      khFeatured,
+      /* topic detail */
+      tp: tp || {}, tpOv: tp ? tp.ov : '', tpName: tp ? tp.n : '',
+      tpSym: tp ? tp.sym.map(t => ({ t })) : [], tpDx: tp ? tp.dx.map(t => ({ t })) : [],
+      tpTx: tp ? tp.tx.map(t => ({ t })) : [], tpSpec: tp ? tp.spec.map(t => ({ t })) : [],
+      tpAdv: tp ? tp.adv.map(t => ({ t })) : [], tpSvc: tp ? tp.svc.map(t => ({ t })) : [],
+      tpArticles: tp ? this.KH_ARTICLES.filter(a => a.topic === tp.id).map(a => ({ ...a, topicName: tp.n })) : [],
+      tpVideos: tp ? this.KH_VIDEOS.filter(v => v.topic === tp.id).map(v => ({ ...v, topicName: tp.n })) : [],
+      tpCases: tp ? this.KH_CASES.filter(c => c.topic === tp.id).map(c => ({ ...c, topicName: tp.n })) : [],
+      tpHasArticles: tp ? this.KH_ARTICLES.some(a => a.topic === tp.id) : false,
+      tpHasVideos: tp ? this.KH_VIDEOS.some(v => v.topic === tp.id) : false,
+      tpHasCases: tp ? this.KH_CASES.some(c => c.topic === tp.id) : false,
+      tpPaths: tp ? this.iconOf(tp.ic).paths : [],
+      tpVb: tp ? this.iconOf(tp.ic).vb : '0 0 24 24', tpSw: tp ? this.iconOf(tp.ic).sw : 2,
+
       /* routes */
       isTriage: s.route === 'triage', isClubs: s.route === 'clubs', isClub: s.route === 'club',
       isAllergy: s.route === 'allergy', isCase: s.route === 'case', isShikhar: s.route === 'shikhar',
