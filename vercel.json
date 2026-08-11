@@ -3,7 +3,13 @@
   "framework": null,
   "buildCommand": "",
   "outputDirectory": "public",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     { "source": "/upiri-2.0.html", "destination": "/", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/knowledge-hub/:topic", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
