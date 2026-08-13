@@ -88,19 +88,23 @@ Adding an article is one entry in `KH_ARTICLES`; adding a condition is one entry
 ŪPIRI is a Yashoda Hospitals service, so the Yashoda identity sits beside the ŪPIRI mark in
 the navbar and footer and on both doctor-facing sections.
 
-**No Yashoda logo asset ships with this repo**, so a styled text lockup renders today. To
-swap in the real logo: drop the file in `public/` and set `logoSrc` in the `BRAND` object at
-the top of the `<script type="text/x-dc">` block. Every placement switches from text to
-image automatically — nothing else needs editing.
+**The Yashoda logo file is not in this repo.** Save it as `public/yashoda-logo.svg` (or
+`.png`) and it appears everywhere on the next load — there is no code change to make. On
+boot the page probes for those filenames and only swaps the text lockup for the image once
+one has actually loaded, so a missing file can never render a broken image in production.
 
 `public/favicon.svg` is the ŪPIRI lungs mark (it was previously the default Vite logo).
 
 ## Videos
 
 `KH_VIDEOS` maps topics to real Yashoda Hospitals YouTube videos via a `yt` video id;
-entries without one stay visible placeholders. Cards link out to YouTube rather than
-embedding an iframe — no third-party script, and a bad link fails visibly instead of
-silently loading the wrong content.
+entries without one render a labelled "Video coming soon" card.
+
+Cards show the real YouTube still (`i.ytimg.com/vi/<id>/hqdefault.jpg`) with a play button,
+and load the player **only when the viewer clicks** — the facade pattern. No YouTube script
+runs on page load, and the player uses `youtube-nocookie.com`. Only one video plays at a
+time (`khPlaying` state). If the thumbnail CDN is unreachable the card falls back to the
+brand indigo rather than a blank box, and a "YouTube" link is always present as a fallback.
 
 ## Before launch
 
@@ -113,7 +117,7 @@ silently loading the wrong content.
   each topic page says so.
 - Everything marked "Placeholder" needs real content: article bodies and dates, video URLs
   and expert names, full clinical cases, and Clinical Council member names.
-- **The Yashoda logo file is missing** — supply it and set `BRAND.logoSrc`.
+- **The Yashoda logo file is missing** — save it as `public/yashoda-logo.svg` or `.png`.
 - **The YouTube video ids need one spot-check pass.** They were sourced by web search;
   YouTube is unreachable from the build environment, so none was opened and confirmed.
 - Six topics still have no video: lung nodules, pulmonary hypertension, CPET, allergy,

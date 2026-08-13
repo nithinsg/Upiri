@@ -23,6 +23,7 @@
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://i.ytimg.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+Telugu:wght@400;600;700&amp;display=swap" rel="stylesheet">
 <style>
@@ -2163,25 +2164,40 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
             <sc-for list="{{ khVideos }}" as="v" hint-placeholder-count="9">
               <article style="border-radius:24px;overflow:hidden;background:#fff;border:1px solid rgba(44,42,107,0.1);box-shadow:0 20px 50px -26px rgba(29,27,75,0.35)">
-                <div aria-hidden="true" style="position:relative;height:132px;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,#2C2A6B,#3B3888)">
-                  <span style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,0.25)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2A6B" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
-                  </span>
-                </div>
-                <div style="padding:18px 20px">
-                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.35;color:#2C2A6B;margin:0 0 8px">{{ v.t }}</h3>
+                <sc-if value="{{ v.idle }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ v.play }}" aria-label="{{ v.aria }}" style="{{ v.thumbSt }}" style-hover="filter:brightness(1.06)">
+                    <span aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(29,27,75,0.05),rgba(29,27,75,0.45))"></span>
+                    <span aria-hidden="true" style="position:relative;width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(0,0,0,0.35)">
+                      <svg width="21" height="21" viewBox="0 0 24 24" fill="#2C2A6B" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
+                    </span>
+                  </button>
+                </sc-if>
+                <sc-if value="{{ v.isPlaying }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:relative;aspect-ratio:16/9;background:#000">
+                    <iframe src="{{ v.embed }}" title="{{ v.frameTitle }}" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block"></iframe>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ false }}">
+                  <div style="aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:repeating-linear-gradient(135deg,rgba(44,42,107,0.05),rgba(44,42,107,0.05) 10px,rgba(44,42,107,0.09) 10px,rgba(44,42,107,0.09) 20px);border-bottom:1px dashed rgba(44,42,107,0.25)">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A88B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 8-6 4 6 4V8Z"></path><rect width="14" height="12" x="2" y="6" rx="2"></rect></svg>
+                    <span style="font-size:11.5px;font-weight:700;color:#8A88B8">Video coming soon</span>
+                  </div>
+                </sc-if>
+                <div style="padding:16px 20px 18px">
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.35;color:#2C2A6B;margin:0 0 6px">{{ v.t }}</h3>
                   <p style="font-size:12.5px;color:#6C6A9E;margin:0">{{ v.topicName }}</p>
                   <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
                     <p style="font-size:11.5px;color:#8A88B8;margin:5px 0 0">Yashoda Hospitals · YouTube</p>
-                    <a href="{{ v.url }}" target="_blank" rel="noreferrer" aria-label="{{ v.aria }}" style="display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:#2C2A6B" style-hover="color:#fff;transform:translateY(-1px)">
-                      Watch on YouTube
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>
-                    </a>
                   </sc-if>
-                  <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ false }}">
-                    <p style="font-size:11px;color:#8A88B8;margin:8px 0 0">Placeholder — video to be added</p>
-                  </sc-if>
-                  <button onClick="{{ v.open }}" style="margin-top:10px;margin-left:8px;padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">Open topic</button>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                    <button onClick="{{ v.open }}" style="padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">Open topic</button>
+                    <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
+                      <a href="{{ v.url }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;color:#6C6A9E" style-hover="color:#2C2A6B">
+                        YouTube
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>
+                      </a>
+                    </sc-if>
+                  </div>
                 </div>
               </article>
             </sc-for>
@@ -2304,19 +2320,30 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related videos</h2>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <sc-for list="{{ tpVideos }}" as="v" hint-placeholder-count="2">
-              <article style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
-                <span aria-hidden="true" style="flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:#2C2A6B;display:flex;align-items:center;justify-content:center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
-                </span>
-                <div>
+              <article style="border-radius:20px;overflow:hidden;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <sc-if value="{{ v.idle }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ v.play }}" aria-label="{{ v.aria }}" style="{{ v.thumbSt }}" style-hover="filter:brightness(1.06)">
+                    <span aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(29,27,75,0.05),rgba(29,27,75,0.45))"></span>
+                    <span aria-hidden="true" style="position:relative;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(0,0,0,0.35)">
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="#2C2A6B" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
+                    </span>
+                  </button>
+                </sc-if>
+                <sc-if value="{{ v.isPlaying }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:relative;aspect-ratio:16/9;background:#000">
+                    <iframe src="{{ v.embed }}" title="{{ v.frameTitle }}" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block"></iframe>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ false }}">
+                  <div style="aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:repeating-linear-gradient(135deg,rgba(44,42,107,0.05),rgba(44,42,107,0.05) 10px,rgba(44,42,107,0.09) 10px,rgba(44,42,107,0.09) 20px)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8A88B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 8-6 4 6 4V8Z"></path><rect width="14" height="12" x="2" y="6" rx="2"></rect></svg>
+                    <span style="font-size:11.5px;font-weight:700;color:#8A88B8">Video coming soon</span>
+                  </div>
+                </sc-if>
+                <div style="padding:14px 18px 16px">
                   <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.35;color:#2C2A6B;margin:0">{{ v.t }}</h3>
                   <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
-                    <a href="{{ v.url }}" target="_blank" rel="noreferrer" aria-label="{{ v.aria }}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#2C2A6B;margin:5px 0 0;text-decoration:underline">
-                      Watch on YouTube · Yashoda Hospitals
-                    </a>
-                  </sc-if>
-                  <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ false }}">
-                    <p style="font-size:12px;color:#8A88B8;margin:4px 0 0">Placeholder — video to be added</p>
+                    <p style="font-size:11.5px;color:#8A88B8;margin:5px 0 0">Yashoda Hospitals · YouTube</p>
                   </sc-if>
                 </div>
               </article>
@@ -2414,7 +2441,8 @@ class Component extends DCLogic {
       ild: { sym: null, doses: [2, 1, 0], val: '', today: null }
     },
     alSel: new Date().getMonth(),
-    khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics'
+    khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics', khPlaying: null,
+    brandLogo: null
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -2610,12 +2638,13 @@ class Component extends DCLogic {
      ŪPIRI is a Yashoda Hospitals service, so the Yashoda identity appears beside
      the ŪPIRI mark in the navbar, the footer, and on both doctor-facing sections.
 
-     >>> TO DROP IN THE REAL LOGO: put the file in public/ and set logoSrc below.
-     Everything switches from the text lockup to the image automatically; nothing
-     else needs editing. No Yashoda logo asset shipped with this repo, so the
-     text lockup is what renders today. <<< */
+     >>> TO DROP IN THE REAL LOGO: save it into public/ as yashoda-logo.svg (or
+     .png). Nothing else to change — on load the page probes for those files and
+     switches every placement from the text lockup to the image the moment one
+     exists. Until then the text lockup renders, so a missing file can never show
+     a broken image in production. <<< */
   BRAND = {
-    logoSrc: '',                       /* e.g. '/yashoda-logo.svg' */
+    candidates: ['/yashoda-logo.svg', '/yashoda-logo.png'],
     logoAlt: 'Yashoda Hospitals',
     name: 'Yashoda Hospitals',
     unit: 'Pulmonology',
@@ -3013,7 +3042,19 @@ class Component extends DCLogic {
     el.textContent = JSON.stringify(data);
   }
 
+  /* Probe for a Yashoda logo file and use it only once it has actually loaded. */
+  findBrandLogo(i) {
+    i = i || 0;
+    const src = this.BRAND.candidates[i];
+    if (!src) return;
+    const probe = new Image();
+    probe.onload = () => this.setState({ brandLogo: src });
+    probe.onerror = () => this.findBrandLogo(i + 1);
+    probe.src = src;
+  }
+
   componentDidMount() {
+    this.findBrandLogo();
     const patch = { qd: new Date().toISOString().slice(0, 10) };
     const start = this.props.startScreen;
     const fromUrl = this.routeFromPath(location.pathname);
@@ -3418,12 +3459,25 @@ class Component extends DCLogic {
     const khArticles = this.KH_ARTICLES
       .filter(a => catInTab(a.cat))
       .map(a => ({ t: a.t, cat: a.cat, read: a.read, topicId: a.topic, topicName: topicName(a.topic), placeholder: !!a.placeholder }));
-    const ytUrl = id => 'https://www.youtube.com/watch?v=' + id;
-    const khVideos = this.KH_VIDEOS.map(v => ({
-      t: v.t, topicId: v.topic, topicName: topicName(v.topic),
-      hasVideo: !!v.yt, placeholder: !v.yt, url: v.yt ? ytUrl(v.yt) : '',
-      aria: 'Watch “' + v.t + '” on the Yashoda Hospitals YouTube channel (opens in a new tab)'
-    }));
+    const videoVm = (v, name) => {
+      const playing = !!v.yt && s.khPlaying === v.yt;
+      return {
+        t: v.t, topicId: v.topic, topicName: name,
+        hasVideo: !!v.yt, placeholder: !v.yt,
+        url: v.yt ? 'https://www.youtube.com/watch?v=' + v.yt : '',
+        /* privacy-friendly host, and only requested once the viewer asks to play */
+        embed: v.yt ? 'https://www.youtube-nocookie.com/embed/' + v.yt + '?autoplay=1&rel=0' : '',
+        isPlaying: playing, idle: !!v.yt && !playing,
+        play: () => this.setState({ khPlaying: v.yt }),
+        /* real YouTube still, with the brand gradient behind it as the fallback */
+        thumbSt: v.yt
+          ? "position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border:none;padding:0;width:100%;cursor:pointer;background-image:url('https://i.ytimg.com/vi/" + v.yt + "/hqdefault.jpg');background-size:cover;background-position:center;background-color:#2C2A6B"
+          : '',
+        frameTitle: v.t + ' — Yashoda Hospitals',
+        aria: 'Play “' + v.t + '”, a Yashoda Hospitals video'
+      };
+    };
+    const khVideos = this.KH_VIDEOS.map(v => videoVm(v, topicName(v.topic)));
     const khCases = this.KH_CASES.map(c => ({ t: c.t, d: c.d, lvl: c.lvl, topicId: c.topic, topicName: topicName(c.topic), placeholder: !!c.placeholder }));
 
     /* client-side search across topics, articles, videos and cases */
@@ -3520,8 +3574,8 @@ class Component extends DCLogic {
       curKnowledge: s.route === 'knowledge' ? 'page' : 'false', curAlumni: s.route === 'alumni' ? 'page' : 'false',
 
       /* ---- Yashoda brand lockup ---- */
-      brandHasLogo: !!this.BRAND.logoSrc, brandNoLogo: !this.BRAND.logoSrc,
-      brandLogo: this.BRAND.logoSrc, brandAlt: this.BRAND.logoAlt,
+      brandHasLogo: !!s.brandLogo, brandNoLogo: !s.brandLogo,
+      brandLogo: s.brandLogo || '', brandAlt: this.BRAND.logoAlt,
       brandName: this.BRAND.name, brandUnit: this.BRAND.unit, brandSite: this.BRAND.site,
 
       /* ---- clinical network (/alumni) ---- */
@@ -3561,11 +3615,7 @@ class Component extends DCLogic {
       tpTx: tp ? tp.tx.map(t => ({ t })) : [], tpSpec: tp ? tp.spec.map(t => ({ t })) : [],
       tpAdv: tp ? tp.adv.map(t => ({ t })) : [], tpSvc: tp ? tp.svc.map(t => ({ t })) : [],
       tpArticles: tp ? this.KH_ARTICLES.filter(a => a.topic === tp.id).map(a => ({ ...a, topicName: tp.n })) : [],
-      tpVideos: tp ? this.KH_VIDEOS.filter(v => v.topic === tp.id).map(v => ({
-        ...v, topicName: tp.n, hasVideo: !!v.yt, placeholder: !v.yt,
-        url: v.yt ? 'https://www.youtube.com/watch?v=' + v.yt : '',
-        aria: 'Watch “' + v.t + '” on the Yashoda Hospitals YouTube channel (opens in a new tab)'
-      })) : [],
+      tpVideos: tp ? this.KH_VIDEOS.filter(v => v.topic === tp.id).map(v => videoVm(v, tp.n)) : [],
       tpCases: tp ? this.KH_CASES.filter(c => c.topic === tp.id).map(c => ({ ...c, topicName: tp.n })) : [],
       tpHasArticles: tp ? this.KH_ARTICLES.some(a => a.topic === tp.id) : false,
       tpHasVideos: tp ? this.KH_VIDEOS.some(v => v.topic === tp.id) : false,
