@@ -156,6 +156,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         <button onClick="{{ goClubs }}" aria-current="{{ curClubs }}" style="{{ navClubs }}" style-hover="background:rgba(44,42,107,0.08)">Clubs</button>
         <button onClick="{{ goJourney }}" aria-current="{{ curJourney }}" style="{{ navJourney }}" style-hover="background:rgba(44,42,107,0.08)">Nodule Journey</button>
         <button onClick="{{ goRendo }}" aria-current="{{ curRendo }}" style="{{ navRendo }}" style-hover="background:rgba(44,42,107,0.08)">Rendo Ūpiri</button>
+        <button onClick="{{ goFind }}" aria-current="{{ curFind }}" style="{{ navFind }}" style-hover="background:rgba(44,42,107,0.08)">Doctors</button>
         <button onClick="{{ goKnowledge }}" aria-current="{{ curKnowledge }}" style="{{ navKnowledge }}" style-hover="background:rgba(44,42,107,0.08)">Knowledge Hub</button>
         <button onClick="{{ goAlumni }}" aria-current="{{ curAlumni }}" style="{{ navAlumni }}" style-hover="background:rgba(44,42,107,0.08)">Clinical Network</button>
       </div>
@@ -391,6 +392,48 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
             </span>
           </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- FIND THE RIGHT SPECIALIST -->
+    <section aria-labelledby="spec-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+        <div>
+          <h2 id="spec-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Find the right lung specialist</h2>
+          <p style="font-size:16px;color:#6C6A9E;margin:10px 0 0;max-width:620px">Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.</p>
+        </div>
+        <button onClick="{{ goFind }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+          See all specialists
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <sc-for list="{{ homeDocs }}" as="d" hint-placeholder-count="3">
+            <article style="display:flex;flex-direction:column;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);box-shadow:0 22px 54px -30px rgba(29,27,75,0.34)">
+              <div style="display:flex;gap:16px;align-items:flex-start">
+                <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:72px;height:72px;border-radius:20px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#2C2A6B">
+                  {{ d.initials }}
+                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
+                </span>
+                <div style="min-width:0">
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
+                  <p style="font-size:12.5px;line-height:1.45;color:#4A4880;margin:5px 0 0">{{ d.desig }}</p>
+                  <p style="font-size:11.5px;color:#8A88B8;margin:6px 0 0">{{ d.unit }} · {{ d.exp }} experience</p>
+                </div>
+              </div>
+              <p style="font-size:11.5px;color:#6C6A9E;margin:12px 0 0">{{ d.qual }}</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+                <sc-for list="{{ d.condChips }}" as="c" hint-placeholder-count="3">
+                  <span style="font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ c.t }}</span>
+                </sc-for>
+              </div>
+              <p style="font-size:11.5px;color:#8A88B8;margin:10px 0 14px">Speaks {{ d.langLine }}</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                <button onClick="{{ d.open }}" style="padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">View profile</button>
+                <a href="{{ d.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452)" style-hover="color:#fff;transform:translateY(-1px)">Book appointment</a>
+              </div>
+            </article>
         </sc-for>
       </div>
     </section>
@@ -1873,6 +1916,166 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   </div>
   </sc-if>
 
+  <!-- ============ FIND A SPECIALIST ============ -->
+  <sc-if value="{{ isFind }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Find a Specialist" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:1150px;margin:0 auto">
+      <nav aria-label="Breadcrumb" style="margin-bottom:16px">
+        <ol style="list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:0;font-size:12.5px;color:#8A88B8">
+          <li><button onClick="{{ goHome }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Home</button></li>
+          <li aria-hidden="true">›</li>
+          <li aria-current="page" style="font-weight:700;color:#2C2A6B">Doctors</li>
+        </ol>
+      </nav>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,3.8vw,42px);letter-spacing:-0.025em;color:#1D1B4B;margin:0">Find a lung specialist</h1>
+      <p style="font-size:16px;color:#4A4880;margin:12px 0 26px;max-width:720px">Pulmonology consultants at Yashoda Hospitals, Hyderabad. Filter by what you need, then book directly.</p>
+
+      <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+        <input value="{{ docQuery }}" onChange="{{ onDocQuery }}" type="search" aria-label="Search specialists by name, expertise or procedure" placeholder="Search a name, condition or procedure..." style="border-radius:999px;padding:14px 20px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:14.5px;outline-color:#F5821F">
+        <select value="{{ docCondVal }}" onChange="{{ onDocCond }}" aria-label="Filter by condition" style="appearance:none;-webkit-appearance:none;border-radius:999px;padding:14px 18px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:14px;font-weight:600;color:#2C2A6B;cursor:pointer;outline-color:#F5821F">
+          <sc-for list="{{ docCondOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select value="{{ docLocVal }}" onChange="{{ onDocLoc }}" aria-label="Filter by location" style="appearance:none;-webkit-appearance:none;border-radius:999px;padding:14px 18px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:14px;font-weight:600;color:#2C2A6B;cursor:pointer;outline-color:#F5821F">
+          <sc-for list="{{ docLocOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select value="{{ docLangVal }}" onChange="{{ onDocLang }}" aria-label="Filter by language" style="appearance:none;-webkit-appearance:none;border-radius:999px;padding:14px 18px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:14px;font-weight:600;color:#2C2A6B;cursor:pointer;outline-color:#F5821F">
+          <sc-for list="{{ docLangOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:26px">
+        <button onClick="{{ togglePaed }}" aria-pressed="{{ docPaed }}" style="{{ paedSt }}">Sees children</button>
+        <button onClick="{{ clearDocFilters }}" style="padding:12px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:#6C6A9E;background:transparent;border:none;cursor:pointer;text-decoration:underline">Clear filters</button>
+        <span style="margin-left:auto;font-size:13.5px;font-weight:700;color:#2C2A6B">{{ docCount }}</span>
+      </div>
+
+      <sc-if value="{{ docNone }}" hint-placeholder-val="{{ false }}">
+        <p style="font-size:15px;color:#4A4880;padding:30px;border-radius:22px;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.9)">No specialist matches that combination. Try clearing a filter, or <a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="font-weight:700;text-decoration:underline">ask us to help you choose</a>.</p>
+      </sc-if>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <sc-for list="{{ docCards }}" as="d" hint-placeholder-count="9">
+            <article style="display:flex;flex-direction:column;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);box-shadow:0 22px 54px -30px rgba(29,27,75,0.34)">
+              <div style="display:flex;gap:16px;align-items:flex-start">
+                <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:72px;height:72px;border-radius:20px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#2C2A6B">
+                  {{ d.initials }}
+                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
+                </span>
+                <div style="min-width:0">
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
+                  <p style="font-size:12.5px;line-height:1.45;color:#4A4880;margin:5px 0 0">{{ d.desig }}</p>
+                  <p style="font-size:11.5px;color:#8A88B8;margin:6px 0 0">{{ d.unit }} · {{ d.exp }} experience</p>
+                </div>
+              </div>
+              <p style="font-size:11.5px;color:#6C6A9E;margin:12px 0 0">{{ d.qual }}</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+                <sc-for list="{{ d.condChips }}" as="c" hint-placeholder-count="3">
+                  <span style="font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ c.t }}</span>
+                </sc-for>
+              </div>
+              <p style="font-size:11.5px;color:#8A88B8;margin:10px 0 14px">Speaks {{ d.langLine }}</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                <button onClick="{{ d.open }}" style="padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">View profile</button>
+                <a href="{{ d.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452)" style-hover="color:#fff;transform:translateY(-1px)">Book appointment</a>
+              </div>
+            </article>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DOCTOR PROFILE ============ -->
+  <sc-if value="{{ isDoctor }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Doctor Profile" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:900px;margin:0 auto">
+      <nav aria-label="Breadcrumb" style="margin-bottom:18px">
+        <ol style="list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:0;font-size:12.5px;color:#8A88B8">
+          <li><button onClick="{{ goHome }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Home</button></li>
+          <li aria-hidden="true">›</li>
+          <li><button onClick="{{ backToDoctors }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Doctors</button></li>
+          <li aria-hidden="true">›</li>
+          <li aria-current="page" style="font-weight:700;color:#2C2A6B">{{ drName }}</li>
+        </ol>
+      </nav>
+
+      <header style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;padding:30px;border-radius:30px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(18px);box-shadow:0 26px 62px -30px rgba(29,27,75,0.34)">
+        <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:112px;height:112px;border-radius:26px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:32px;color:#2C2A6B">
+          {{ drInitials }}
+          <img src="{{ drImg }}" alt="{{ drImgAlt }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
+        </span>
+        <div style="flex:1;min-width:240px">
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">{{ drName }}</h1>
+          <p style="font-size:15px;font-weight:600;color:#2C2A6B;margin:8px 0 0">{{ drDesig }}</p>
+          <p style="font-size:13px;color:#4A4880;margin:8px 0 0">{{ drQual }}</p>
+          <p style="font-size:13px;color:#8A88B8;margin:8px 0 0">Yashoda Hospitals, {{ drUnit }} · {{ drExp }} experience</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+            <a href="{{ drBook }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 14px 34px -12px rgba(245,130,31,0.65)" style-hover="color:#fff;transform:translateY(-2px)">Book appointment</a>
+            <a href="{{ drProfileUrl }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:7px;padding:13px 22px;border-radius:999px;font-size:13.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14)" style-hover="color:#2C2A6B">Yashoda profile
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px">
+        <section style="padding:24px 26px;border-radius:24px;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9)">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16.5px;color:#2C2A6B;margin:0 0 10px">Languages</h2>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ drLangs }}" as="x" hint-placeholder-count="3"><li style="font-size:12.5px;font-weight:700;padding:7px 15px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ x.t }}</li></sc-for>
+          </ul>
+        </section>
+        <sc-if value="{{ drHasTimings }}" hint-placeholder-val="{{ true }}">
+          <section style="padding:24px 26px;border-radius:24px;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9)">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16.5px;color:#2C2A6B;margin:0 0 10px">OPD timings</h2>
+            <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">{{ drTimings }}</p>
+          </section>
+        </sc-if>
+      </div>
+
+      <section style="margin-top:20px;padding:28px 30px;border-radius:26px;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#2C2A6B;margin:0 0 12px">About</h2>
+        <sc-for list="{{ drAbout }}" as="x" hint-placeholder-count="2">
+          <p style="font-size:14.5px;line-height:1.7;color:#4A4880;margin:0 0 12px">{{ x.t }}</p>
+        </sc-for>
+      </section>
+
+      <section style="margin-top:20px;padding:28px 30px;border-radius:26px;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#2C2A6B;margin:0 0 12px">Conditions treated</h2>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;gap:9px;flex-wrap:wrap">
+          <sc-for list="{{ drConds }}" as="c" hint-placeholder-count="6">
+            <li><button onClick="{{ c.open }}" style="font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;background:#E7E7F4;color:#2C2A6B;border:none;cursor:pointer" style-hover="background:#DAD9EE">{{ c.t }}</button></li>
+          </sc-for>
+        </ul>
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#2C2A6B;margin:26px 0 12px">Procedures</h2>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;gap:9px;flex-wrap:wrap">
+          <sc-for list="{{ drProcs }}" as="x" hint-placeholder-count="5">
+            <li style="font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;background:#FDEBD9;color:#B35A08">{{ x.t }}</li>
+          </sc-for>
+        </ul>
+      </section>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px">
+        <section style="padding:26px 28px;border-radius:26px;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9)">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#2C2A6B;margin:0 0 12px">Education</h2>
+          <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#4A4880">
+            <sc-for list="{{ drEdu }}" as="x" hint-placeholder-count="3"><li>{{ x.t }}</li></sc-for>
+          </ul>
+        </section>
+        <section style="padding:26px 28px;border-radius:26px;background:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.9)">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#2C2A6B;margin:0 0 12px">Experience</h2>
+          <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#4A4880">
+            <sc-for list="{{ drHist }}" as="x" hint-placeholder-count="3"><li>{{ x.t }}</li></sc-for>
+          </ul>
+        </section>
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">
+        <button onClick="{{ backToDoctors }}" style="padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">All specialists</button>
+        <a href="{{ drBook }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452)" style-hover="color:#fff">Book appointment</a>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
   <!-- ============ ŪPIRI CLINICAL NETWORK ============ -->
   <sc-if value="{{ isAlumni }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Clinical Network" style="min-height:100vh;padding:120px 24px 90px">
@@ -2286,6 +2489,15 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   <sc-if value="{{ isTopic }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Knowledge Topic" style="min-height:100vh;padding:120px 24px 90px">
     <div style="max-width:900px;margin:0 auto">
+      <nav aria-label="Breadcrumb" style="margin-bottom:16px">
+        <ol style="list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:0;font-size:12.5px;color:#8A88B8">
+          <li><button onClick="{{ goHome }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Home</button></li>
+          <li aria-hidden="true">›</li>
+          <li><button onClick="{{ backToHub }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Knowledge Hub</button></li>
+          <li aria-hidden="true">›</li>
+          <li aria-current="page" style="font-weight:700;color:#2C2A6B">{{ tpName }}</li>
+        </ol>
+      </nav>
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:26px">
         <button onClick="{{ backToHub }}" aria-label="Back to the Knowledge Hub" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.8);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateX(-3px)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
@@ -2420,6 +2632,26 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         </section>
       </sc-if>
 
+      <sc-if value="{{ tpHasDocs }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:34px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Meet the specialists</h2>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            <sc-for list="{{ tpDocs }}" as="d" hint-placeholder-count="3">
+              <article style="display:flex;flex-direction:column;padding:20px;border-radius:22px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <span aria-hidden="true" style="position:relative;width:56px;height:56px;border-radius:16px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#2C2A6B;margin-bottom:12px">
+                  {{ d.initials }}
+                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
+                </span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
+                <p style="font-size:11.5px;line-height:1.45;color:#6C6A9E;margin:5px 0 0;flex:1">{{ d.desig }}</p>
+                <p style="font-size:11px;color:#8A88B8;margin:6px 0 12px">{{ d.unit }}</p>
+                <button onClick="{{ d.open }}" style="align-self:flex-start;padding:8px 15px;border-radius:999px;font-size:12px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">View profile</button>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
       <section style="margin-top:34px;padding:28px 32px;border-radius:26px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1);display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <p style="font-size:14.5px;line-height:1.6;color:#4A4880;margin:0;max-width:520px">This page is general education, not a diagnosis. If something here matches what you are experiencing, speak to a doctor.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -2495,7 +2727,8 @@ class Component extends DCLogic {
     },
     alSel: new Date().getMonth(),
     khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics', khPlaying: null,
-    brandLogo: null
+    brandLogo: null,
+    docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -2709,6 +2942,27 @@ class Component extends DCLogic {
     unit: 'Pulmonology',
     site: 'https://www.yashodahospitals.com'
   };
+
+  /* Yashoda pulmonology consultants, transcribed from the department's own listing.
+     `conds` and `procs` are derived from each doctor's stated expertise and services so
+     condition and procedure pages can link to the right people without hand-tagging. */
+  DOCTORS = [
+    { id: 'l-harish-rao', name: 'Dr L. Harish Rao', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-l-harish-rao/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2025/12/Web-Profile-Photo_Dr-L.-Harish-Rao.png', desig: 'Consultant Clinical & Interventional Pulmonologist', qual: 'MBBS, MD (Pulmonary Medicine)', langs: ['English', 'Telugu', 'Hindi'], exp: '10 Yrs', timings: 'Day time OPD: MON – SAT : 9:00 AM – 4:00 PM', expertise: '', about: 'Dr L. Harish Rao is a Consultant Clinical & Interventional Pulmonologist working at Yashoda Hospitals, Hitec City.', edu: '2018: MD Pulmonary Medicine, Gandhi Medical College, Hyderabad. 2013: MBBS, Kakatiya Medical College, Warangal', hist: 'Present: Consultant Clinical & Interventional Pulmonologist, Hitec City. Nov 2022 to SEP 2025: Consultant Clinical & Interventional Pulmonologist at Archana Hospital, Miyapur. 2018 to 2022: Consultant Clinical & Interventional Pulmonologist at Sri Sri Holistic Hospital, Kukatpally.', services: 'Basic Pulmonology OPD & IPD Services Respiratory Infections ( Pneumonia, Tuberculosis, Covid 19) Interstitial lung diseases evaluation & management Expert-level Asthma Care Chronic Obstructive Pulmonary Disease (COPD) Sleep Apnea Advanced Diagnostic & Therapeutic bronchoscopy procedures Rigid Thoracoscopy Diagnostic Bronchoscopy (BAL, EBB, TBLB) EBUS Critical Care & ARDS management', conds: ['asthma', 'copd', 'ild', 'interventional-pulmonology', 'bronchoscopy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Thoracoscopy', 'Critical care'], paed: false },
+    { id: 'b-viswesvaran', name: 'Dr. B Viswesvaran', unit: 'Somajiguda', url: 'https://www.yashodahospitals.com/doctor/somajiguda/pulmonology/dr-b-viswesvaran/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2019/10/Dr.-B-Viswesvaran.png', desig: 'Senior Consultant Interventional Pulmonology and Sleep Medicine', qual: 'MD, DNB, DM (Pulmonary and Critical care – Gold Medalist), Fellowship in Sleep Medicine (Gold Medalist), Fellowship in Interventional Pulmonology (Malaysia), European Diploma in Adult Respiratory Medicine (Switzerland)', langs: ['English', 'Telugu', 'Hindi', 'Tamil'], exp: '13 Yrs', timings: 'Day time OPD: MON – SAT : 10:00 AM – 04:00 PM Evening OPD: MON – SAT : 05:00 PM – 07:00 PM', expertise: 'Interventional Pulmonology, Sleep Medicine, ILD Diagnosis and Treatment, Allergy Management, Lung Cancer, ECMO & Lung Transplantation', about: 'Dr Viswesvaran Balasubramanian is widely regarded amongst the best and reputed clinical and interventional pulmonologists in the country. He is also the course director of basic and advanced interventional pulmonology fellowship and has trained many national and international candidates. | He has undergone dedicated training and acquired the skills to perform basic and advanced bronchoscopy, which includes flexible bronchoscopy, transbronchial cryo lung biopsies, endobronchial biopsy, endobronchial ultrasound (linear & radial), pleuroscopy, foreign body extraction, and interventions such as airway stent placements, electrocautery, dilation, and glue therapy. He has performed thousands of bronchoscopies and EBUS and is considered a pioneer in field of interventional pulmonology. | He has also undergone extensive training in the management of sleep disorders, such as level 1 polysomnography and other levels of sleep study; positive airway pressure therapy in OSA, COPD, obesity hypoventilation syndrome, neuromuscular disorders, and other sleep-disordered breathing disorders. He has also been awarded a gold medal in a fellowship on sleep medicine conducted by ISDA. | Dr Viswesvaran Balasubramanian is also trained in management of critically ill respiratory patients, patients requiring ventilator management and has special interest in management of patients requiring advanced life support systems like ECMO ( Extracorporeal Membrane Oxygenation ). He is also actively involved in management of lung transplantation patients. | He is an invited faculty at various national and international conferences and has been awarded the best pulmonologist of the year by ‘ Economic Times’ and ‘ Outlook’ magazines. His achievements are also featured as cover story in Silicone India magazine and is regarded amongst the best in field of Pulmonary medicine. | He underwent special training in the management of allergic disorders and ABPA with hands-on training in allergy testing (skin prick test) from India’s premier institute for allergic disorders, the Vallabhbhai Patel Chest Institute. | His skills lie in the management of COPD, asthma, bronchiolitis, bronchiectasis, tuberculosis, infectious disease, ILD (DPLD), ABPA, vasculitis, pulmonary vascular disorders, occupational lung disease, pleural and mediastinal disorders, malignancies of the lung and pleura, and patients of pulmonary rehabilitation.', edu: '2019: DM (Pulmonary, Critical Care & Sleep Medicine), Vardhman Mahavir Medical College & Safdarjung Hospital, Delhi (Gold Medallist) 2016: DNB (Pulmonary Medicine), National Board of Examinations, India 2016: MD (Pulmonary Medicine), Vallabhbhai Patel Chest Institute, University of Delhi, Delhi 2013: MBBS, Government Medical College & Hospital, Coimbatore, Tamil Nadu, Dr MGR Medical University, Tamil Nadu', hist: '2019-Present: Senior Consultant Interventional Pulmonology and Sleep Medicine, Yashoda Hospitals, Somajiguda 2016-2019: Senior Resident, Vardhman Mahavir Medical College & Safdarjung Hospital, Delhi 2013-2016: Junior Resident, Vallabhbhai Patel Chest Institute, University of Delhi, Delhi Fellowship in Sleep Medicine (Gold Medalist) Fellowship in Interventional Pulmonology (Malaysia)', services: 'Advanced Diagnostic & Therapeutic Pulmonary Intervention (Rigid Bronchoscopy, Cryobiopsy, Airway Stenting, Foreign Body Removal, Rigid Thoracoscopy, Airway Stenosis) Diagnostic Flexible Bronchoscopy (EBB, TBLB, TBNA) Linear, Radial EBUS, Bronchial Thermoplasty, Bronchial Thermal Vapor Ablation (BTVA) Advanced Sleep Diagnostics, Positive Airway Pressure Devices Administration Allergy Management Expert ILD Consultation Expert Lung Cancer Diagnostics Critical Care: Advanced Respiratory Services Rehabilitation Asthma ECMO & Lung Transplantation', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'lung-cancer', 'pulmonary-hypertension', 'lung-transplantation', 'interventional-pulmonology', 'bronchoscopy', 'allergy', 'sleep-medicine', 'respiratory-infections', 'occupational-lung-disease'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Bronchial thermoplasty', 'Sleep study', 'Allergy testing', 'Critical care'], paed: false },
+    { id: 'belgundi-preeti-vidyasagar', name: 'Dr. Belgundi Preeti Vidyasagar', unit: 'Secunderabad', url: 'https://www.yashodahospitals.com/doctor/secunderabad/pulmonology/dr-belgundi-preeti-vidyasagar/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr.-Belgundi-Preeti-Vidyasagar.png', desig: 'Consultant Interventional Pulmonologist', qual: 'MD, DNB, DM (Pulmonary Medicine), Fellowship in Interventional Pulmonology', langs: ['English', 'Hindi', 'Kannada', 'Telugu', 'Malayalam'], exp: '13 Yrs', timings: 'Day time OPD: MON – SAT : 09:00 AM – 4:00 PM Evening OPD: MON – SAT : 05:00 PM – 08:00 PM', expertise: 'Advanced Therapeutic Thoracic Bronchoscopy, Respiratory Medical Oncology, Allergy Management, Thoracoscopy, Critical Care, Respiratory Infections', about: 'Dr Belgundi Preeti Vidyasagar has received intensive training and has developed the necessary skills to perform both basic and advanced bronchoscopy, including flexible bronchoscopy, transbronchial lung biopsy, endobronchial biopsy, endobronchial ultrasound (linear & radial), semi-rigid and rigid pleuroscopy, foreign body extraction, and cryoextraction. | She had undergone basic training in the management of sleep disorders: level 1 polysomnography and other levels of sleep studies, positive airway pressure therapy in OSA, COPD, obesity, hypoventilation syndrome, neuromuscular disorders, and other sleep-disordered breathing disorders. | She has gained first-hand experience in other ICU-related procedures like central venous cannulation, echocardiography, and arterial lines, as well as critical care ultrasound. She has also gained expertise in the use of non-invasive ventilator strategies as well as high-flow nasal cannulas. | Dr Preeti Vidyasagar is experienced in managing COPD, asthma, bronchiolitis, bronchiectasis, tuberculosis, infectious disease, ILD (DPLD), ABPA, vasculitis, pulmonary vascular disorders, occupational lung diseases, pleural and mediastinal disorders, and lung and pleural malignancies. | Dr Preeti Vidyasagar is a skilled pulmonologist specialising in the diagnosis and management of respiratory diseases, with special expertise in performing minimally invasive pulmonary procedures in both adults and children.', edu: '2022-2023: Level II Masters in Interventional Pulmonology, University Of Firenze, Florence, Italy. Clinical Fellowship in Advanced Interventional Pulmonology, Yashoda Hospital, Secunderabad DM Pulmonary Medicine, Amrita Institute of Medical Sciences, Kochi, Kerala DNB Respiratory Medicine, National Board of Examinations MD Respiratory Medicine, JJM Medical College, Davangere, Karnataka MBBS, JJM Medical College, Davangere, Karnataka', hist: 'Nov 2020-Present: Consultant Interventional Pulmonologist, Yashoda Hospitals, Secunderabad Aug 2017-Oct 2017: Senior Resident, Department of Respiratory Medicine, Rajiv Gandhi Institute of Chest Diseases, Bangalore Sep 2016-Mar 2017: Senior Resident, Department of Respiratory Medicine, St. John’s Medical College Hospital & Research Institute, Bangalore', services: 'Diagnosis of Peripheral Pulmonary Lesions Diagnosis of Persistent Air Leak Diagnosis and Treatment of Interstitial Lung Disease (ILD) Airway Disease Management Respiratory Disease Management Tuberculosis Management Critical Care Medicine Advanced Endoscopy Services Endobronchial Ultrasound-Convex and Radial Probe Cryobiopsy & APC Tracheobronchial Stenting Pleuroscopy (Rigid & Semi-Rigid) Indwelling Pleural Catheter ARDS Management Sleep Study Lung Transplant Asthma', conds: ['asthma', 'copd', 'ild', 'lung-cancer', 'lung-nodules', 'pulmonary-hypertension', 'lung-transplantation', 'interventional-pulmonology', 'bronchoscopy', 'allergy', 'sleep-medicine', 'respiratory-infections', 'occupational-lung-disease'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Sleep study', 'Pleural procedures', 'Critical care'], paed: true },
+    { id: 'd-ragotham-reddy', name: 'Dr. D Ragotham Reddy', unit: 'Somajiguda', url: 'https://www.yashodahospitals.com/doctor/somajiguda/pulmonology/dr-d-ragotham-reddy/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr.-D-Ragotham-Reddy.png', desig: 'Sr. Consultant Chest Physician & Pulmonologist', qual: 'MD, MSASMS', langs: ['English', 'Hindi', 'Telugu'], exp: '28 Yrs', timings: 'Day time OPD: MON – SAT : 09:00 AM – 02:00 PM Evening OPD: MON – SAT : 05:00 PM – 07:00 PM', expertise: 'Bronchoscopy , Critical Care , Managing Tuberculosis including MDR (Multi Drug Resistant) Cases and Chronic Empyema , Pleurodesis , Pleural Biopsy , Tube Thoracostomy (Chest Tube Drainage)', about: 'Dr D. Ragotham Reddy is a Senior Consultant Pulmonologist at Yashoda Hospitals, Somajiguda, with over 27 years of experience. He is an experienced pulmonologist specialising in the diagnosis and management of respiratory diseases, with particular expertise in minimally invasive pulmonary procedures for both adults and children.', edu: 'MD, MSASMS', hist: '', services: 'Diagnosis and Management of Respiratory Diseases Asthma management Chronic Obstructive Pulmonary Disease (COPD) Bronchitis (acute and chronic) Pneumonia Tuberculosis (TB) Interstitial Lung Disease (ILD) Lung fibrosis Pleural diseases (pleural effusion, pneumothorax) Pulmonary infections Evaluation of Respiratory Symptoms Chronic cough Shortness of breath (dyspnea) Wheezing Chest tightness Blood in sputum (hemoptysis) Lung Function and Diagnostic Testing Pulmonary Function Tests (PFT) Spirometry testing Bronchial provocation testing Arterial blood gas analysis Allergy testing for respiratory conditions Sleep and Breathing Disorders Diagnosis and treatment of sleep apnea Sleep studies (polysomnography) CPAP/BiPAP therapy management', conds: ['asthma', 'copd', 'ild', 'pulmonary-fibrosis', 'bronchoscopy', 'pulmonary-function-testing', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'Pulmonary function testing', 'Sleep study', 'Pleural procedures', 'Allergy testing', 'Critical care'], paed: true },
+    { id: 'gonuguntla-hari-kishan', name: 'Dr. Gonuguntla Hari Kishan', unit: 'Secunderabad', url: 'https://www.yashodahospitals.com/doctor/secunderabad/pulmonology/dr-hari-kishan-gonuguntla/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr.-Hari-Kishan-Gonuguntla.png', desig: 'Consultant Interventional PulmonologistDirector Interventional Pulmonology', qual: 'MD (Pulmonary Medicine), DM (Pulmonary Medicine) – AIMS, Fellowship In Interventional Pulmonology (Mahidol University), Fellowship Respiratory Endoscopy (NCC, Tokyo, Japan)', langs: ['English', 'Hindi', 'Telugu', 'Malayalam'], exp: '28 Yrs', timings: 'Day time OPD: MON – SAT : 09:00 AM – 7:00 PM', expertise: 'Bronchial Thermoplasty, Respiratory Medical Oncology, Advanced Therapeutic Thoracic Endoscopy, Interstitial Lung Diseases, Diagnosis of Peripheral Pulmonary Lesions , Persistent Air-Leak Management', about: 'Dr Gonuguntla Hari Kishan is a Consultant Interventional Pulmonologist at Yashoda Hospitals, Secunderabad. | He is an experienced pulmonologist specialising in the diagnosis and management of respiratory diseases, with particular expertise in minimally invasive pulmonary procedures for both adults and children.', edu: '2018: Endobronchial Ultrasound (EBUS), ERS Certification, Netherlands 2017: Clinical Fellowship in Advanced Interventional Pulmonology, Siriraj Hospital, Mahidol University, Bangkok, Thailand 2017: Fellowship in Respiratory Endoscopy, Respiratory Endoscopy National Cancer Centre, Tokyo 2016: DM (Pulmonology Medicine), Amrita Institute of Medical Sciences, Kochi, Kerala 2013: MD (Pulmonology Medicine), Katuri Medical College and Hospital, Guntur, Andhra Pradesh 2009: MBBS, Katuri Medical College and Hospital, Guntur, Andhra Pradesh', hist: 'Currently working as a Consultant Interventional Pulmonologist at Yashoda Hospitals, Secunderabad Feb 2017-Aug 2017: Clinical Fellow, Interventional Pulmonology, Siriraj Hospital, Mahidol University, Thailand Jan 2017-Feb 2017: Visiting Fellow, Respiratory Endoscopy National Cancer Centre, Tokyo, Japan Aug 2013-Aug 2016: Senior Resident, Amrita Institute of Medical Sciences, Kochi May 2010-June 2013: Junior Resident, Katuri Medical College and Hospital, Guntur, Andhra Pradesh', services: 'Respiratory Disease Management Tuberculosis Management Critical Care Medicine Advanced Endoscopy Services Endobronchial Ultrasound Cryobiopsy & APC Tracheo-Bronchial Stenting Pleuroscopy (Rigid & Semi-Rigid) ARDS Management Asthma Evaluation of Respiratory Symptoms Chronic cough Shortness of breath (dyspnea) Wheezing Chest tightness Blood in sputum (hemoptysis) Diagnosis and Management of Respiratory Diseases Asthma management Chronic Obstructive Pulmonary Disease (COPD) Bronchitis (acute and chronic) Pneumonia Tuberculosis (TB) Interstitial Lung Disease (ILD) Lung fibrosis Pleural diseases (pleural effusion, pneumothorax) Pulmonary infections Lung Function and Diagnostic Testing Pulmonary Function Tests (PFT) Spirometry testing Bronchial provocation testing Arterial blood gas analysis Allergy testing for respiratory conditions Sleep and Breathing Disorders Diagnosis and treatment of sleep apnea Sleep studies (polysomnography) CPAP/BiPAP therapy management', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'pulmonary-fibrosis', 'lung-cancer', 'lung-nodules', 'interventional-pulmonology', 'pulmonary-function-testing', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Bronchial thermoplasty', 'Pulmonary function testing', 'Sleep study', 'Pleural procedures', 'Allergy testing', 'Critical care'], paed: true },
+    { id: 'gopi-krishna-yedlapati', name: 'Dr. Gopi Krishna Yedlapati', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-gopi-krishna-yedlapati/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2017/11/WhatsApp-Image-2025-03-17-at-16.24.53.jpeg', desig: 'Sr. Consultant Interventional Pulmonologist', qual: 'MD (Pulmonary Medicine), FCCP (USA), FAPSR', langs: ['English', 'Hindi', 'Telugu', 'Tamil', 'Kannada'], exp: '19 Yrs', timings: 'Day time OPD: MON – SAT : 08:30 AM – 05:00 PM', expertise: '', about: 'Dr. Gopi Krishna Yedlapati is a Senior Consultant Interventional Pulmonologist at Yashoda Hospitals, Hitec City. | He is an experienced pulmonologist with expertise in treating and managing adult and paediatric pulmonary conditions.', edu: 'MD (Pulmonary Medicine), FCCP (USA), FAPSR', hist: '2014-Present: Consultant Interventional Pulmonologist, Yashoda Hospitals, Hitec City 2010-2014: Consultant Pulmonologist 2007-2014: Senior Resident', services: 'Comprehensive pulmonary services Basic Pulmonology OPD and IPD Services Bronchoscopy (Adults & Pediatrics) Video Bronchoscopy (Diagnostic and Therapeutic) Endobronchial Ultrasound (EBUS) Rigid Thoracoscopy Lung Cancer Services Advanced Pulmonary Function Testing Lab: Advanced Spirometry, DLCO, Six Minute Walk Test Rigid Bronchoscopy (Diagnostic and Therapeutic) Advanced Sleep Lab for Sleep Disorders DNB Respiratory Medicine: Course-Primary, Secondary Asthma Pediatric Pulmonology Pediatric Bronchoscopy Foreign Body Removal from the Pediatric Airway Evaluation of Congenital Airway Disorders Management of Chronic Lung Disease of Prematurity Pediatric Sleep Breathing Disorders', conds: ['asthma', 'lung-cancer', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'cpet', 'sleep-medicine'], procs: ['Bronchoscopy', 'EBUS', 'Thoracoscopy', 'Pulmonary function testing', 'Sleep study'], paed: true },
+    { id: 'j-v-s-aswith-chowdary', name: 'Dr. J V S Aswith Chowdary', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-j-v-s-aswith-chowdary/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2026/05/Dr-J-V-S-Aswith-Chowdary-scaled.png', desig: 'Consultant Clinical & Interventional Pulmonologist, Allergy & Immunology Specialist', qual: 'MBBS, DNB, DM (Pulmonary Medicine, CMC Vellore)', langs: ['Telugu', 'Hindi', 'Tamil', 'English'], exp: '11 Yrs', timings: 'Day time OPD: MON-SAT : 9:00 am – 5:00 pm', expertise: 'Allergy and Immunology, Airway Disorders (asthma, COPD), Tobacco-related disorders and de-addiction, Pulmonary Infections (Tuberculosis, Bacterial and Fungal), Interstitial Lung Disease, Interventiona…', about: 'Dr. J V S Aswith Chowdary is a consultant clinical & interventional pulmonologist. Allergy & Immunology Specialist working at Yashoda Hospitals, Hitec City. | He has a strong interest in allergy, immunology, and interventional pulmonology. Experienced in managing complex respiratory and allergic conditions, with expertise in bronchoscopic and pleural interventions. Passionate about evidence‑based care, minimally invasive pulmonary procedures, and allergen immunotherapy.', edu: '2020 to 2023: DM-Pulmonary Medicine, Christian Medical College Hospital, Vellore 2016 to 2019: DNB-Respiratory Diseases, Sir Ganga Ram Hospital, New Delhi 2008 to 2013: MBBS, Andhra Medical College, Vishakapatnam', hist: '2024 to 2026: Assistant Professor, Christian Medical College, Vellore. 2020 to 2023: Senior Resident (Academic), Christian Medical College, Vellore. 2019 to 2020: Senior Resident, ESI-PGIMSR Basaidarapur. 2016 to 2019: Junior Resident (Academic), Sir Ganga Ram Hospital.', services: 'Pulmonology Outpatient and Inpatient Services Diagnostic Allergy Testing (Skin Prick Test, Blood Test) Allergen Immunotherapy Biologic Therapy Adult Vaccination Tobacco cessation counselling and pharmacotherapy Advanced Pulmonary Function Tests Advanced Sleep Diagnostics and Therapeutics Diagnostic and Therapeutic Bronchoscopy (flexible and Rigid) Medical Thoracoscopy Linear and Radial EBUS Bronchoscopic Management of Hemoptysis', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'allergy', 'sleep-medicine', 'respiratory-infections', 'smoking-cessation'], procs: ['Bronchoscopy', 'EBUS', 'Thoracoscopy', 'Pulmonary function testing', 'Allergy testing'], paed: false },
+    { id: 'k-yugaveer-goud', name: 'Dr. K. Yugaveer Goud', unit: 'Malakpet', url: 'https://www.yashodahospitals.com/doctor/malakpet/pulmonology/dr-k-yugaveer-goud/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2025/01/Dr.-K.-Yugaveer-Goud-1.jpg', desig: 'Consultant Interventional Pulmonologist', qual: 'MBBS, MD, FCCP (Pulmonary Medicine)Fellowship in Interventional Pulmonology (Shanghai)', langs: ['Telugu', 'English', 'Hindi'], exp: '16 Yrs', timings: 'Day time OPD: MON – SAT : 09:00 AM – 4:00 PM', expertise: 'Interventional Pulmonology, Sleep Medicine', about: 'Dr. K. Yugaveer Goud is a Consultant Interventional Pulmonologist at Yashoda Hospitals, Malakpet.', edu: 'May 2007-2010: MD Pulmonary Medicine, Kamineni Institute of Medical Sciences Dec 2000-Dec 2006: MBBS, Deccan College of Medical Sciences, Hyderabad Fellowships 2019: Fellowship in Interventional Pulmonology, Shanghai East Hospital, China 2014: Fellow American College of Chest Physicians (FCCP) Certifications 2014: Certification Course in Medical Thoracoscopy, American Oncology Institute, Serilingampally, Hyderabad 2013: Certification Course in COPD, American Thoracic Society 2010: Certification Course in Sleep Medicine, International Institute of Sleep Medicine, Mumbai 2009: Certificate Course in Management of HIV/AIDS, Government Chest and TB Hospital, Hyderabad', hist: 'Currently working as Consultant Interventional Pulmonologist at Yashoda Hospitals, Malakpet Apr 2023-Apr 2024: Senior Consultant Pulmonologist, KIMS-Sunshine, Secunderabad Dec 2020-Mar 2023: Senior Consultant Interventional Pulmonologist, Omni Hospital, Kukatpally Apr 2017-Nov 2020: Consultant, Department of Interventional Pulmonology and Sleep Medicine, Yashoda Hospitals, Malakpet 2012-2017: Consultant Pulmonologist, Omni Hospital, Kothapet 2010-2012: Senior Registrar, Calibre Critical Care Unit, Vasavi Hospital, Lakdikapul', services: 'Asthma', conds: ['asthma', 'interventional-pulmonology', 'sleep-medicine'], procs: [], paed: false },
+    { id: 'pranay-sai-chandragiri', name: 'Dr. Pranay Sai Chandragiri', unit: 'Malakpet', url: 'https://www.yashodahospitals.com/doctor/malakpet/pulmonology/dr-pranay-sai-chandragiri/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2025/10/Dr.-Pranay-Sai.png', desig: 'Consultant Interventional Pulmonologist', qual: 'M.B.B.S; M.D (Pulmonary Medicine); D.M, AIIMS, New Delhi, (Pulmonary, Critical Care & Sleep Medicine)', langs: ['Telugu', 'Hindi', 'English'], exp: '7 Yrs', timings: 'Day time OPD:MON – SAT : Not Available', expertise: 'Interstitial Lung Diseases, Sleep Medicine, Tuberculosis, Lung Cancers, Bronchoscopic Interventions (diagnostic and palliative)', about: 'Dr. Pranay Sai Chandragiri is Consultant Interventional Pulmonologist working at Yashoda Hospitals, Malakpet.', edu: '2022 - 2025: DM in Pulmonary, Critical Care, and Sleep Medicine, AIIMS, New Delhi 2019 - 2022: MD in Respiratory Medicine - Rangaraya Medical College, Kakinada, Andhra Pradesh 2013 - 2019: MBBS - Kakatiya Medical College, Warangal, Telangana', hist: '2022 - 2025: Senior Resident at AIIMS (New Delhi) 2019 - 2022: Resident at Govt. General Hospital, Kakinada', services: 'Allergy Polysomnography ICU Critical Care Chronic Cough Interstitial Lung Disease Occupational Lung Diseases Lung Abscess Lung Cancer Pleural Effusion Pneumonia Respiratory Tract Infection Snoring and Sleep Medicine COPD Adult Immunization Tuberculosis Covid & Post-Covid Complications Interventions offered Adult and Paediatric Video Bronchoscopy Adult and Paediatric Rigid Bronchoscopy Pleuroscopy EBUS Radial EBUS Cryo Biopsy Endobronchial Stent Placement Pleurodesis Bronchial Asthma', conds: ['asthma', 'copd', 'ild', 'lung-cancer', 'interventional-pulmonology', 'bronchoscopy', 'allergy', 'sleep-medicine', 'respiratory-infections', 'occupational-lung-disease'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Sleep study', 'Pleural procedures', 'Critical care'], paed: true },
+    { id: 'sai-reddy', name: 'Dr. Sai Reddy', unit: 'Secunderabad', url: 'https://www.yashodahospitals.com/doctor/secunderabad/pulmonology/dr-sai-reddy/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2019/08/Dr.-Sai-Reddy-1-scaled.jpg', desig: 'Consultant Pulmonologist', qual: 'MBBS, MD (Pulmonary Medicine)', langs: ['English', 'Hindi', 'Telugu'], exp: '7 Yrs', timings: 'Day time OPD: MON – SAT : 09:00 AM – 4:00 PM Evening OPD: MON – SAT : 05:00 PM – 06:30 PM', expertise: 'Bronchoscopy, Medical Thoracoscopy, Endobronchial Ultrasonography, Level 1 Polysomnography', about: 'Dr Sai Reddy is a Consultant Pulmonologist at Yashoda Hospitals, Secunderabad. He is a skilled pulmonologist with specific expertise in diagnosing, treating and managing pulmonary conditions in adults and children.', edu: 'MD (Pulmonary Medicine): Pinnamaneni Siddhartha Medical College and Research Foundation, Vijayawada, Andhra Pradesh MBBS: Rangaraya Medical College, Kakinada', hist: 'Jun 2014-July 2018: Registrar, Department of Pulmonary Medicine, Yashoda Hospitals, Secunderabad', services: 'Bronchoscopy Medical Thoracoscopy Endobronchial Ultrasonography Level 1 Polysomnography Paediatric Pulmonology: Treatment and Management of Asthma Bronchiectasis Persistent or recurrent cough Recurrent chest infections Airway-related problems Exercise-related problems Cystic fibrosis Congenital lung abnormalities TB Sleep-related problems Any other respiratory problems causing concern in children or young adults', conds: ['asthma', 'copd', 'ild', 'pulmonary-fibrosis', 'bronchoscopy', 'cpet', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Thoracoscopy', 'Airway stenting', 'Sleep study'], paed: true },
+    { id: 'tapaswi-krishna-kattragada', name: 'Dr. Tapaswi Krishna Kattragada', unit: 'Somajiguda', url: 'https://www.yashodahospitals.com/doctor/somajiguda/pulmonology/dr-tapaswi-krishna-kattragada/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2026/05/Tapasvi.png', desig: 'Consultant Transplant Pulmonologist', qual: 'MBBS, MD (Pulmonary Medicine), FICCM, PGDLT (EHEA)', langs: ['English', 'Hindi', 'Kannada', 'Telugu'], exp: '19 Yrs', timings: 'Day time OPD: MON-SAT : 10:00 am – 4:00 pm', expertise: 'Lung Transplant and Regenerative Medicine', about: 'Dr. Tapaswi Krishna Kattragada is a consultant transplant pulmonologist and enthusiast about advanced lung disease, helping people breathe again.', edu: 'Post Graduate Certificate in Lung Transplant (EHEA), Medical University of Vienna, Vienna, Austria Fellowship in Critical Care Medicine (FICCM), Apollo Hospitals, India 2007 to 2010, MD, Narayana Medical College, Nellore, Andhra Pradesh, India 1999 to 2005, MBBS, Kasturba Medical College, Mangalore, Karnataka, India', hist: '2026: Consultant Transplant Pulmonologist, Yashoda Hospitals, Somajiguda, Hyderabad, India. 2015 to 2026: Consultant Transplant Pulmonologist, Gleneagles Fortis Hospitals, Hyderabad, India. 2014 to 2015: Consultant Pulmonologist, Kamineni Hospitals, King Koti, Hyderabad, India. 2011 to 2014: Assistant Professor of Pulmonology, Narayana Medical College, Nellore, Andhra Pradesh, India. 2010: Registrar, Yashoda Hospitals, Somajiguda, Hyderabad, India.', services: 'Lung Transplant Advanced Lung disease Post-lung transplant care Interstitial lung disease COPD Pulmonary Hypertension Bronchoscopy Regenerative Medicine consultant', conds: ['copd', 'ild', 'pulmonary-hypertension', 'lung-transplantation', 'bronchoscopy'], procs: ['Bronchoscopy'], paed: false },
+    { id: 'ugandhar-bhattu-c', name: 'Dr. Ugandhar Bhattu. C', unit: 'Malakpet', url: 'https://www.yashodahospitals.com/doctor/malakpet/pulmonology/dr-ugandhar-bhattu-c/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2017/11/Dr.-Ugandhar-Bhattu.-C-1-scaled.jpg', desig: 'Consultant Interventional Pulmonologist', qual: 'MD', langs: ['English', 'Hindi', 'Telugu'], exp: '16 Yrs', timings: 'Day time OPD: MON – SAT : 11:00 AM – 04:00 PM', expertise: 'Clinical & Interventional Pulmonology, Sleep Medicine, Allergy and Bronchiectasis, Smoking Cessation, Interstitial Lung Disease (ILD), Severe Asthma', about: 'Dr. Ugandhar Bhattu. C is a Consultant Interventional Pulmonologist at Yashoda Hospitals, Malakpet, with over 15 years of experience. | He graduated from Kakatiya Medical College in 2005 and received his postgraduate degree from Osmania Medical College in 2010. He served as a professor in the pulmonology department at the Deccan College of Medical Sciences and the Bhaskara Medical College. He serves as an official thesis advisor for PG students pursuing MD and DNB degrees (Thesis topics: Opportunistic Infections in CKD Patients, Sleep Studies in CKD Patients, and Role of EBUS in Isolated Mediastinal Lymphedenopathy). He has been officially designated as a guest speaker for Care Hospital Banjara Hills’ Pan African Telemedicine in Hyderabad.', edu: '2010: MD, Osmania Medical College 2005: MBBS, Kakatiya Medical College', hist: 'Oct 2016-Present: Consultant Pulmonologist, Yashoda Hospitals, Malakpet 2015-2016: Consultant Pulmonologist, Care Hospitals, Banjara Hills & Hitech City 2011-2015: Junior Consultant Pulmonologist 2010-2011: Senior Resident, Care Hospital, Banjara Hills 2007-2010: Junior Resident, Government General Chest Hospital, Osmania Medical College', services: 'Management of Chronic Cough Interstitial Lung Disease Occupational Lung Diseases Lung Abscess Lung Cancer Pleural Effusion Pneumonia Respiratory Tract Infection Snoring and Sleep Medicine COPD Adult Immunization Tuberculosis Covid & Post-Covid Complications Interventions offered Adult and Paediatric Video Bronchoscopy Adult and Paediatric Rigid Bronchoscopy Rigid Thoracoscopy EBUS Radial EBUS Cryo Biopsy Endobronchial Stent Placement Pleurodesis Bronchial Thermoplasty for Severe Asthma & BTVA for COPD Bronchial Asthma', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'lung-cancer', 'interventional-pulmonology', 'bronchoscopy', 'allergy', 'sleep-medicine', 'respiratory-infections', 'smoking-cessation', 'occupational-lung-disease'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Bronchial thermoplasty', 'Sleep study', 'Pleural procedures'], paed: true },
+    { id: 'v-nagarjuna-maturu', name: 'Dr. V Nagarjuna Maturu', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-v-nagarjuna-maturu/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr.-Nagarjuna-Maturu-V.png', desig: 'Senior Consultant, Clinical and Interventional Pulmonology', qual: 'MD, DM (Pulmonary & Critical Care Medicine), FCCP (USA), FAPSR', langs: ['English', 'Hindi', 'Telugu'], exp: '19 Yrs', timings: 'Day time OPD: MON – SAT : 11:00 AM – 05:00 PM', expertise: 'Bronchoscopy and Endobronchial Ultrasonography (EBUS): Trained in both linear and radial EBUS, and has performed over 1000 bronchoscopies and 150 EBUS procedures., Medical thoracoscopy: Well-versed in…', about: 'Dr V. Nagarjuna Maturu is a Senior Consultant, Clinical and Interventional Pulmonology, at Yashoda Hospitals, Hitec City, with over 18 years of experience. | He is a skilled pulmonologist specialising in the diagnosis and management of respiratory diseases, with particular expertise in minimally invasive pulmonology procedures for both adults and children.', edu: 'MD, DM (Pulmonary & Critical Care Medicine), FCCP (USA), FAPSR', hist: '', services: 'Diagnostic Procedures Bronchoalveolar lavage Endobronchial biopsy Transbronchial lung biopsy Transbronchial cryo-lung biopsy Endobronchial ultrasound-guided TBNA (Linear EBUS) Radial EBUS-guided biopsy of peripheral lung nodules Cryobiopsy for peripheral pulmonary nodules Navigational bronchoscopy for peripheral lung nodules Diagnostic medical thoracoscopy (Pleuroscopy) Therapeutic Procedures Airway foreign body removal Endobronchial tumor removal (benign and malignant) Tracheobronchial stenting Tracheobronchial dilation for benign airway stenosis Bronchial thermoplasty for refractory asthma Bronchoscopic thermal vapor ablation for severe emphysema Therapeutic whole lung lavage for pulmonary alveolar proteinosis Bronchoscopic closure of airway fistulae Thoracoscopic adhesiolysis and pleurodesis Indwelling pleural catheter placement Pediatric Pulmonology Pediatric Bronchoscopy Foreign Body Removal from the Pediatric Airway Evaluation of Congenital Airway Disorders Management of Chronic Lung Disease of Prematurity Pediatric Sleep Breathing Disorders Advanced Pulmonary Care Advanced & critical respiratory care', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'lung-cancer', 'lung-nodules', 'interventional-pulmonology', 'bronchoscopy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Bronchial thermoplasty', 'Pleural procedures', 'Critical care'], paed: true },
+    { id: 'v-pratibh-prasad', name: 'Dr. V Pratibh Prasad', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-v-pratibh-prasad/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr-V-Pratibh-Prasad.png', desig: 'Consultant Clinical and Interventional Pulmonologist', qual: 'MBBS, DNB (Pulmonary Medicine), SCE-Resp Medicine (UK), Fellowship in Interventional Pulmonology', langs: ['English', 'Hindi', 'Telugu'], exp: '10 Yrs', timings: 'Day time OPD: MON – SAT : 9:00 AM – 4:00 PM', expertise: 'Obstructive Airway Diseases: Asthma, Allergy, COPD, Interstitial Lung Diseases, Respiratory Infections: Tuberculosis, Covid-19, Pneumonia, Interventional Pulmonology: Diagnostic and Therapeutic Bronch…', about: 'Dr. V Pratibh Prasad is a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Hitec City, with over 9 years of experience. | He has a keen interest in Interventional Pulmonology and specialises in the treatment and management of Pulmonary Infections, Interstitial Lung Diseases, Severe Asthma, and COPD, among others.', edu: '2019-2020: Fellowship in Interventional Pulmonology, Yashoda Hospitals 2017: SCE Respiratory Medicine, Royal College of Physicians, UK 2014-2017: DNB Pulmonary Medicine, P. D. Hinduja National Hospital & Medical Research Centre, Mumbai 2006-2011: MBBS, SVS Medical College, Mahabubnagar', hist: 'Currently working as a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Hitec City 2020-2022: Associate Consultant, Pulmonary Medicine, Yashoda Hospitals, Somajiguda 2018-2019: Consultant Pulmonologist, Mayo Hospitals, Chandigarh 2017-2018: Senior Resident, Pulmonary Medicine, Government General and Chest Hospital, Osmania Medical College, Hyderabad 2014-2017: Junior Resident, Pulmonary Medicine, P. D. Hinduja National Hospital & Medical Research Centre, Mumbai', services: 'Pulmonology Outpatient and Inpatient Services Advanced Pulmonary Function Tests Advanced Sleep Diagnostics Diagnostic Bronchoscopy Medical Thoracoscopy Linear and Radial EBUS Rigid Bronchoscopy: Central Airway Obstruction Management, Airway Stenting, Cryo Lung Biopsy Bronchoscopic Management of Hemoptysis Bronchoscopic Management of Broncho-Pleural Fistula and Tracheo-Eesophageal Fistula Whole Lung Lavage Asthma', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Pulmonary function testing'], paed: false },
+    { id: 'y-soma-sai-kiran', name: 'Dr. Y. Soma Sai Kiran', unit: 'Secunderabad', url: 'https://www.yashodahospitals.com/doctor/secunderabad/pulmonology/dr-y-soma-sai-kiran/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2025/03/Web-Profile-Photo-Dr.-Y.-Soma-Sai-Kiran-1.png', desig: 'Consultant Clinical & Interventional Pulmonologist', qual: 'MD, DM (Pulmonary, Critical Care, and Sleep Medicine), AIIMS.', langs: ['English', 'Telugu', 'Hindi'], exp: '10 Yrs', timings: 'Day time OPD: Mon to Sat : 09:00 AM – 4:00 PM', expertise: 'copd, ILD, Pulmonary hypertension, Pulmonary embolism, Lung cancer, Sleep disorders', about: 'Dr Y. Soma Sai Kiran is a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Secunderabad. He is a skilled pulmonologist with special expertise in treating pulmonary concerns with advanced minimally invasive treatment techniques in both adults and children.', edu: '2022 - 2025: DM (pulmonary, critical care, and sleep medicine), AIIMS, Raipur. 2017 - 2020: MD, Guntur Medical College, Guntur, Andhra Pradesh 2010 - 2016: MBBS, Maharajah Institute of Medical Sciences, Vizianagaram', hist: '', services: 'Respiratory Diseases Management Advanced Pulmonary Function Tests Skin Allergy Testing Level 1 Polysomnography Bronchoscopy (Flexible and Rigid) Thoracoscopy Endobronchial Ultrasound (Convex and Radial) Airway Stenting Critical Care Tumor Debulking Cryobiopsy and APC Pulmonary Rehabilitation Severe asthma Paediatric Pulmonology: Treatment and Management of Asthma Bronchiectasis Persistent or recurrent cough Recurrent chest infections Airway-related problems Exercise-related problems Cystic fibrosis Congenital lung abnormalities TB Sleep-related problems Any other respiratory problems causing concern in children or young adults', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'pulmonary-fibrosis', 'lung-cancer', 'pulmonary-hypertension', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'cpet', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Pulmonary function testing', 'Sleep study', 'Allergy testing', 'Critical care'], paed: true }
+  ];
 
   /* ============ HOMEPAGE: WHAT BRINGS YOU HERE? ============ */
   ENTRY_POINTS = [
@@ -3037,26 +3291,33 @@ class Component extends DCLogic {
     home: '/', risk: '/risk-check', breath: '/lung-age', journey: '/nodule-journey', rendo: '/rendo-upiri',
     triage: '/symptom-checker', clubs: '/clubs', club: '/clubs/member', allergy: '/allergy-calendar',
     case: '/case-of-the-month', shikhar: '/shikhar', doctors: '/for-doctors', corporates: '/for-corporates',
-    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub'
+    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub', find: '/doctors'
   };
   META = {
     alumni: ['ŪPIRI Clinical Network — Yashoda Pulmonology', 'A community of doctors connected by learning, collaboration and better patient care. Case discussions, CME, mentorship and access to advanced pulmonary expertise.'],
+    find: ['Find a Lung Specialist — Yashoda Pulmonology', 'Meet the pulmonology consultants at Yashoda Hospitals Hyderabad. Filter by condition, procedure, location and language, and book an appointment.'],
     knowledge: ['Yashoda Knowledge Hub — Pulmonary Medicine', 'Trusted pulmonary knowledge from Yashoda experts: conditions, articles, expert videos, clinical cases and patient guides across pulmonary medicine.'],
     home: ['ŪPIRI 2.0 — Precision Pulmonary Care', 'ŪPIRI Precision Pulmonary Care: lung risk check, breath score, nodule journey, Rendo Ūpiri quit challenge, condition clubs, symptom triage and altitude readiness.']
   };
   pathFor(route, topic) {
     if (route === 'knowledge' && topic) return '/knowledge-hub/' + topic;
+    if (route === 'find' && this.state.docId) return '/doctors/' + this.state.docId;
     return this.ROUTES[route] || '/';
   }
   routeFromPath(path) {
     const clean = ('/' + String(path || '').replace(/^\/+|\/+$/g, '')).replace(/\/index\.html$/, '/');
+    const dr = clean.match(/^\/doctors\/(.+)$/);
+    if (dr) {
+      const d = this.DOCTORS.find(x => x.id === dr[1]);
+      return { route: 'find', khTopic: null, docId: d ? d.id : null };
+    }
     const kh = clean.match(/^\/knowledge-hub\/(.+)$/);
     if (kh) {
       const t = this.KH_TOPICS.find(x => x.id === kh[1]);
-      return { route: 'knowledge', khTopic: t ? t.id : null };
+      return { route: 'knowledge', khTopic: t ? t.id : null, docId: null };
     }
     const hit = Object.keys(this.ROUTES).find(k => this.ROUTES[k] === clean);
-    return { route: hit || 'home', khTopic: null };
+    return { route: hit || 'home', khTopic: null, docId: null };
   }
   syncUrl(route, topic, replace) {
     const url = this.pathFor(route, topic) + location.search;
@@ -3074,9 +3335,13 @@ class Component extends DCLogic {
   }
   applyMeta(route, topic) {
     const t = topic && this.KH_TOPICS.find(x => x.id === topic);
-    const pair = t
-      ? [t.n + ' — Yashoda Knowledge Hub', t.ov.slice(0, 155)]
-      : (this.META[route] || this.META.home);
+    const d = (route === 'find' && this.state.docId) ? this.DOCTORS.find(x => x.id === this.state.docId) : null;
+    const pair = d
+      ? [d.name + ' — ' + d.desig + ', Yashoda Hospitals ' + d.unit,
+         d.name + ' is a ' + d.desig + ' at Yashoda Hospitals, ' + d.unit + ', with ' + d.exp + ' of experience. ' + d.qual]
+      : t
+        ? [t.n + ' — Yashoda Knowledge Hub', t.ov.slice(0, 155)]
+        : (this.META[route] || this.META.home);
     const url = this.ORIGIN + this.pathFor(route, topic);
 
     document.title = pair[0];
@@ -3091,28 +3356,51 @@ class Component extends DCLogic {
         const m = document.createElement('meta'); m.setAttribute('property', prop); return m;
       }).setAttribute('content', val);
     });
-    this.applySchema(route, t, url, pair);
+    this.applySchema(route, t, url, pair, d);
+  }
+  /* Breadcrumbs mirror the visible trail so crawlers see the same hierarchy. */
+  crumbs(route, t, d) {
+    const items = [{ name: 'Home', item: this.ORIGIN + '/' }];
+    if (d) { items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' }, { name: d.name, item: this.ORIGIN + '/doctors/' + d.id }); }
+    else if (t) { items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' }, { name: t.n, item: this.ORIGIN + '/knowledge-hub/' + t.id }); }
+    else if (route === 'find') items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' });
+    else if (route === 'knowledge') items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' });
+    else if (route === 'alumni') items.push({ name: 'ŪPIRI Clinical Network', item: this.ORIGIN + '/alumni' });
+    return {
+      '@type': 'BreadcrumbList',
+      itemListElement: items.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.name, item: x.item }))
+    };
   }
   /* Structured data, rewritten per route. Conditions get MedicalWebPage so the
      Knowledge Hub can be understood as a medical reference rather than marketing. */
-  applySchema(route, t, url, pair) {
+  applySchema(route, t, url, pair, d) {
     const publisher = {
       '@type': 'MedicalOrganization', name: this.BRAND.name,
       department: { '@type': 'MedicalOrganization', name: this.BRAND.name + ' ' + this.BRAND.unit },
       url: this.BRAND.site
     };
-    const data = t
+    const data = d
+      ? {
+        '@context': 'https://schema.org', '@type': 'Physician', name: d.name, url,
+        medicalSpecialty: 'Pulmonary', description: pair[1], image: d.img,
+        jobTitle: d.desig, knowsLanguage: d.langs,
+        worksFor: { '@type': 'MedicalOrganization', name: this.BRAND.name + ', ' + d.unit, url: this.BRAND.site },
+        availableService: d.procs.map(x => ({ '@type': 'MedicalProcedure', name: x })),
+        breadcrumb: this.crumbs(route, t, d)
+      }
+      : t
       ? {
         '@context': 'https://schema.org', '@type': 'MedicalWebPage', name: pair[0], description: pair[1],
         url, inLanguage: 'en', publisher, lastReviewed: undefined,
         about: { '@type': 'MedicalCondition', name: t.n, description: t.ov,
           signOrSymptom: t.sym.map(x => ({ '@type': 'MedicalSignOrSymptom', name: x })) },
-        significantLink: this.ORIGIN + '/knowledge-hub'
+        significantLink: this.ORIGIN + '/knowledge-hub', breadcrumb: this.crumbs(route, t, null)
       }
       : {
         '@context': 'https://schema.org', '@type': 'WebPage', name: pair[0], description: pair[1],
         url, inLanguage: 'en', publisher,
-        isPartOf: { '@type': 'WebSite', name: 'ŪPIRI · ' + this.BRAND.name, url: this.ORIGIN }
+        isPartOf: { '@type': 'WebSite', name: 'ŪPIRI · ' + this.BRAND.name, url: this.ORIGIN },
+        breadcrumb: this.crumbs(route, null, null)
       };
     const el = this.headTag('script[data-schema]', () => {
       const s = document.createElement('script');
@@ -3139,13 +3427,15 @@ class Component extends DCLogic {
     const start = this.props.startScreen;
     const fromUrl = this.routeFromPath(location.pathname);
     if (start && start !== 'home') patch.route = start;
-    else if (fromUrl.route !== 'home' || fromUrl.khTopic) { patch.route = fromUrl.route; patch.khTopic = fromUrl.khTopic; }
+    else if (fromUrl.route !== 'home' || fromUrl.khTopic || fromUrl.docId) {
+      patch.route = fromUrl.route; patch.khTopic = fromUrl.khTopic; patch.docId = fromUrl.docId || null;
+    }
     try { const d = JSON.parse(localStorage.getItem('upiri2:rendo')); if (d) patch.rd = d; } catch (e) { }
     this.setState(patch);
     this.syncUrl(patch.route || 'home', patch.khTopic, true);
     window.addEventListener('popstate', () => {
       const r = this.routeFromPath(location.pathname);
-      this.setState({ route: r.route, khTopic: r.khTopic });
+      this.setState({ route: r.route, khTopic: r.khTopic, docId: r.docId || null });
       this.applyMeta(r.route, r.khTopic);
     });
   }
@@ -3159,7 +3449,19 @@ class Component extends DCLogic {
     const t = 1 - Math.max(0, Math.min(1, health));
     return { base: this.lerp('#F2989F', '#787D89', t), deep: this.lerp('#DE6E7A', '#565B66', t), light: this.lerp('#FBC7CC', '#9CA3AF', t) };
   }
-  go = (r) => { this.setState({ route: r, khTopic: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
+  go = (r) => { this.setState({ route: r, khTopic: null, docId: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
+  goDoctor = (id) => {
+    this.state.docId = id;
+    this.setState({ route: 'find', docId: id, khTopic: null });
+    try { history.pushState({}, '', '/doctors/' + id); } catch (e) { }
+    this.applyMeta('find', null); window.scrollTo({ top: 0 });
+  };
+  backToDoctors = () => {
+    this.state.docId = null;
+    this.setState({ docId: null });
+    try { history.pushState({}, '', '/doctors'); } catch (e) { }
+    this.applyMeta('find', null); window.scrollTo({ top: 0 });
+  };
   goTopic = (id) => { this.setState({ route: 'knowledge', khTopic: id }); this.syncUrl('knowledge', id); window.scrollTo({ top: 0 }); };
   backToHub = () => { this.setState({ khTopic: null }); this.syncUrl('knowledge', null); window.scrollTo({ top: 0 }); };
   countUp(key, target, dur) {
@@ -3523,6 +3825,33 @@ class Component extends DCLogic {
       library: this.wal('Please share the ŪPIRI research library — the list of papers and journals published by the department.')
     };
 
+    /* ---- specialist finder ---- */
+    const condName = id => { const t = this.KH_TOPICS.find(x => x.id === id); return t ? t.n : id; };
+    const dq = s.docQuery.trim().toLowerCase();
+    const docLocs = ['All locations'].concat([...new Set(this.DOCTORS.map(d => d.unit))].sort());
+    const docLangs = ['All languages'].concat([...new Set(this.DOCTORS.flatMap(d => d.langs))].sort());
+    const docConds = ['All conditions'].concat(this.KH_TOPICS.filter(t => this.DOCTORS.some(d => d.conds.includes(t.id))).map(t => t.n));
+    const matchesDoc = d => {
+      if (s.docLoc !== 'All locations' && d.unit !== s.docLoc) return false;
+      if (s.docLang !== 'All languages' && !d.langs.includes(s.docLang)) return false;
+      if (s.docCond !== 'All conditions' && !d.conds.some(c => condName(c) === s.docCond)) return false;
+      if (s.docPaed && !d.paed) return false;
+      if (dq && ![d.name, d.desig, d.qual, d.expertise, d.services, d.unit].join(' ').toLowerCase().includes(dq)) return false;
+      return true;
+    };
+    const docCard = d => ({
+      id: d.id, name: d.name, unit: d.unit, desig: d.desig, qual: d.qual, exp: d.exp,
+      img: d.img, imgAlt: d.name + ', ' + d.desig + ', Yashoda Hospitals ' + d.unit,
+      initials: d.name.replace(/^Dr\.?\s*/, '').split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase(),
+      langLine: d.langs.join(' · '),
+      condChips: d.conds.slice(0, 4).map(c => ({ t: condName(c) })),
+      open: () => this.goDoctor(d.id),
+      book: this.wal('I would like to book an appointment with ' + d.name + ' (Yashoda Hospitals, ' + d.unit + ').')
+    });
+    const docsFiltered = this.DOCTORS.filter(matchesDoc);
+    const doc = s.docId ? this.DOCTORS.find(d => d.id === s.docId) : null;
+    const splitList = t => String(t || '').split(/(?=\b(?:19|20)\d\d\b)|(?:\s\|\s)/).map(x => x.trim()).filter(x => x.length > 3);
+
     /* ---- knowledge hub: one filtered/searched dataset feeding every card list ---- */
     const topicName = id => { const t = this.KH_TOPICS.find(x => x.id === id); return t ? t.n : ''; };
     const khQ = s.khQuery.trim().toLowerCase();
@@ -3649,10 +3978,50 @@ class Component extends DCLogic {
       navClubs: this.navSt(s.route === 'clubs' || s.route === 'club'),
       navJourney: this.navSt(s.route === 'journey'), navRendo: this.navSt(s.route === 'rendo'),
       navKnowledge: this.navSt(s.route === 'knowledge'), navAlumni: this.navSt(s.route === 'alumni'),
+      navFind: this.navSt(s.route === 'find'), curFind: s.route === 'find' ? 'page' : 'false',
       curRisk: s.route === 'risk' ? 'page' : 'false', curBreath: s.route === 'breath' ? 'page' : 'false',
       curClubs: (s.route === 'clubs' || s.route === 'club') ? 'page' : 'false',
       curJourney: s.route === 'journey' ? 'page' : 'false', curRendo: s.route === 'rendo' ? 'page' : 'false',
       curKnowledge: s.route === 'knowledge' ? 'page' : 'false', curAlumni: s.route === 'alumni' ? 'page' : 'false',
+
+      /* ---- specialist finder ---- */
+      isFind: s.route === 'find' && !s.docId,
+      isDoctor: s.route === 'find' && !!s.docId,
+      goFind: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('find'); },
+      backToDoctors: this.backToDoctors,
+      docQuery: s.docQuery,
+      onDocQuery: (e) => this.setState({ docQuery: e.target.value }),
+      docCards: docsFiltered.map(docCard),
+      docCount: docsFiltered.length + (docsFiltered.length === 1 ? ' specialist' : ' specialists'),
+      docNone: docsFiltered.length === 0,
+      docLocOpts: docLocs.map(v => ({ v, label: v })), docLocVal: s.docLoc,
+      onDocLoc: (e) => this.setState({ docLoc: e.target.value }),
+      docLangOpts: docLangs.map(v => ({ v, label: v })), docLangVal: s.docLang,
+      onDocLang: (e) => this.setState({ docLang: e.target.value }),
+      docCondOpts: docConds.map(v => ({ v, label: v })), docCondVal: s.docCond,
+      onDocCond: (e) => this.setState({ docCond: e.target.value }),
+      docPaed: s.docPaed, togglePaed: () => this.setState({ docPaed: !s.docPaed }),
+      paedSt: this.pillSt(s.docPaed),
+      clearDocFilters: () => this.setState({ docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false }),
+      homeDocs: this.DOCTORS.slice(0, 3).map(docCard),
+      /* doctor profile */
+      dr: doc ? docCard(doc) : {},
+      drName: doc ? doc.name : '', drDesig: doc ? doc.desig : '', drQual: doc ? doc.qual : '',
+      drUnit: doc ? doc.unit : '', drExp: doc ? doc.exp : '', drTimings: doc ? doc.timings : '',
+      drAbout: doc ? doc.about.split(' | ').map(t => ({ t })) : [],
+      drEdu: doc ? splitList(doc.edu).map(t => ({ t })) : [],
+      drHist: doc ? splitList(doc.hist).map(t => ({ t })) : [],
+      drServices: doc ? doc.services.split(/(?=[A-Z][a-z]+(?:\s|$))/).map(x => x.trim()).filter(x => x.length > 6).slice(0, 30).map(t => ({ t })) : [],
+      drLangs: doc ? doc.langs.map(t => ({ t })) : [],
+      drConds: doc ? doc.conds.map(c => ({ t: condName(c), open: () => this.goTopic(c) })) : [],
+      drProcs: doc ? doc.procs.map(t => ({ t })) : [],
+      drHasTimings: !!(doc && doc.timings), drProfileUrl: doc ? doc.url : '',
+      drBook: doc ? this.wal('I would like to book an appointment with ' + doc.name + ' (Yashoda Hospitals, ' + doc.unit + ').') : '',
+      drImg: doc ? doc.img : '', drImgAlt: doc ? doc.name + ', ' + doc.desig : '',
+      drInitials: doc ? doc.name.replace(/^Dr\.?\s*/, '').split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() : '',
+      /* condition page -> specialists */
+      tpDocs: tp ? this.DOCTORS.filter(d => d.conds.includes(tp.id)).slice(0, 3).map(docCard) : [],
+      tpHasDocs: tp ? this.DOCTORS.some(d => d.conds.includes(tp.id)) : false,
 
       /* ---- what brings you here? ---- */
       entryPoints: this.ENTRY_POINTS.map(e => ({
