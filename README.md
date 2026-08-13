@@ -6,16 +6,23 @@ symptom triage, the allergy calendar and the Shikhar altitude assessment.
 
 ## What gets deployed
 
-The site is **static**: Vercel serves `public/` as-is, with no build step (see
-`vercel.json`). `public/index.html` is the ŪPIRI 2.0 page and `public/support.js` is its
-runtime; `/upiri-2.0.html` redirects to `/` so the earlier link keeps working.
+`npm run build` prerenders every route into `dist/`, which is what Vercel serves.
+`scripts/prerender.mjs` loads `public/index.html` once per route in a real browser, waits for
+the runtime to render, and writes the result — so each route ships its content, `<title>`,
+meta description, canonical and JSON-LD in the initial HTML. The original `<template>` is
+re-inserted into every file, so the page still hydrates into the full app on load: crawlers
+get the text, users get the app.
+
+Route list comes from the page's own data (`KH_TOPICS`, `DOCTORS`, `PROCEDURES`), so it
+cannot drift. `/upiri-2.0.html` redirects to `/`.
 
 The React app under `src/` is the previous (v2) implementation. It is **retired from the
 deploy** — kept in the repo for reference and history, but no longer built or served.
 
 ```bash
 npm install
-npm run dev    # http://localhost:5173 — serves public/
+npm run dev    # http://localhost:5173 — serves public/ unbuilt
+npm run build  # prerender every route into dist/
 npm run lint
 ```
 
@@ -33,6 +40,8 @@ page reads `location.pathname` on load, pushes state on navigation and handles B
 | `/risk-check`, `/lung-age`, `/nodule-journey`, `/rendo-upiri` | Existing tools |
 | `/symptom-checker`, `/clubs`, `/allergy-calendar`, `/case-of-the-month`, `/shikhar` | Existing tools |
 | `/for-doctors`, `/for-corporates`, `/for-schools` | Existing spaces |
+| `/doctors`, `/doctors/:id` | Specialist finder and profiles (15 consultants) |
+| `/tests-and-procedures`, `/tests-and-procedures/:id` | Tests & procedures (9) |
 | `/alumni` | ŪPIRI Clinical Network |
 | `/knowledge-hub` | Yashoda Knowledge Hub |
 | `/knowledge-hub/:topic` | Knowledge Hub topic detail (18 topics) |
@@ -79,6 +88,10 @@ Both new sections are data-driven — the card markup is written once and repeat
 | `KH_TOPICS` | Topic grid **and** every topic detail page |
 | `KH_ARTICLES`, `KH_VIDEOS`, `KH_CASES` | Article / video / case libraries, related lists, search |
 | `KH_ICONS` | Shared stroke icons, reused across topics |
+| `KH_SYMPTOMS`, `KH_CATEGORIES`, `KH_SUGGESTED` | Intent-grouped search and the Knowledge Hub category bands |
+| `TOPIC_GROUPS`, `ENTRY_POINTS` | Homepage "Explore pulmonary care" and "What brings you here?" |
+| `DOCTORS` | Specialist finder, profiles, and condition/procedure cross-links |
+| `PROCEDURES` | Tests & procedures pages, with `dp` matching doctors who perform them |
 
 Adding an article is one entry in `KH_ARTICLES`; adding a condition is one entry in
 `KH_TOPICS` and its detail page, related content and search entry all follow.

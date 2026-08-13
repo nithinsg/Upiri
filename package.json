@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --root public",
+    "build": "node scripts/prerender.mjs dist",
     "lint": "oxlint"
   },
   "dependencies": {

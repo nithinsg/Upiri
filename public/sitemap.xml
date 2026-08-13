@@ -16,6 +16,7 @@
   <url><loc>https://upiri.vercel.app/alumni</loc><lastmod>2026-08-13</lastmod><priority>0.8</priority></url>
   <url><loc>https://upiri.vercel.app/knowledge-hub</loc><lastmod>2026-08-13</lastmod><priority>0.8</priority></url>
   <url><loc>https://upiri.vercel.app/doctors</loc><lastmod>2026-08-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures</loc><lastmod>2026-08-13</lastmod><priority>0.8</priority></url>
   <url><loc>https://upiri.vercel.app/knowledge-hub/asthma</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
   <url><loc>https://upiri.vercel.app/knowledge-hub/severe-asthma</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
   <url><loc>https://upiri.vercel.app/knowledge-hub/copd</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
@@ -49,4 +50,13 @@
   <url><loc>https://upiri.vercel.app/doctors/v-nagarjuna-maturu</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
   <url><loc>https://upiri.vercel.app/doctors/v-pratibh-prasad</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
   <url><loc>https://upiri.vercel.app/doctors/y-soma-sai-kiran</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/pulmonary-function-test</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/cpet</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/bronchoscopy</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/ebus</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/cryobiopsy</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/thoracoscopy</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/lung-nodule-biopsy</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/airway-procedures</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://upiri.vercel.app/tests-and-procedures/sleep-study</loc><lastmod>2026-08-13</lastmod><priority>0.6</priority></url>
 </urlset>
