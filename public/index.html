@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ŪPIRI 2.0 — Precision Pulmonary Care</title>
-<meta name="description" content="ŪPIRI Precision Pulmonary Care: lung risk check, breath score, nodule journey, Rendo Ūpiri quit challenge, condition clubs, symptom triage and altitude readiness.">
+<title>ŪPIRI — Yashoda Pulmonology | Lung conditions, specialists and tests</title>
+<meta name="description" content="Understand lung conditions, find the right pulmonologist, learn what your tests involve, and use practical lung-health tools. The pulmonary platform of Yashoda Hospitals, Hyderabad.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://upiri.vercel.app/">
 <meta name="theme-color" content="#2C2A6B">
@@ -548,6 +548,62 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <p style="margin:0;font-size:14px;line-height:1.55;color:#4A4880">From the Nodule Board: real pathways, anonymised, explained.</p>
           <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#F5821F;margin-top:auto">Open<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
         </button>
+      </div>
+    </section>
+
+    <!-- TESTS & PROCEDURES PREVIEW (§5) -->
+    <section aria-labelledby="proc-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+        <div>
+          <h2 id="proc-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Tests &amp; procedures</h2>
+          <p style="font-size:16px;color:#6C6A9E;margin:10px 0 0;max-width:620px">If a test has been suggested, read what it actually involves before the day.</p>
+        </div>
+        <button onClick="{{ goProcs }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+          See all tests
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <sc-for list="{{ procCards }}" as="x" hint-placeholder-count="9">
+          <button onClick="{{ x.open }}" style="text-align:left;display:flex;align-items:flex-start;gap:14px;padding:20px 22px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.75);backdrop-filter:blur(14px);cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+            <span aria-hidden="true" style="flex:0 0 auto;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#FDEBD9;color:#B35A08">
+              <svg width="19" height="19" viewBox="{{ x.vb }}" fill="none" stroke="currentColor" stroke-width="{{ x.sw }}" stroke-linecap="round" stroke-linejoin="round">
+                <sc-for list="{{ x.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+              </svg>
+            </span>
+            <span>
+              <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#2C2A6B">{{ x.n }}</span>
+              <span style="display:block;font-size:12.5px;line-height:1.5;color:#6C6A9E;margin-top:4px">{{ x.plain }}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- SEEING BEYOND THE SCAN (§6) -->
+    <section aria-labelledby="scan-heading" style="max-width:1150px;margin:56px auto 0;padding:0 24px">
+      <div style="border-radius:34px;overflow:hidden;background:radial-gradient(900px 520px at 88% -10%, rgba(245,130,31,0.18), transparent 60%), linear-gradient(155deg,#1D1B4B,#2C2A6B);padding:52px 48px">
+        <span style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:rgba(245,130,31,0.2);color:#FFB067">Signature capability</span>
+        <h2 id="scan-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,40px);letter-spacing:-0.025em;color:#fff;margin:18px 0 0;text-wrap:balance">Seeing beyond the scan</h2>
+        <p style="font-size:16.5px;line-height:1.65;color:#C9D2E6;margin:14px 0 0;max-width:660px;text-wrap:pretty">Advanced AI-assisted imaging with expert clinical review. A shadow on a film is a question, not an answer — this is the path from one to the other.</p>
+        <ol style="list-style:none;padding:0;margin:36px 0 0;display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+          <sc-for list="{{ scanPath }}" as="p" hint-placeholder-count="6">
+            <li style="position:relative;padding:20px 16px;border-radius:20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14)">
+              <span aria-hidden="true" style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F5821F,#FFA452);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px">
+                {{ p.n }}
+                <sc-if value="{{ p.live }}" hint-placeholder-val="{{ false }}">
+                  <span data-r="pulse" style="position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(245,130,31,0.7)"></span>
+                </sc-if>
+              </span>
+              <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#fff;margin-top:12px">{{ p.t }}</span>
+              <span style="display:block;font-size:12px;line-height:1.5;color:#9FB0D0;margin-top:6px">{{ p.d }}</span>
+            </li>
+          </sc-for>
+        </ol>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:30px">
+          <button onClick="{{ goJourney }}" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);border:none;cursor:pointer;box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px)">Follow the nodule journey</button>
+          <button onClick="{{ goProcs }}" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600;color:#fff;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.25);cursor:pointer" style-hover="background:rgba(255,255,255,0.16)">How the tests work</button>
+        </div>
       </div>
     </section>
 
@@ -2032,6 +2088,153 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   </div>
   </sc-if>
 
+  <!-- ============ TESTS & PROCEDURES (§5) ============ -->
+  <sc-if value="{{ isProcs }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Tests and Procedures" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:1150px;margin:0 auto">
+      <nav aria-label="Breadcrumb" style="margin-bottom:16px">
+        <ol style="list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:0;font-size:12.5px;color:#8A88B8">
+          <li><button onClick="{{ goHome }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Home</button></li>
+          <li aria-hidden="true">›</li>
+
+          <li aria-current="page" style="font-weight:700;color:#2C2A6B">Tests &amp; Procedures</li>
+        </ol>
+      </nav>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,3.8vw,42px);letter-spacing:-0.025em;color:#1D1B4B;margin:0">Tests &amp; procedures</h1>
+      <p style="font-size:16px;line-height:1.6;color:#4A4880;margin:12px 0 30px;max-width:720px">What each test involves, why it is done, how to prepare and what happens afterwards — in plain language first.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <sc-for list="{{ procCards }}" as="x" hint-placeholder-count="9">
+          <article style="display:flex;flex-direction:column;padding:26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -28px rgba(29,27,75,0.3)">
+            <span aria-hidden="true" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#FDEBD9;color:#B35A08;margin-bottom:14px">
+              <svg width="22" height="22" viewBox="{{ x.vb }}" fill="none" stroke="currentColor" stroke-width="{{ x.sw }}" stroke-linecap="round" stroke-linejoin="round">
+                <sc-for list="{{ x.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+              </svg>
+            </span>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17.5px;line-height:1.3;color:#2C2A6B;margin:0 0 8px">{{ x.n }}</h2>
+            <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0 0 16px;flex:1">{{ x.plain }}</p>
+            <button onClick="{{ x.open }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">
+              What to expect
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </button>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PROCEDURE DETAIL ============ -->
+  <sc-if value="{{ isProc }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Procedure" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:900px;margin:0 auto">
+      <nav aria-label="Breadcrumb" style="margin-bottom:16px">
+        <ol style="list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:0;font-size:12.5px;color:#8A88B8">
+          <li><button onClick="{{ goHome }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Home</button></li>
+          <li aria-hidden="true">›</li>
+          <li><button onClick="{{ backToProcs }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#6C6A9E;text-decoration:underline">Tests &amp; Procedures</button></li>
+          <li aria-hidden="true">›</li>
+          <li aria-current="page" style="font-weight:700;color:#2C2A6B">{{ pcName }}</li>
+        </ol>
+      </nav>
+      <header style="display:flex;gap:18px;align-items:flex-start;margin-bottom:22px">
+        <span aria-hidden="true" style="flex:0 0 auto;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:#FDEBD9;color:#B35A08">
+          <svg width="25" height="25" viewBox="{{ pcVb }}" fill="none" stroke="currentColor" stroke-width="{{ pcSw }}" stroke-linecap="round" stroke-linejoin="round">
+            <sc-for list="{{ pcPaths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+          </svg>
+        </span>
+        <div>
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px,3.4vw,38px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">{{ pcName }}</h1>
+          <p style="font-size:16px;line-height:1.55;color:#4A4880;margin:10px 0 0;max-width:620px">{{ pcPlain }}</p>
+        </div>
+      </header>
+
+      <article style="padding:34px 38px;border-radius:30px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(20px);box-shadow:0 28px 66px -30px rgba(29,27,75,0.34)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:0 0 10px">What is it?</h2>
+        <p style="font-size:15.5px;line-height:1.7;color:#4A4880;margin:0">{{ pcWhat }}</p>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:28px 0 10px">Why is it done?</h2>
+        <p style="font-size:15.5px;line-height:1.7;color:#4A4880;margin:0">{{ pcWhy }}</p>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:28px 0 14px">What happens?</h2>
+        <ol style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ pcHappens }}" as="x" hint-placeholder-count="4">
+            <li style="display:flex;gap:14px;align-items:flex-start">
+              <span aria-hidden="true" style="flex:0 0 auto;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#2C2A6B;color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px">{{ x.n }}</span>
+              <span style="font-size:14.5px;line-height:1.6;color:#4A4880;padding-top:3px">{{ x.t }}</span>
+            </li>
+          </sc-for>
+        </ol>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px">
+          <section style="padding:20px 22px;border-radius:20px;background:#E7E7F4">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15.5px;color:#2C2A6B;margin:0 0 8px">How long does it take?</h2>
+            <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0">{{ pcHowLong }}</p>
+          </section>
+          <section style="padding:20px 22px;border-radius:20px;background:#E3F2E9">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15.5px;color:#2E5A44;margin:0 0 8px">Is it painful?</h2>
+            <p style="font-size:13.5px;line-height:1.6;color:#2E5A44;margin:0">{{ pcPain }}</p>
+          </section>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+          <section style="padding:22px 24px;border-radius:20px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1)">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15.5px;color:#2C2A6B;margin:0 0 10px">How should I prepare?</h2>
+            <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#4A4880">
+              <sc-for list="{{ pcPrep }}" as="x" hint-placeholder-count="4"><li>{{ x.t }}</li></sc-for>
+            </ul>
+          </section>
+          <section style="padding:22px 24px;border-radius:20px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1)">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15.5px;color:#2C2A6B;margin:0 0 10px">What happens afterwards?</h2>
+            <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#4A4880">
+              <sc-for list="{{ pcAfter }}" as="x" hint-placeholder-count="4"><li>{{ x.t }}</li></sc-for>
+            </ul>
+          </section>
+        </div>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:28px 0 10px">When would a doctor recommend it?</h2>
+        <ul style="margin:0;padding-left:20px;font-size:14.5px;line-height:1.75;color:#4A4880">
+          <sc-for list="{{ pcWhen }}" as="x" hint-placeholder-count="4"><li>{{ x.t }}</li></sc-for>
+        </ul>
+
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:28px 0 12px">Related conditions</h2>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;gap:9px;flex-wrap:wrap">
+          <sc-for list="{{ pcTopics }}" as="x" hint-placeholder-count="3">
+            <li><button onClick="{{ x.open }}" style="font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;background:#E7E7F4;color:#2C2A6B;border:none;cursor:pointer" style-hover="background:#DAD9EE">{{ x.t }}</button></li>
+          </sc-for>
+        </ul>
+      </article>
+
+      <sc-if value="{{ pcHasDocs }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:30px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Which Yashoda specialists perform it</h2>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            <sc-for list="{{ pcDocs }}" as="d" hint-placeholder-count="3">
+              <article style="display:flex;flex-direction:column;padding:20px;border-radius:22px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <span aria-hidden="true" style="position:relative;width:56px;height:56px;border-radius:16px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#2C2A6B;margin-bottom:12px">
+                  {{ d.initials }}
+                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
+                </span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
+                <p style="font-size:11.5px;line-height:1.45;color:#6C6A9E;margin:5px 0 0;flex:1">{{ d.desig }}</p>
+                <p style="font-size:11px;color:#8A88B8;margin:6px 0 12px">{{ d.unit }}</p>
+                <button onClick="{{ d.open }}" style="align-self:flex-start;padding:8px 15px;border-radius:999px;font-size:12px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">View profile</button>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <section style="margin-top:30px;padding:28px 32px;border-radius:26px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1);display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <p style="font-size:14.5px;line-height:1.6;color:#4A4880;margin:0;max-width:520px">This page explains what a test involves. Whether you need it, and when, is a decision for you and your doctor together.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="{{ pcBook }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 12px 30px -10px rgba(245,130,31,0.65)" style-hover="transform:translateY(-2px);color:#fff">Ask about this test</a>
+          <button onClick="{{ backToProcs }}" style="padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">All tests</button>
+        </div>
+      </section>
+    </div>
+  </div>
+  </sc-if>
+
   <!-- ============ FIND A SPECIALIST ============ -->
   <sc-if value="{{ isFind }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Find a Specialist" style="min-height:100vh;padding:120px 24px 90px">
@@ -2391,7 +2594,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
           </button>
           <div>
-            <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,3.8vw,42px);letter-spacing:-0.025em;line-height:1.1;color:#1D1B4B;margin:0">Yashoda Knowledge Hub</h1>
+            <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,3.8vw,42px);letter-spacing:-0.025em;line-height:1.1;color:#1D1B4B;margin:0">Understand your lungs</h1>
             <p style="font-size:13.5px;color:#F5821F;font-weight:700;margin:4px 0 0">Trusted pulmonary knowledge from Yashoda experts.</p>
             <p style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#8A88B8;margin:7px 0 0">
               <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ true }}">
@@ -2402,15 +2605,21 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
             </p>
           </div>
         </div>
-        <p style="font-size:16px;line-height:1.6;color:#4A4880;margin:0 0 24px;max-width:760px;text-wrap:pretty">Explore trusted information, expert insights, clinical cases, videos and resources across pulmonary medicine.</p>
+        <p style="font-size:16px;line-height:1.6;color:#4A4880;margin:0 0 24px;max-width:760px;text-wrap:pretty">Trusted pulmonary information from Yashoda Hospitals — explained simply, clearly and by topic.</p>
 
         <div style="position:relative;max-width:680px">
           <span aria-hidden="true" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#8A88B8;display:flex">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
           </span>
-          <input value="{{ khQuery }}" onChange="{{ onKhQuery }}" type="search" aria-label="Search the Knowledge Hub" placeholder="Search a disease, condition or question..." style="width:100%;border-radius:999px;padding:17px 22px 17px 52px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:15.5px;outline-color:#F5821F;box-shadow:0 18px 44px -26px rgba(29,27,75,0.4)">
+          <input value="{{ khQuery }}" onChange="{{ onKhQuery }}" type="search" aria-label="Search the Knowledge Hub" placeholder="What would you like to know?" style="width:100%;border-radius:999px;padding:17px 22px 17px 52px;border:1.5px solid rgba(44,42,107,0.16);background:rgba(255,255,255,0.9);font-size:15.5px;outline-color:#F5821F;box-shadow:0 18px 44px -26px rgba(29,27,75,0.4)">
         </div>
 
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px">
+          <span style="font-size:12.5px;color:#8A88B8">Try:</span>
+          <sc-for list="{{ khSuggested }}" as="q" hint-placeholder-count="4">
+            <button onClick="{{ q.pick }}" style="padding:7px 15px;border-radius:999px;font-size:12.5px;font-weight:600;color:#2C2A6B;background:rgba(255,255,255,0.85);border:1px solid rgba(44,42,107,0.14);cursor:pointer" style-hover="background:#fff;transform:translateY(-1px)">{{ q.q }}</button>
+          </sc-for>
+        </div>
         <p style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:#6C6A9E;margin:16px 0 0">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
           {{ revText }}
@@ -2429,41 +2638,50 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <sc-if value="{{ khNoResults }}" hint-placeholder-val="{{ false }}">
             <p style="font-size:15px;color:#4A4880;padding:28px;border-radius:22px;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.9)">Nothing matched that. Try a condition name such as “asthma”, “nodule” or “fibrosis” — or <a href="{{ wa.khAsk }}" target="_blank" rel="noreferrer" style="font-weight:700;text-decoration:underline">ask us directly</a>.</p>
           </sc-if>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
-            <sc-for list="{{ khHits }}" as="h" hint-placeholder-count="6">
-              <button onClick="{{ h.open }}" style="text-align:left;display:flex;flex-direction:column;gap:6px;padding:20px 24px;border-radius:22px;border:1px solid rgba(44,42,107,0.1);background:#fff;cursor:pointer;box-shadow:0 14px 34px -24px rgba(29,27,75,0.35);transition:transform .15s ease" style-hover="transform:translateY(-2px)">
-                <span style="font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#B35A08">{{ h.kind }}</span>
-                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#2C2A6B">{{ h.t }}</span>
-                <span style="font-size:13px;color:#4A4880">{{ h.d }}</span>
-              </button>
-            </sc-for>
-          </div>
+          <sc-for list="{{ khGroups }}" as="gr" hint-placeholder-count="4">
+            <section style="margin-bottom:26px">
+              <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#B35A08;margin:0">{{ gr.g }}</h3>
+                <span style="font-size:12.5px;color:#8A88B8">{{ gr.d }}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+                <sc-for list="{{ gr.items }}" as="h" hint-placeholder-count="3">
+                  <button onClick="{{ h.open }}" style="text-align:left;display:flex;flex-direction:column;gap:5px;padding:18px 22px;border-radius:20px;border:1px solid rgba(44,42,107,0.1);background:#fff;cursor:pointer;box-shadow:0 14px 34px -26px rgba(29,27,75,0.35);transition:transform .15s ease" style-hover="transform:translateY(-2px)">
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;color:#2C2A6B">{{ h.t }}</span>
+                    <span style="font-size:13px;line-height:1.5;color:#4A4880">{{ h.d }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
         </section>
       </sc-if>
 
-      <!-- B. TOPIC LIBRARY -->
+      <!-- B. TOPIC LIBRARY, BANDED BY INTENT (§9) -->
       <sc-if value="{{ khShowTopics }}" hint-placeholder-val="{{ true }}">
-        <section style="margin-bottom:60px">
-          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">Conditions &amp; topics</h2>
-          <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px">Start with a condition. Each topic covers what it is, how it is diagnosed, how it is treated and when to seek specialist care.</p>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
-            <sc-for list="{{ khTopicCards }}" as="t" hint-placeholder-count="18">
-              <article style="display:flex;flex-direction:column;padding:26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3)">
-                <span aria-hidden="true" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B;margin-bottom:14px">
-                  <svg width="22" height="22" viewBox="{{ t.vb }}" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round">
-                    <sc-for list="{{ t.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
-                  </svg>
-                </span>
-                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#2C2A6B;margin:0 0 8px">{{ t.n }}</h3>
-                <p style="font-size:13.5px;line-height:1.6;color:#4A4880;margin:0 0 16px;flex:1">{{ t.blurb }}</p>
-                <button onClick="{{ t.open }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">
-                  Explore {{ t.n }}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-                </button>
-              </article>
-            </sc-for>
-          </div>
-        </section>
+        <sc-for list="{{ khCategories }}" as="cat" hint-placeholder-count="4">
+          <section style="margin-bottom:44px">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(20px,2.6vw,27px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">{{ cat.g }}</h2>
+            <p style="font-size:14.5px;color:#6C6A9E;margin:8px 0 20px">{{ cat.d }}</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+              <sc-for list="{{ cat.items }}" as="t" hint-placeholder-count="5">
+                <article style="display:flex;flex-direction:column;padding:24px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 22px 52px -30px rgba(29,27,75,0.3)">
+                  <span aria-hidden="true" style="width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B;margin-bottom:12px">
+                    <svg width="20" height="20" viewBox="{{ t.vb }}" fill="none" stroke="currentColor" stroke-width="{{ t.sw }}" stroke-linecap="round" stroke-linejoin="round">
+                      <sc-for list="{{ t.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+                    </svg>
+                  </span>
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#2C2A6B;margin:0 0 8px">{{ t.n }}</h3>
+                  <p style="font-size:13px;line-height:1.55;color:#4A4880;margin:0 0 14px;flex:1">{{ t.blurb }}</p>
+                  <button onClick="{{ t.open }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">
+                    Explore
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                  </button>
+                </article>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
       </sc-if>
 
       <!-- D. FEATURED -->
@@ -2841,7 +3059,7 @@ class Component extends DCLogic {
     khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics', khPlaying: null,
     brandLogo: null,
     docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false,
-    menu: null, mobileNav: false
+    menu: null, mobileNav: false, procId: null
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -3076,6 +3294,138 @@ class Component extends DCLogic {
     { id: 'v-nagarjuna-maturu', name: 'Dr. V Nagarjuna Maturu', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-v-nagarjuna-maturu/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr.-Nagarjuna-Maturu-V.png', desig: 'Senior Consultant, Clinical and Interventional Pulmonology', qual: 'MD, DM (Pulmonary & Critical Care Medicine), FCCP (USA), FAPSR', langs: ['English', 'Hindi', 'Telugu'], exp: '19 Yrs', timings: 'Day time OPD: MON – SAT : 11:00 AM – 05:00 PM', expertise: 'Bronchoscopy and Endobronchial Ultrasonography (EBUS): Trained in both linear and radial EBUS, and has performed over 1000 bronchoscopies and 150 EBUS procedures., Medical thoracoscopy: Well-versed in…', about: 'Dr V. Nagarjuna Maturu is a Senior Consultant, Clinical and Interventional Pulmonology, at Yashoda Hospitals, Hitec City, with over 18 years of experience. | He is a skilled pulmonologist specialising in the diagnosis and management of respiratory diseases, with particular expertise in minimally invasive pulmonology procedures for both adults and children.', edu: 'MD, DM (Pulmonary & Critical Care Medicine), FCCP (USA), FAPSR', hist: '', services: 'Diagnostic Procedures Bronchoalveolar lavage Endobronchial biopsy Transbronchial lung biopsy Transbronchial cryo-lung biopsy Endobronchial ultrasound-guided TBNA (Linear EBUS) Radial EBUS-guided biopsy of peripheral lung nodules Cryobiopsy for peripheral pulmonary nodules Navigational bronchoscopy for peripheral lung nodules Diagnostic medical thoracoscopy (Pleuroscopy) Therapeutic Procedures Airway foreign body removal Endobronchial tumor removal (benign and malignant) Tracheobronchial stenting Tracheobronchial dilation for benign airway stenosis Bronchial thermoplasty for refractory asthma Bronchoscopic thermal vapor ablation for severe emphysema Therapeutic whole lung lavage for pulmonary alveolar proteinosis Bronchoscopic closure of airway fistulae Thoracoscopic adhesiolysis and pleurodesis Indwelling pleural catheter placement Pediatric Pulmonology Pediatric Bronchoscopy Foreign Body Removal from the Pediatric Airway Evaluation of Congenital Airway Disorders Management of Chronic Lung Disease of Prematurity Pediatric Sleep Breathing Disorders Advanced Pulmonary Care Advanced & critical respiratory care', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'lung-cancer', 'lung-nodules', 'interventional-pulmonology', 'bronchoscopy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Bronchial thermoplasty', 'Pleural procedures', 'Critical care'], paed: true },
     { id: 'v-pratibh-prasad', name: 'Dr. V Pratibh Prasad', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-v-pratibh-prasad/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr-V-Pratibh-Prasad.png', desig: 'Consultant Clinical and Interventional Pulmonologist', qual: 'MBBS, DNB (Pulmonary Medicine), SCE-Resp Medicine (UK), Fellowship in Interventional Pulmonology', langs: ['English', 'Hindi', 'Telugu'], exp: '10 Yrs', timings: 'Day time OPD: MON – SAT : 9:00 AM – 4:00 PM', expertise: 'Obstructive Airway Diseases: Asthma, Allergy, COPD, Interstitial Lung Diseases, Respiratory Infections: Tuberculosis, Covid-19, Pneumonia, Interventional Pulmonology: Diagnostic and Therapeutic Bronch…', about: 'Dr. V Pratibh Prasad is a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Hitec City, with over 9 years of experience. | He has a keen interest in Interventional Pulmonology and specialises in the treatment and management of Pulmonary Infections, Interstitial Lung Diseases, Severe Asthma, and COPD, among others.', edu: '2019-2020: Fellowship in Interventional Pulmonology, Yashoda Hospitals 2017: SCE Respiratory Medicine, Royal College of Physicians, UK 2014-2017: DNB Pulmonary Medicine, P. D. Hinduja National Hospital & Medical Research Centre, Mumbai 2006-2011: MBBS, SVS Medical College, Mahabubnagar', hist: 'Currently working as a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Hitec City 2020-2022: Associate Consultant, Pulmonary Medicine, Yashoda Hospitals, Somajiguda 2018-2019: Consultant Pulmonologist, Mayo Hospitals, Chandigarh 2017-2018: Senior Resident, Pulmonary Medicine, Government General and Chest Hospital, Osmania Medical College, Hyderabad 2014-2017: Junior Resident, Pulmonary Medicine, P. D. Hinduja National Hospital & Medical Research Centre, Mumbai', services: 'Pulmonology Outpatient and Inpatient Services Advanced Pulmonary Function Tests Advanced Sleep Diagnostics Diagnostic Bronchoscopy Medical Thoracoscopy Linear and Radial EBUS Rigid Bronchoscopy: Central Airway Obstruction Management, Airway Stenting, Cryo Lung Biopsy Bronchoscopic Management of Hemoptysis Bronchoscopic Management of Broncho-Pleural Fistula and Tracheo-Eesophageal Fistula Whole Lung Lavage Asthma', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Pulmonary function testing'], paed: false },
     { id: 'y-soma-sai-kiran', name: 'Dr. Y. Soma Sai Kiran', unit: 'Secunderabad', url: 'https://www.yashodahospitals.com/doctor/secunderabad/pulmonology/dr-y-soma-sai-kiran/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2025/03/Web-Profile-Photo-Dr.-Y.-Soma-Sai-Kiran-1.png', desig: 'Consultant Clinical & Interventional Pulmonologist', qual: 'MD, DM (Pulmonary, Critical Care, and Sleep Medicine), AIIMS.', langs: ['English', 'Telugu', 'Hindi'], exp: '10 Yrs', timings: 'Day time OPD: Mon to Sat : 09:00 AM – 4:00 PM', expertise: 'copd, ILD, Pulmonary hypertension, Pulmonary embolism, Lung cancer, Sleep disorders', about: 'Dr Y. Soma Sai Kiran is a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Secunderabad. He is a skilled pulmonologist with special expertise in treating pulmonary concerns with advanced minimally invasive treatment techniques in both adults and children.', edu: '2022 - 2025: DM (pulmonary, critical care, and sleep medicine), AIIMS, Raipur. 2017 - 2020: MD, Guntur Medical College, Guntur, Andhra Pradesh 2010 - 2016: MBBS, Maharajah Institute of Medical Sciences, Vizianagaram', hist: '', services: 'Respiratory Diseases Management Advanced Pulmonary Function Tests Skin Allergy Testing Level 1 Polysomnography Bronchoscopy (Flexible and Rigid) Thoracoscopy Endobronchial Ultrasound (Convex and Radial) Airway Stenting Critical Care Tumor Debulking Cryobiopsy and APC Pulmonary Rehabilitation Severe asthma Paediatric Pulmonology: Treatment and Management of Asthma Bronchiectasis Persistent or recurrent cough Recurrent chest infections Airway-related problems Exercise-related problems Cystic fibrosis Congenital lung abnormalities TB Sleep-related problems Any other respiratory problems causing concern in children or young adults', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'pulmonary-fibrosis', 'lung-cancer', 'pulmonary-hypertension', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'cpet', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Pulmonary function testing', 'Sleep study', 'Allergy testing', 'Critical care'], paed: true }
+  ];
+
+  /* ============ TESTS & PROCEDURES (§5) ============
+     Plain language first, medical terminology second. `dp` matches the derived
+     `procs` tags on DOCTORS so each procedure lists the people who perform it. */
+  PROCEDURES = [
+    {
+      id: 'pulmonary-function-test', n: 'Pulmonary Function Test (PFT)', ic: 'pulse',
+      plain: 'A breathing test that measures how much air your lungs hold and how fast you can move it.',
+      kw: 'spirometry, lung function test, PFT, DLCO, gas transfer, lung volumes, peak flow',
+      what: 'You breathe into a mouthpiece attached to a machine while a technician coaches you through a set of breaths. It measures lung volumes, how quickly air leaves the lungs, and in the fuller version how well oxygen passes into the blood.',
+      why: 'To find out whether breathlessness comes from the airways, the lung tissue or something else, to confirm a diagnosis such as asthma or COPD, and to track a known condition over time.',
+      happens: ['You sit upright and a soft clip closes your nose', 'You breathe normally, then blow out as hard and long as you can', 'The effort is repeated a few times so the best reading is recorded', 'Sometimes an inhaler is given and the test repeated to see if the numbers improve'],
+      howlong: 'About 15–30 minutes, longer if gas transfer is included.',
+      pain: 'Not painful. Blowing out hard can feel tiring and may make you cough or feel briefly light-headed.',
+      prep: ['Avoid a heavy meal just before', 'Ask your doctor whether to hold inhalers on the day', 'Wear loose clothing', 'Avoid smoking on the day of the test'],
+      after: ['You can go home and return to normal activity straight away', 'Results are read alongside your symptoms and examination, not on their own'],
+      when: ['Breathlessness or cough without a clear cause', 'Confirming or monitoring asthma or COPD', 'Before some operations', 'Monitoring occupational dust or fume exposure'],
+      dp: ['Pulmonary function testing'], topics: ['pulmonary-function-testing', 'asthma', 'copd']
+    },
+    {
+      id: 'cpet', n: 'CPET — Cardiopulmonary Exercise Test', ic: 'pulse',
+      plain: 'An exercise test that measures your heart, lungs and muscles working together.',
+      kw: 'cardiopulmonary exercise test, exercise test, VO2, stress test, exercise capacity',
+      what: 'You cycle or walk while the effort is gradually increased, wearing a mask that measures the oxygen you use and the carbon dioxide you produce, with your heart rhythm and oxygen levels monitored throughout.',
+      why: 'When breathlessness is unexplained and resting tests look normal, CPET can show whether the limit is cardiac, ventilatory, gas-exchange or simply deconditioning. It is also used before major surgery and to assess fitness for altitude.',
+      happens: ['Resting measurements and a baseline tracing are taken', 'You start easy pedalling or walking', 'Resistance rises step by step while you are monitored', 'You continue to your own limit, then cool down'],
+      howlong: 'About 45–60 minutes in total; the hard part lasts roughly 8–12 minutes.',
+      pain: 'Not painful, but it is meant to be tiring — the test stops when you have had enough or when the team decides you have done enough.',
+      prep: ['Wear clothes and shoes you can exercise in', 'Eat lightly two hours before', 'Bring your inhalers', 'Ask which medicines to take that morning'],
+      after: ['A short rest and recovery monitoring', 'Normal activity afterwards', 'Results are discussed with the referring doctor'],
+      when: ['Exertional breathlessness that resting tests do not explain', 'Pre-operative risk assessment', 'Altitude or occupational fitness assessment', 'Setting a safe rehabilitation prescription'],
+      dp: ['Pulmonary function testing', 'Critical care'], topics: ['cpet', 'pulmonary-hypertension']
+    },
+    {
+      id: 'bronchoscopy', n: 'Bronchoscopy', ic: 'micro',
+      plain: 'A thin flexible camera passed into the airways to look, take samples, and sometimes treat.',
+      kw: 'camera test, airway scope, flexible bronchoscopy, lung camera, BAL, lavage',
+      what: 'A soft tube a few millimetres wide is passed through the nose or mouth into the windpipe and airways. The team can see the airway lining directly, wash or brush areas for testing, and take small biopsies.',
+      why: 'To investigate a shadow on imaging, a persistent cough, coughing up blood, an infection that is not settling, or to reach a lesion for a tissue diagnosis.',
+      happens: ['Local anaesthetic is sprayed to numb the nose and throat', 'Sedation is given so you are drowsy and comfortable', 'The scope is passed and the airways inspected', 'Samples are taken; you can breathe throughout'],
+      howlong: 'The procedure itself usually takes 20–40 minutes; expect to be in the unit for a few hours including recovery.',
+      pain: 'Not usually painful. The throat spray tastes bitter and the throat feels numb; most people remember little because of the sedation.',
+      prep: ['Nothing to eat for about 6 hours and no fluids for about 2 hours before, as advised', 'Tell the team about blood thinners — these often need adjusting', 'Arrange for someone to take you home', 'Bring your inhalers and a list of medicines'],
+      after: ['No eating or drinking until the throat numbness wears off', 'A sore throat, hoarse voice or a little blood-streaked phlegm for a day is common', 'No driving for the rest of the day after sedation', 'Results take a few days when samples are sent to the laboratory'],
+      when: ['An unexplained shadow or lesion on a scan', 'Coughing up blood', 'A pneumonia or infection that is not resolving', 'Suspected airway narrowing or a foreign body'],
+      dp: ['Bronchoscopy'], topics: ['bronchoscopy', 'lung-cancer', 'respiratory-infections']
+    },
+    {
+      id: 'ebus', n: 'EBUS — Endobronchial Ultrasound', ic: 'scan',
+      plain: 'A bronchoscopy with an ultrasound tip, used to sample lymph nodes and lesions next to the airways.',
+      kw: 'endobronchial ultrasound, lymph node sampling, staging, TBNA, mediastinal',
+      what: 'An ultrasound probe on the end of the bronchoscope lets the operator see through the airway wall to the structures beyond, so a needle can be guided precisely into a lymph node or mass under real-time imaging.',
+      why: 'It is the standard way to stage lung cancer accurately and to diagnose enlarged mediastinal lymph nodes, often replacing a surgical procedure.',
+      happens: ['Performed like a bronchoscopy, under sedation', 'The ultrasound identifies the target through the airway wall', 'A fine needle samples it under real-time guidance', 'Several stations may be sampled in one sitting'],
+      howlong: 'Usually 30–60 minutes, plus recovery.',
+      pain: 'Comparable to a bronchoscopy — discomfort rather than pain, and sedation covers most of it.',
+      prep: ['Fasting as instructed', 'Blood thinners usually paused after discussion', 'Someone to accompany you home'],
+      after: ['Same-day discharge in most cases', 'Mild sore throat or cough is common', 'Results guide staging and the treatment plan'],
+      when: ['Staging a confirmed or suspected lung cancer', 'Enlarged mediastinal lymph nodes needing a diagnosis', 'Suspected sarcoidosis or tuberculosis of the lymph nodes'],
+      dp: ['EBUS'], topics: ['interventional-pulmonology', 'lung-cancer', 'lung-nodules']
+    },
+    {
+      id: 'cryobiopsy', n: 'Cryobiopsy', ic: 'micro',
+      plain: 'A bronchoscopic biopsy that freezes a small piece of lung so a larger, better-preserved sample can be taken.',
+      kw: 'cryo biopsy, freezing biopsy, lung biopsy, ILD biopsy',
+      what: 'A probe cooled to a very low temperature is placed in the target area; tissue freezes onto the tip and is withdrawn with the scope. The sample is bigger and less crushed than a standard forceps biopsy.',
+      why: 'Mainly to diagnose interstitial lung disease, where the pattern of tissue matters, and to sample peripheral lung lesions.',
+      happens: ['Performed under sedation or general anaesthesia depending on the case', 'The target is reached bronchoscopically, often with imaging guidance', 'The cryoprobe is applied briefly and withdrawn with the sample', 'Measures to control bleeding are prepared in advance as routine'],
+      howlong: 'Typically 30–60 minutes, with a longer observation period afterwards.',
+      pain: 'You are sedated or asleep for it. Some chest discomfort and cough afterwards is usual.',
+      prep: ['Fasting as instructed', 'Blood thinners stopped in advance as advised', 'Pre-procedure blood tests and imaging review'],
+      after: ['Observation for several hours; sometimes an overnight stay', 'A chest X-ray is usually done to check for air leak', 'Results are discussed at a multidisciplinary meeting for ILD'],
+      when: ['Interstitial lung disease where imaging alone is not conclusive', 'A peripheral lesion needing tissue', 'When a surgical biopsy would otherwise be required'],
+      dp: ['Cryobiopsy'], topics: ['ild', 'pulmonary-fibrosis', 'interventional-pulmonology']
+    },
+    {
+      id: 'thoracoscopy', n: 'Thoracoscopy (Pleuroscopy)', ic: 'micro',
+      plain: 'A camera passed into the space between the lung and the chest wall to find the cause of fluid, and to treat it.',
+      kw: 'pleuroscopy, pleural biopsy, pleural fluid, effusion drainage, talc, pleurodesis',
+      what: 'Through a small cut between the ribs, a scope is passed into the pleural space. Fluid can be drained, the lining inspected and biopsied, and treatment given to stop fluid returning.',
+      why: 'When fluid keeps collecting around the lung and simpler tests have not explained why.',
+      happens: ['Local anaesthetic and sedation, sometimes general anaesthesia', 'Fluid is drained and the pleural surface inspected', 'Targeted biopsies are taken', 'Talc may be applied to help prevent recurrence, and a chest drain is left in place'],
+      howlong: 'Around 30–60 minutes; a hospital stay of a few days is usual because of the drain.',
+      pain: 'The chest drain site is sore and pain relief is given routinely. The procedure itself is covered by anaesthetic.',
+      prep: ['Fasting as instructed', 'Blood thinners adjusted in advance', 'Imaging and blood tests beforehand', 'Plan for a short inpatient stay'],
+      after: ['The drain stays until the lung has re-expanded and drainage settles', 'Pain relief and breathing exercises', 'Biopsy results usually take several days'],
+      when: ['Recurrent or unexplained pleural effusion', 'Suspected pleural malignancy or tuberculosis', 'Fluid that reaccumulates after simple drainage'],
+      dp: ['Thoracoscopy', 'Pleural procedures'], topics: ['interventional-pulmonology', 'lung-cancer']
+    },
+    {
+      id: 'lung-nodule-biopsy', n: 'Lung Nodule Biopsy', ic: 'scan',
+      plain: 'Taking a small sample from a nodule so it can be identified rather than watched.',
+      kw: 'nodule biopsy, CT guided biopsy, navigation bronchoscopy, tissue diagnosis, spot on lung',
+      what: 'The route depends on where the nodule sits: bronchoscopic navigation or radial ultrasound for lesions reachable through the airways, or a needle through the chest wall under CT guidance for others.',
+      why: 'Most nodules are benign and are simply monitored. A biopsy is for the ones where size, appearance, growth or risk factors mean an answer is needed now.',
+      happens: ['The safest route is chosen at a multidisciplinary discussion', 'Guidance imaging locates the nodule during the procedure', 'A sample is taken and sent for analysis', 'A chest X-ray afterwards checks for air leak'],
+      howlong: 'Usually 30–60 minutes, with a few hours of observation.',
+      pain: 'Local anaesthetic and sedation are used. A needle biopsy through the chest wall can cause brief sharp discomfort.',
+      prep: ['Fasting as instructed', 'Blood thinners paused as advised', 'Recent imaging available on the day', 'Someone to take you home'],
+      after: ['Observation and a check X-ray', 'A small risk of air leak is explained beforehand and watched for', 'Results are brought back to a multidisciplinary meeting'],
+      when: ['A nodule with features or growth that warrant a diagnosis', 'A nodule in someone at higher risk', 'When surveillance imaging shows change'],
+      dp: ['Bronchoscopy', 'EBUS', 'Cryobiopsy'], topics: ['lung-nodules', 'lung-cancer', 'interventional-pulmonology']
+    },
+    {
+      id: 'airway-procedures', n: 'Airway Procedures', ic: 'wind',
+      plain: 'Bronchoscopic treatments that open, support or clear a narrowed or blocked airway.',
+      kw: 'stent, airway stenting, tumour debulking, foreign body removal, airway narrowing, stenosis',
+      what: 'A group of therapeutic procedures performed through a bronchoscope: removing tumour tissue from inside an airway, stretching a narrowed segment, placing a stent to hold it open, removing a foreign body, or controlling bleeding.',
+      why: 'To relieve breathlessness caused by an airway that is narrowed or blocked, and to make other treatment possible.',
+      happens: ['Usually performed under general anaesthesia with a rigid scope for the bigger interventions', 'The obstruction is treated by the technique that suits it', 'A stent is placed if the airway needs support', 'Recovery is monitored closely'],
+      howlong: 'Varies widely with the intervention — from 30 minutes to more than an hour.',
+      pain: 'You are asleep for most of these. Sore throat and cough afterwards are usual.',
+      prep: ['Full pre-anaesthetic assessment', 'Fasting as instructed', 'Blood thinners managed in advance'],
+      after: ['Monitoring, sometimes in a high-dependency area', 'Chest imaging to confirm the result', 'Stents need follow-up and clear aftercare instructions'],
+      when: ['Breathlessness or stridor from central airway obstruction', 'Airway narrowing after intubation or tuberculosis', 'An inhaled foreign body', 'Bleeding needing bronchoscopic control'],
+      dp: ['Airway stenting', 'Bronchoscopy'], topics: ['interventional-pulmonology', 'lung-cancer']
+    },
+    {
+      id: 'sleep-study', n: 'Sleep Study (Polysomnography)', ic: 'moon',
+      plain: 'An overnight recording of your breathing, oxygen and sleep to check for sleep apnoea.',
+      kw: 'polysomnography, sleep test, sleep apnoea test, CPAP titration, snoring test',
+      what: 'Sensors record airflow, breathing effort, oxygen levels, heart rhythm and sleep stages. It is done in a sleep laboratory, or at home with a simpler set of sensors for straightforward cases.',
+      why: 'To confirm obstructive sleep apnoea, judge how severe it is, and guide treatment such as positive airway pressure.',
+      happens: ['Sensors are attached in the evening — none of them break the skin', 'You sleep as normally as you can while the recording runs', 'Sometimes pressure therapy is trialled during the second half of the night', 'Sensors are removed in the morning'],
+      howlong: 'One night. Home studies are set up in a short appointment and returned the next day.',
+      pain: 'Painless. The sensors and wires feel unfamiliar but do not hurt.',
+      prep: ['Avoid caffeine and alcohol that evening', 'Wash hair without conditioner or oil so sensors stick', 'Bring your usual medicines and night clothes', 'Continue routine medicines unless told otherwise'],
+      after: ['Normal activity the next day', 'The report is interpreted alongside your symptoms and sleepiness score'],
+      when: ['Loud snoring with witnessed pauses in breathing', 'Daytime sleepiness affecting work or driving', 'Morning headaches and unrefreshing sleep', 'Difficult-to-control blood pressure with snoring'],
+      dp: ['Sleep study'], topics: ['sleep-medicine']
+    }
   ];
 
   /* ============ HOMEPAGE: EXPLORE PULMONARY CARE (§3) ============ */
@@ -3410,39 +3760,66 @@ class Component extends DCLogic {
     { t: 'Occupational asthma in a spray painter', topic: 'occupational-lung-disease', lvl: 'Intermediate', d: 'Linking symptom pattern to workplace exposure and acting on it.', placeholder: true }
   ];
   KH_TABS = ['All', 'Articles', 'Videos', 'Clinical Cases', 'Patient Guides', 'Expert Insights'];
+  /* §8: symptoms are how patients actually search, so they are first-class results
+     that route to the checker or to the condition most associated with them. */
+  KH_SYMPTOMS = [
+    { t: 'Breathlessness', d: 'Feeling short of breath on exertion or at rest', to: 'triage' },
+    { t: 'Cough that will not settle', d: 'A cough lasting more than three weeks', to: 'triage' },
+    { t: 'Wheezing', d: 'A whistling sound when you breathe out', topic: 'asthma' },
+    { t: 'Chest tightness', d: 'A band-like or heavy feeling in the chest', to: 'triage' },
+    { t: 'Coughing up blood', d: 'Blood in sputum, even once', to: 'triage' },
+    { t: 'Snoring with daytime sleepiness', d: 'Loud snoring, witnessed pauses, unrefreshing sleep', topic: 'sleep-medicine' },
+    { t: 'A spot found on a scan', d: 'A nodule or shadow reported on an X-ray or CT', topic: 'lung-nodules' },
+    { t: 'Breathless only when I exert myself', d: 'Exercise limitation with normal resting tests', topic: 'cpet' }
+  ];
+  /* §9: four bands of intent, rather than eighteen equal cards. */
+  KH_CATEGORIES = [
+    { g: 'Common conditions', d: 'The conditions we see most often', ids: ['asthma', 'copd', 'respiratory-infections', 'allergy', 'sleep-medicine'] },
+    { g: 'Specialist & advanced care', d: 'Where subspecialty input changes the outcome', ids: ['severe-asthma', 'ild', 'pulmonary-fibrosis', 'lung-cancer', 'lung-nodules', 'pulmonary-hypertension', 'lung-transplantation'] },
+    { g: 'Tests & procedures', d: 'How your lungs get measured and sampled', ids: ['pulmonary-function-testing', 'cpet', 'bronchoscopy', 'interventional-pulmonology'] },
+    { g: 'Prevention & lifestyle', d: 'What keeps lungs well, and what harms them', ids: ['smoking-cessation', 'occupational-lung-disease'] }
+  ];
+  KH_SUGGESTED = ['Why am I breathless?', 'What is a lung nodule?', 'What does spirometry mean?', 'Can asthma be controlled?'];
 
   /* ---- URL routing: every screen has a real path, so refresh and deep links work ---- */
   ROUTES = {
     home: '/', risk: '/risk-check', breath: '/lung-age', journey: '/nodule-journey', rendo: '/rendo-upiri',
     triage: '/symptom-checker', clubs: '/clubs', club: '/clubs/member', allergy: '/allergy-calendar',
     case: '/case-of-the-month', shikhar: '/shikhar', doctors: '/for-doctors', corporates: '/for-corporates',
-    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub', find: '/doctors'
+    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub', find: '/doctors', procs: '/tests-and-procedures'
   };
   META = {
     alumni: ['ŪPIRI Clinical Network — Yashoda Pulmonology', 'A community of doctors connected by learning, collaboration and better patient care. Case discussions, CME, mentorship and access to advanced pulmonary expertise.'],
+    procs: ['Tests & Procedures — Yashoda Pulmonology', 'Pulmonary tests and procedures explained in plain language: what they are, why they are done, what happens, how to prepare and what follows.'],
     find: ['Find a Lung Specialist — Yashoda Pulmonology', 'Meet the pulmonology consultants at Yashoda Hospitals Hyderabad. Filter by condition, procedure, location and language, and book an appointment.'],
     knowledge: ['Yashoda Knowledge Hub — Pulmonary Medicine', 'Trusted pulmonary knowledge from Yashoda experts: conditions, articles, expert videos, clinical cases and patient guides across pulmonary medicine.'],
-    home: ['ŪPIRI 2.0 — Precision Pulmonary Care', 'ŪPIRI Precision Pulmonary Care: lung risk check, breath score, nodule journey, Rendo Ūpiri quit challenge, condition clubs, symptom triage and altitude readiness.']
+    home: ['ŪPIRI — Yashoda Pulmonology | Lung conditions, specialists and tests', 'Understand lung conditions, find the right pulmonologist, learn what your tests involve, and use practical lung-health tools. The pulmonary platform of Yashoda Hospitals, Hyderabad.']
   };
   pathFor(route, topic) {
     if (route === 'knowledge' && topic) return '/knowledge-hub/' + topic;
     if (route === 'find' && this.state.docId) return '/doctors/' + this.state.docId;
+    if (route === 'procs' && this.state.procId) return '/tests-and-procedures/' + this.state.procId;
     return this.ROUTES[route] || '/';
   }
   routeFromPath(path) {
     const clean = ('/' + String(path || '').replace(/^\/+|\/+$/g, '')).replace(/\/index\.html$/, '/');
+    const pr = clean.match(/^\/tests-and-procedures\/(.+)$/);
+    if (pr) {
+      const x = this.PROCEDURES.find(y => y.id === pr[1]);
+      return { route: 'procs', khTopic: null, docId: null, procId: x ? x.id : null };
+    }
     const dr = clean.match(/^\/doctors\/(.+)$/);
     if (dr) {
       const d = this.DOCTORS.find(x => x.id === dr[1]);
-      return { route: 'find', khTopic: null, docId: d ? d.id : null };
+      return { route: 'find', khTopic: null, docId: d ? d.id : null, procId: null };
     }
     const kh = clean.match(/^\/knowledge-hub\/(.+)$/);
     if (kh) {
       const t = this.KH_TOPICS.find(x => x.id === kh[1]);
-      return { route: 'knowledge', khTopic: t ? t.id : null, docId: null };
+      return { route: 'knowledge', khTopic: t ? t.id : null, docId: null, procId: null };
     }
     const hit = Object.keys(this.ROUTES).find(k => this.ROUTES[k] === clean);
-    return { route: hit || 'home', khTopic: null, docId: null };
+    return { route: hit || 'home', khTopic: null, docId: null, procId: null };
   }
   syncUrl(route, topic, replace) {
     const url = this.pathFor(route, topic) + location.search;
@@ -3461,7 +3838,10 @@ class Component extends DCLogic {
   applyMeta(route, topic) {
     const t = topic && this.KH_TOPICS.find(x => x.id === topic);
     const d = (route === 'find' && this.state.docId) ? this.DOCTORS.find(x => x.id === this.state.docId) : null;
-    const pair = d
+    const pc = (route === 'procs' && this.state.procId) ? this.PROCEDURES.find(x => x.id === this.state.procId) : null;
+    const pair = pc
+      ? [pc.n + ' — Yashoda Pulmonology', pc.plain]
+      : d
       ? [d.name + ' — ' + d.desig + ', Yashoda Hospitals ' + d.unit,
          d.name + ' is a ' + d.desig + ' at Yashoda Hospitals, ' + d.unit + ', with ' + d.exp + ' of experience. ' + d.qual]
       : t
@@ -3482,13 +3862,15 @@ class Component extends DCLogic {
         const m = document.createElement('meta'); m.setAttribute('property', prop); return m;
       }).setAttribute('content', val);
     });
-    this.applySchema(route, t, url, pair, d);
+    this.applySchema(route, t, url, pair, d, pc);
   }
   /* Breadcrumbs mirror the visible trail so crawlers see the same hierarchy. */
-  crumbs(route, t, d) {
+  crumbs(route, t, d, pc) {
     const items = [{ name: 'Home', item: this.ORIGIN + '/' }];
-    if (d) { items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' }, { name: d.name, item: this.ORIGIN + '/doctors/' + d.id }); }
+    if (pc) { items.push({ name: 'Tests & Procedures', item: this.ORIGIN + '/tests-and-procedures' }, { name: pc.n, item: this.ORIGIN + '/tests-and-procedures/' + pc.id }); }
+    else if (d) { items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' }, { name: d.name, item: this.ORIGIN + '/doctors/' + d.id }); }
     else if (t) { items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' }, { name: t.n, item: this.ORIGIN + '/knowledge-hub/' + t.id }); }
+    else if (route === 'procs') items.push({ name: 'Tests & Procedures', item: this.ORIGIN + '/tests-and-procedures' });
     else if (route === 'find') items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' });
     else if (route === 'knowledge') items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' });
     else if (route === 'alumni') items.push({ name: 'ŪPIRI Clinical Network', item: this.ORIGIN + '/alumni' });
@@ -3499,13 +3881,19 @@ class Component extends DCLogic {
   }
   /* Structured data, rewritten per route. Conditions get MedicalWebPage so the
      Knowledge Hub can be understood as a medical reference rather than marketing. */
-  applySchema(route, t, url, pair, d) {
+  applySchema(route, t, url, pair, d, pc) {
     const publisher = {
       '@type': 'MedicalOrganization', name: this.BRAND.name,
       department: { '@type': 'MedicalOrganization', name: this.BRAND.name + ' ' + this.BRAND.unit },
       url: this.BRAND.site
     };
-    const data = d
+    const data = pc
+      ? {
+        '@context': 'https://schema.org', '@type': 'MedicalProcedure', name: pc.n, description: pc.plain, url,
+        howPerformed: pc.what, preparation: pc.prep.join(' '), followup: pc.after.join(' '),
+        provider: publisher, breadcrumb: this.crumbs(route, null, null, pc)
+      }
+      : d
       ? {
         '@context': 'https://schema.org', '@type': 'Physician', name: d.name, url,
         medicalSpecialty: 'Pulmonary', description: pair[1], image: d.img,
@@ -3528,6 +3916,36 @@ class Component extends DCLogic {
         isPartOf: { '@type': 'WebSite', name: 'ŪPIRI · ' + this.BRAND.name, url: this.ORIGIN },
         breadcrumb: this.crumbs(route, null, null)
       };
+    /* A second block: the page's own sections answer real search questions, so
+       they are also expressed as an FAQPage. */
+    const faq = t
+      ? [['What is ' + t.n.toLowerCase() + '?', t.ov],
+         ['What are the symptoms of ' + t.n.toLowerCase() + '?', t.sym.join('. ')],
+         ['How is ' + t.n.toLowerCase() + ' diagnosed?', t.dx.join('. ')],
+         ['How is ' + t.n.toLowerCase() + ' treated?', t.tx.join('. ')],
+         ['When should I see a specialist for ' + t.n.toLowerCase() + '?', t.spec.join('. ')]]
+      : pc
+        ? [['What is ' + pc.n + '?', pc.what],
+           ['Why is ' + pc.n + ' done?', pc.why],
+           ['What happens during ' + pc.n + '?', pc.happens.join('. ')],
+           ['How long does ' + pc.n + ' take?', pc.howlong],
+           ['Is ' + pc.n + ' painful?', pc.pain],
+           ['How do I prepare for ' + pc.n + '?', pc.prep.join('. ')],
+           ['What happens after ' + pc.n + '?', pc.after.join('. ')]]
+        : null;
+    const faqEl = this.headTag('script[data-faq]', () => {
+      const x = document.createElement('script');
+      x.type = 'application/ld+json'; x.setAttribute('data-faq', '');
+      return x;
+    });
+    faqEl.textContent = faq ? JSON.stringify({
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: faq.filter(q => q[1]).map(q => ({
+        '@type': 'Question', name: q[0],
+        acceptedAnswer: { '@type': 'Answer', text: String(q[1]).slice(0, 900) }
+      }))
+    }) : '';
+
     const el = this.headTag('script[data-schema]', () => {
       const s = document.createElement('script');
       s.type = 'application/ld+json'; s.setAttribute('data-schema', '');
@@ -3553,8 +3971,10 @@ class Component extends DCLogic {
     const start = this.props.startScreen;
     const fromUrl = this.routeFromPath(location.pathname);
     if (start && start !== 'home') patch.route = start;
-    else if (fromUrl.route !== 'home' || fromUrl.khTopic || fromUrl.docId) {
-      patch.route = fromUrl.route; patch.khTopic = fromUrl.khTopic; patch.docId = fromUrl.docId || null;
+    else if (fromUrl.route !== 'home' || fromUrl.khTopic || fromUrl.docId || fromUrl.procId) {
+      patch.route = fromUrl.route; patch.khTopic = fromUrl.khTopic;
+      patch.docId = fromUrl.docId || null; patch.procId = fromUrl.procId || null;
+      this.state.docId = patch.docId; this.state.procId = patch.procId;
     }
     try { const d = JSON.parse(localStorage.getItem('upiri2:rendo')); if (d) patch.rd = d; } catch (e) { }
     this.setState(patch);
@@ -3565,7 +3985,8 @@ class Component extends DCLogic {
     });
     window.addEventListener('popstate', () => {
       const r = this.routeFromPath(location.pathname);
-      this.setState({ route: r.route, khTopic: r.khTopic, docId: r.docId || null });
+      this.state.docId = r.docId || null; this.state.procId = r.procId || null;
+      this.setState({ route: r.route, khTopic: r.khTopic, docId: r.docId || null, procId: r.procId || null });
       this.applyMeta(r.route, r.khTopic);
     });
   }
@@ -3579,7 +4000,19 @@ class Component extends DCLogic {
     const t = 1 - Math.max(0, Math.min(1, health));
     return { base: this.lerp('#F2989F', '#787D89', t), deep: this.lerp('#DE6E7A', '#565B66', t), light: this.lerp('#FBC7CC', '#9CA3AF', t) };
   }
-  go = (r) => { this.setState({ route: r, khTopic: null, docId: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
+  go = (r) => { this.state.docId = null; this.state.procId = null; this.setState({ route: r, khTopic: null, docId: null, procId: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
+  goProc = (id) => {
+    this.state.procId = id;
+    this.setState({ route: 'procs', procId: id, khTopic: null, docId: null });
+    try { history.pushState({}, '', '/tests-and-procedures/' + id); } catch (e) { }
+    this.applyMeta('procs', null); window.scrollTo({ top: 0 });
+  };
+  backToProcs = () => {
+    this.state.procId = null;
+    this.setState({ procId: null });
+    try { history.pushState({}, '', '/tests-and-procedures'); } catch (e) { }
+    this.applyMeta('procs', null); window.scrollTo({ top: 0 });
+  };
   goDoctor = (id) => {
     this.state.docId = id;
     this.setState({ route: 'find', docId: id, khTopic: null });
@@ -3955,6 +4388,8 @@ class Component extends DCLogic {
       library: this.wal('Please share the ŪPIRI research library — the list of papers and journals published by the department.')
     };
 
+    const proc = s.procId ? this.PROCEDURES.find(x => x.id === s.procId) : null;
+
     /* ---- specialist finder ---- */
     const condName = id => { const t = this.KH_TOPICS.find(x => x.id === id); return t ? t.n : id; };
     const dq = s.docQuery.trim().toLowerCase();
@@ -4020,21 +4455,47 @@ class Component extends DCLogic {
     const khVideos = this.KH_VIDEOS.map(v => videoVm(v, topicName(v.topic)));
     const khCases = this.KH_CASES.map(c => ({ t: c.t, d: c.d, lvl: c.lvl, topicId: c.topic, topicName: topicName(c.topic), placeholder: !!c.placeholder }));
 
-    /* client-side search across topics, articles, videos and cases */
-    const khHits = !khQ ? [] : [].concat(
-      this.KH_TOPICS.filter(t => matches(t.n, t.blurb, t.ov)).map(t => ({
-        kind: 'Condition', t: t.n, d: t.blurb, open: () => this.goTopic(t.id)
-      })),
-      this.KH_ARTICLES.filter(a => matches(a.t, a.cat, topicName(a.topic))).map(a => ({
-        kind: a.cat, t: a.t, d: topicName(a.topic) + ' · ' + a.read + ' read', open: () => this.goTopic(a.topic)
-      })),
-      this.KH_VIDEOS.filter(v => matches(v.t, topicName(v.topic))).map(v => ({
-        kind: 'Video', t: v.t, d: topicName(v.topic), open: () => this.goTopic(v.topic)
-      })),
-      this.KH_CASES.filter(c => matches(c.t, c.d, topicName(c.topic))).map(c => ({
-        kind: 'Clinical case', t: c.t, d: topicName(c.topic) + ' · ' + c.lvl, open: () => this.goTopic(c.topic)
-      }))
-    ).slice(0, 40);
+    /* §8: search results grouped by kind, so it is obvious why each one appeared */
+    const procIds = this.PROCEDURES.map(x => x.id);
+    const isProcTopic = id => ['bronchoscopy', 'interventional-pulmonology', 'pulmonary-function-testing', 'cpet'].includes(id);
+    const khGroups = !khQ ? [] : [
+      {
+        g: 'Conditions', d: 'Diseases and long-term conditions',
+        items: this.KH_TOPICS.filter(t => !isProcTopic(t.id) && matches(t.n, t.blurb, t.ov))
+          .map(t => ({ t: t.n, d: t.blurb, open: () => this.goTopic(t.id) }))
+      },
+      {
+        g: 'Symptoms', d: 'What you are actually feeling',
+        items: this.KH_SYMPTOMS.filter(x => matches(x.t, x.d))
+          .map(x => ({ t: x.t, d: x.d, open: () => (x.topic ? this.goTopic(x.topic) : this.go(x.to)) }))
+      },
+      {
+        g: 'Tests', d: 'How lungs are measured',
+        items: this.PROCEDURES.filter(x => /Test|CPET|Function|Sleep/.test(x.n) && matches(x.n, x.plain, x.what, x.kw))
+          .map(x => ({ t: x.n, d: x.plain, open: () => this.goProc(x.id) }))
+      },
+      {
+        g: 'Procedures', d: 'What happens in the procedure room',
+        items: this.PROCEDURES.filter(x => !/Test|CPET|Function|Sleep/.test(x.n) && matches(x.n, x.plain, x.what, x.kw))
+          .map(x => ({ t: x.n, d: x.plain, open: () => this.goProc(x.id) }))
+      },
+      {
+        g: 'Articles', d: 'Patient guides and expert writing',
+        items: this.KH_ARTICLES.filter(a => matches(a.t, a.cat, topicName(a.topic)))
+          .map(a => ({ t: a.t, d: topicName(a.topic) + ' · ' + a.read + ' read', open: () => this.goTopic(a.topic) }))
+      },
+      {
+        g: 'Videos', d: 'Expert video content',
+        items: this.KH_VIDEOS.filter(v => matches(v.t, topicName(v.topic)))
+          .map(v => ({ t: v.t, d: topicName(v.topic), open: () => this.goTopic(v.topic) }))
+      },
+      {
+        g: 'Clinical cases', d: 'Teaching cases for doctors',
+        items: this.KH_CASES.filter(c => matches(c.t, c.d, topicName(c.topic)))
+          .map(c => ({ t: c.t, d: topicName(c.topic) + ' · ' + c.lvl, open: () => this.goTopic(c.topic) }))
+      }
+    ].filter(gr => gr.items.length);
+    const khHitCount = khGroups.reduce((a, gr) => a + gr.items.length, 0);
 
     const feat = (list, kind) => {
       const x = list[0];
@@ -4114,6 +4575,41 @@ class Component extends DCLogic {
       curJourney: s.route === 'journey' ? 'page' : 'false', curRendo: s.route === 'rendo' ? 'page' : 'false',
       curKnowledge: s.route === 'knowledge' ? 'page' : 'false', curAlumni: s.route === 'alumni' ? 'page' : 'false',
 
+      /* ---- seeing beyond the scan (§6) ---- */
+      scanPath: [
+        ['Scan', 'A chest X-ray or CT is taken'],
+        ['AI-assisted analysis', 'Software flags areas for closer attention'],
+        ['Expert review', 'A radiologist and pulmonologist read the same film'],
+        ['Tissue diagnosis', 'Sampling only where it changes the answer'],
+        ['Multidisciplinary discussion', 'The Nodule Board agrees the plan'],
+        ['Treatment or surveillance', 'Either active treatment or a defined follow-up schedule']
+      ].map((x, i) => ({ n: String(i + 1), t: x[0], d: x[1], live: i === 1 })),
+
+      /* ---- tests & procedures (§5) ---- */
+      isProcs: s.route === 'procs' && !s.procId,
+      isProc: s.route === 'procs' && !!s.procId,
+      goProcs: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('procs'); },
+      backToProcs: this.backToProcs,
+      procCards: this.PROCEDURES.map(x => ({
+        n: x.n, plain: x.plain, ...this.iconOf(x.ic), open: () => this.goProc(x.id)
+      })),
+      pc: proc || {}, pcName: proc ? proc.n : '', pcPlain: proc ? proc.plain : '',
+      pcWhat: proc ? proc.what : '', pcWhy: proc ? proc.why : '',
+      pcHowLong: proc ? proc.howlong : '', pcPain: proc ? proc.pain : '',
+      pcHappens: proc ? proc.happens.map((t, i) => ({ t, n: String(i + 1) })) : [],
+      pcPrep: proc ? proc.prep.map(t => ({ t })) : [],
+      pcAfter: proc ? proc.after.map(t => ({ t })) : [],
+      pcWhen: proc ? proc.when.map(t => ({ t })) : [],
+      pcTopics: proc ? proc.topics.map(id => {
+        const t2 = this.KH_TOPICS.find(y => y.id === id);
+        return { t: t2 ? t2.n : id, open: () => this.goTopic(id) };
+      }) : [],
+      pcDocs: proc ? this.DOCTORS.filter(dd => dd.procs.some(pp => proc.dp.includes(pp))).slice(0, 3).map(docCard) : [],
+      pcHasDocs: proc ? this.DOCTORS.some(dd => dd.procs.some(pp => proc.dp.includes(pp))) : false,
+      pcIcon: proc ? this.iconOf(proc.ic) : this.iconOf('lung'),
+      pcPaths: proc ? this.iconOf(proc.ic).paths : [], pcVb: proc ? this.iconOf(proc.ic).vb : '0 0 24 24', pcSw: proc ? this.iconOf(proc.ic).sw : 2,
+      pcBook: proc ? this.wal('I would like to ask about ' + proc.n + ' at Yashoda Pulmonology.') : '',
+
       /* ---- explore pulmonary care ---- */
       topicGroups: this.TOPIC_GROUPS.map(gr => ({
         g: gr.g,
@@ -4129,13 +4625,14 @@ class Component extends DCLogic {
       toggleCare: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'care' ? null : 'care' }); },
       toggleTools: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'tools' ? null : 'tools' }); },
       toggleDocs: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'docs' ? null : 'docs' }); },
-      navCareSt: this.navSt(['knowledge', 'journey', 'clubs', 'club', 'allergy'].includes(s.route)),
+      navCareSt: this.navSt(['knowledge', 'journey', 'clubs', 'club', 'allergy', 'procs'].includes(s.route)),
       navToolsSt: this.navSt(['risk', 'triage', 'breath', 'rendo', 'shikhar'].includes(s.route)),
       navDocsSt: this.navSt(['alumni', 'doctors', 'case'].includes(s.route)),
       mobileNavOpen: s.mobileNav, mobileNavClosed: !s.mobileNav,
       toggleMobileNav: (e) => { if (e) e.stopPropagation(); this.setState({ mobileNav: !s.mobileNav, menu: null }); },
       navItems: [
         { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
+        { t: 'Tests & Procedures', go: () => this.go('procs'), grp: 'care' },
         { t: 'Nodule Journey', go: () => this.go('journey'), grp: 'care' },
         { t: 'Breath Clubs', go: () => this.go('clubs'), grp: 'care' },
         { t: 'Allergy Calendar', go: () => this.go('allergy'), grp: 'care' },
@@ -4165,6 +4662,7 @@ class Component extends DCLogic {
              { t: 'Knowledge Hub', go: () => { this.setState({ mobileNav: false }); this.go('knowledge'); } }]
           : [
             { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
+            { t: 'Tests & Procedures', go: () => this.go('procs'), grp: 'care' },
             { t: 'Nodule Journey', go: () => this.go('journey'), grp: 'care' },
             { t: 'Breath Clubs', go: () => this.go('clubs'), grp: 'care' },
             { t: 'Allergy Calendar', go: () => this.go('allergy'), grp: 'care' },
@@ -4255,9 +4753,17 @@ class Component extends DCLogic {
       onKhQuery: (e) => this.setState({ khQuery: e.target.value }),
       clearKhQuery: () => this.setState({ khQuery: '' }),
       khHasQuery: khQ.length > 0,
-      khNoResults: khQ.length > 0 && khHits.length === 0,
-      khResultCount: khHits.length + (khQ ? ' result' + (khHits.length === 1 ? '' : 's') + ' for “' + s.khQuery.trim() + '”' : ''),
-      khHits,
+      khNoResults: khQ.length > 0 && khHitCount === 0,
+      khResultCount: khHitCount + (khQ ? ' result' + (khHitCount === 1 ? '' : 's') + ' for “' + s.khQuery.trim() + '”' : ''),
+      khGroups,
+      khSuggested: this.KH_SUGGESTED.map(q => ({ q, pick: () => this.setState({ khQuery: q }) })),
+      khCategories: this.KH_CATEGORIES.map(c => ({
+        g: c.g, d: c.d,
+        items: c.ids.map(id => {
+          const t = this.KH_TOPICS.find(x => x.id === id);
+          return { n: t.n, blurb: t.blurb, ...this.iconOf(t.ic), open: () => this.goTopic(id) };
+        })
+      })),
       khTabs: this.KH_TABS.map(t => ({ label: t, pick: () => this.setState({ khTab: t }), st: this.pillSt(s.khTab === t) })),
       khTopicCards: khTopicCards,
       khShowTopics: !khQ && (s.khTab === 'All'),
