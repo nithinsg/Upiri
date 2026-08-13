@@ -2160,7 +2160,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       <sc-if value="{{ khShowVideos }}" hint-placeholder-val="{{ true }}">
         <section style="margin-bottom:60px">
           <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.8vw,30px);letter-spacing:-0.02em;color:#1D1B4B;margin:0 0 8px">Expert video library</h2>
-          <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px">Short explanations from the Yashoda pulmonology team.</p>
+          <p style="font-size:15px;color:#6C6A9E;margin:0 0 24px">Short explanations from the Yashoda pulmonology team, with a few clearly-marked videos from other trusted centres where we do not yet have our own.</p>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
             <sc-for list="{{ khVideos }}" as="v" hint-placeholder-count="9">
               <article style="border-radius:24px;overflow:hidden;background:#fff;border:1px solid rgba(44,42,107,0.1);box-shadow:0 20px 50px -26px rgba(29,27,75,0.35)">
@@ -2187,7 +2187,12 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
                   <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.35;color:#2C2A6B;margin:0 0 6px">{{ v.t }}</h3>
                   <p style="font-size:12.5px;color:#6C6A9E;margin:0">{{ v.topicName }}</p>
                   <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
-                    <p style="font-size:11.5px;color:#8A88B8;margin:5px 0 0">Yashoda Hospitals · YouTube</p>
+                    <p style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11.5px;color:#8A88B8;margin:5px 0 0">
+                      {{ v.channel }} · YouTube
+                      <sc-if value="{{ v.isExternal }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">External source</span>
+                      </sc-if>
+                    </p>
                   </sc-if>
                   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
                     <button onClick="{{ v.open }}" style="padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">Open topic</button>
@@ -2343,7 +2348,12 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
                 <div style="padding:14px 18px 16px">
                   <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.35;color:#2C2A6B;margin:0">{{ v.t }}</h3>
                   <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
-                    <p style="font-size:11.5px;color:#8A88B8;margin:5px 0 0">Yashoda Hospitals · YouTube</p>
+                    <p style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11.5px;color:#8A88B8;margin:5px 0 0">
+                      {{ v.channel }} · YouTube
+                      <sc-if value="{{ v.isExternal }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">External source</span>
+                      </sc-if>
+                    </p>
                   </sc-if>
                 </div>
               </article>
@@ -2907,10 +2917,12 @@ class Component extends DCLogic {
     { t: 'Allergic rhinitis and asthma: one airway', topic: 'allergy', cat: 'Articles', read: '5 min', placeholder: true },
     { t: 'Staging lung cancer: why it decides everything', topic: 'lung-cancer', cat: 'Expert Insights', read: '9 min', placeholder: true }
   ];
-  /* Real Yashoda Hospitals YouTube videos, sourced by web search and mapped to topics.
-     `yt` is the video id; entries without one stay placeholders until a video exists.
-     NOTE: YouTube is unreachable from the build environment, so these ids were not
-     opened and confirmed — spot-check them once before promoting the page. */
+  /* Videos mapped to topics. `yt` is the YouTube id; `ch` is the source channel and
+     defaults to Yashoda. Entries carrying `ext: true` come from another institution
+     and are labelled as such on the card so they are never mistaken for Yashoda's
+     own content. Entries with no `yt` render a "Video coming soon" card.
+     NOTE: YouTube is unreachable from the build environment, so no id below was
+     opened and confirmed — they need a spot-check pass. */
   KH_VIDEOS = [
     { t: 'Inhalation Therapy & Inhalation Devices', topic: 'asthma', yt: 'Qqfsh6rFQDo' },
     { t: 'Asthma Treatment in Hyderabad, India', topic: 'severe-asthma', yt: '6LG0IyIiSAo' },
@@ -2936,10 +2948,18 @@ class Component extends DCLogic {
     { t: 'Success Cases Series of Lung Transplant in India', topic: 'lung-transplantation', yt: '353Mz7wfBuI' },
     { t: 'Department of Heart & Lung', topic: 'lung-transplantation', yt: 'DQy0Y_PvNNs' },
     { t: 'Pulmonary & Critical Care — Basics & Beyond', topic: 'pulmonary-function-testing', yt: 'GM9HO-Qh_QA' },
-    { t: 'Lung nodule assessment explained', topic: 'lung-nodules', placeholder: true },
-    { t: 'Understanding pulmonary hypertension', topic: 'pulmonary-hypertension', placeholder: true },
+
+    /* --- external sources, used only where Yashoda has no video on the topic --- */
+    { t: 'How Does Lung Cancer Screening Work?', topic: 'lung-nodules', yt: 'gFaxi8-i9NE', ch: 'Cleveland Clinic', ext: true },
+    { t: 'Mayo Clinic Minute — Lighting up lung nodules during surgery', topic: 'lung-nodules', yt: 'ivxg-aawqeY', ch: 'Mayo Clinic', ext: true },
+    { t: 'Mayo Clinic Minute: Under pressure with pulmonary hypertension', topic: 'pulmonary-hypertension', yt: 'KGu8jCMQOoc', ch: 'Mayo Clinic', ext: true },
+    { t: 'Pulmonary Hypertension Overview', topic: 'pulmonary-hypertension', yt: 'm0bRgBNAro0', ch: 'Mayo Clinic', ext: true },
+    { t: 'Mayo Clinic Minute: Tips to deal with spring pollen and allergies', topic: 'allergy', yt: 'Sc45QvlCEN0', ch: 'Mayo Clinic', ext: true },
+    { t: 'Mayo Clinic Minute — How to manage hay fever symptoms', topic: 'allergy', yt: '1zfs6wlIEO4', ch: 'Mayo Clinic', ext: true },
+    { t: 'Mayo Clinic Minute: Using your nasal spray properly', topic: 'allergy', yt: 'ICqBAN28Tgo', ch: 'Mayo Clinic', ext: true },
+
+    /* --- still no suitable video from Yashoda, Mayo or Cleveland --- */
     { t: 'Preparing for a CPET', topic: 'cpet', placeholder: true },
-    { t: 'Managing respiratory allergy at home', topic: 'allergy', placeholder: true },
     { t: 'Silica and occupational lung disease', topic: 'occupational-lung-disease', placeholder: true }
   ];
   KH_CASES = [
@@ -3473,8 +3493,9 @@ class Component extends DCLogic {
         thumbSt: v.yt
           ? "position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border:none;padding:0;width:100%;cursor:pointer;background-image:url('https://i.ytimg.com/vi/" + v.yt + "/hqdefault.jpg');background-size:cover;background-position:center;background-color:#2C2A6B"
           : '',
-        frameTitle: v.t + ' — Yashoda Hospitals',
-        aria: 'Play “' + v.t + '”, a Yashoda Hospitals video'
+        channel: v.ch || this.BRAND.name, isExternal: !!v.ext,
+        frameTitle: v.t + ' — ' + (v.ch || this.BRAND.name),
+        aria: 'Play “' + v.t + '”, a ' + (v.ch || this.BRAND.name) + ' video'
       };
     };
     const khVideos = this.KH_VIDEOS.map(v => videoVm(v, topicName(v.topic)));

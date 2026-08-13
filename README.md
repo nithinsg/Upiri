@@ -97,8 +97,11 @@ one has actually loaded, so a missing file can never render a broken image in pr
 
 ## Videos
 
-`KH_VIDEOS` maps topics to real Yashoda Hospitals YouTube videos via a `yt` video id;
-entries without one render a labelled "Video coming soon" card.
+`KH_VIDEOS` maps topics to YouTube videos via a `yt` video id. `ch` names the source
+channel and defaults to Yashoda; entries with `ext: true` come from another institution
+(Mayo Clinic, Cleveland Clinic) and render an **External source** tag so they are never
+mistaken for Yashoda's own content. Entries without a `yt` render a "Video coming soon"
+card. Coverage today: 16 of 18 topics — 24 Yashoda videos plus 7 external.
 
 Cards show the real YouTube still (`i.ytimg.com/vi/<id>/hqdefault.jpg`) with a play button,
 and load the player **only when the viewer clicks** — the facade pattern. No YouTube script
@@ -120,7 +123,7 @@ brand indigo rather than a blank box, and a "YouTube" link is always present as 
 - **The Yashoda logo file is missing** — save it as `public/yashoda-logo.svg` or `.png`.
 - **The YouTube video ids need one spot-check pass.** They were sourced by web search;
   YouTube is unreachable from the build environment, so none was opened and confirmed.
-- Six topics still have no video: lung nodules, pulmonary hypertension, CPET, allergy,
-  occupational lung disease and PFT-specific content.
+- Two topics still have no video: **CPET / exercise testing** and **occupational lung
+  disease** — no suitable video found from Yashoda, Mayo or Cleveland.
 - Knowledge Hub topic text is rendered client-side. For search-engine indexing of the 18
   topic pages, add a prerender step that writes static HTML per topic.
