@@ -89,6 +89,12 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   x-dc [data-r="nav-brand"]>span>span:last-child{display:none}
   x-dc [data-r="nav-links"]>button{padding:8px 9px !important;font-size:13px !important}
 }
+@media (max-width:900px){
+  /* grouped menus collapse into a single sheet on phones */
+  x-dc [data-r="nav-links"]{display:none !important}
+  x-dc [data-r="nav-burger"]{display:flex !important}
+  x-dc [data-r="nav-space"]{display:none !important}
+}
 @media (max-width:1150px){
   x-dc [data-r="nav-brand"]{display:none !important}
 }
@@ -151,15 +157,48 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </span>
       <div data-r="nav-sep" style="width:1px;height:24px;background:rgba(44,42,107,0.14);margin:0 8px"></div>
       <div data-r="nav-links" style="display:flex;align-items:center;gap:2px;flex:1">
-        <button onClick="{{ goRisk }}" aria-current="{{ curRisk }}" style="{{ navRisk }}" style-hover="background:rgba(44,42,107,0.08)">Risk Check</button>
-        <button onClick="{{ goBreath }}" aria-current="{{ curBreath }}" style="{{ navBreath }}" style-hover="background:rgba(44,42,107,0.08)">Lung Age</button>
-        <button onClick="{{ goClubs }}" aria-current="{{ curClubs }}" style="{{ navClubs }}" style-hover="background:rgba(44,42,107,0.08)">Clubs</button>
-        <button onClick="{{ goJourney }}" aria-current="{{ curJourney }}" style="{{ navJourney }}" style-hover="background:rgba(44,42,107,0.08)">Nodule Journey</button>
-        <button onClick="{{ goRendo }}" aria-current="{{ curRendo }}" style="{{ navRendo }}" style-hover="background:rgba(44,42,107,0.08)">Rendo Ūpiri</button>
+        <span style="position:relative;display:inline-block">
+          <button onClick="{{ toggleCare }}" aria-haspopup="true" aria-expanded="{{ careExp }}" style="{{ navCareSt }}" style-hover="background:rgba(44,42,107,0.08)">Explore Care ▾</button>
+          <sc-if value="{{ menuCare }}" hint-placeholder-val="{{ false }}">
+            <span data-r="menu" style="position:absolute;top:calc(100% + 10px);left:0;z-index:60;min-width:230px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
+              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="4">
+                <sc-if value="{{ i.inCare }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
+                </sc-if>
+              </sc-for>
+            </span>
+          </sc-if>
+        </span>
         <button onClick="{{ goFind }}" aria-current="{{ curFind }}" style="{{ navFind }}" style-hover="background:rgba(44,42,107,0.08)">Doctors</button>
         <button onClick="{{ goKnowledge }}" aria-current="{{ curKnowledge }}" style="{{ navKnowledge }}" style-hover="background:rgba(44,42,107,0.08)">Knowledge Hub</button>
-        <button onClick="{{ goAlumni }}" aria-current="{{ curAlumni }}" style="{{ navAlumni }}" style-hover="background:rgba(44,42,107,0.08)">Clinical Network</button>
+        <span style="position:relative;display:inline-block">
+          <button onClick="{{ toggleTools }}" aria-haspopup="true" aria-expanded="{{ toolsExp }}" style="{{ navToolsSt }}" style-hover="background:rgba(44,42,107,0.08)">Tools ▾</button>
+          <sc-if value="{{ menuTools }}" hint-placeholder-val="{{ false }}">
+            <span data-r="menu" style="position:absolute;top:calc(100% + 10px);left:0;z-index:60;min-width:240px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
+              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="5">
+                <sc-if value="{{ i.inTools }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
+                </sc-if>
+              </sc-for>
+            </span>
+          </sc-if>
+        </span>
+        <span style="position:relative;display:inline-block">
+          <button onClick="{{ toggleDocs }}" aria-haspopup="true" aria-expanded="{{ docsExp }}" style="{{ navDocsSt }}" style-hover="background:rgba(44,42,107,0.08)">For Doctors ▾</button>
+          <sc-if value="{{ menuDocs }}" hint-placeholder-val="{{ false }}">
+            <span data-r="menu" style="position:absolute;top:calc(100% + 10px);right:0;z-index:60;min-width:230px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
+              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="3">
+                <sc-if value="{{ i.inDocs }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
+                </sc-if>
+              </sc-for>
+            </span>
+          </sc-if>
+        </span>
       </div>
+      <button data-r="nav-burger" onClick="{{ toggleMobileNav }}" aria-label="Menu" aria-expanded="{{ mobileNavOpen }}" style="display:none;width:40px;height:40px;border-radius:12px;align-items:center;justify-content:center;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M3 12h18"></path><path d="M3 18h18"></path></svg>
+      </button>
       <select data-r="nav-space" value="{{ spaceValue }}" onChange="{{ pickSpace }}" aria-label="Choose your ŪPIRI space" style="appearance:none;-webkit-appearance:none;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;color:#2C2A6B;cursor:pointer;outline:none">
         <option value="people">People · ప్రజలు</option>
         <option value="doctors">Doctors</option>
@@ -171,6 +210,16 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         Book
       </a>
     </div>
+    <sc-if value="{{ mobileNavOpen }}" hint-placeholder-val="{{ false }}">
+      <div data-r="nav-sheet" style="position:fixed;top:96px;left:12px;right:12px;z-index:70;max-height:70vh;overflow-y:auto;padding:12px;border-radius:24px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 30px 70px -20px rgba(29,27,75,0.45)">
+        <sc-for list="{{ navSections }}" as="sec" hint-placeholder-count="3">
+          <div style="padding:8px 10px 4px;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#8A88B8">{{ sec.g }}</div>
+          <sc-for list="{{ sec.items }}" as="i" hint-placeholder-count="4">
+            <button onClick="{{ i.go }}" style="display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:15px;font-weight:600;color:#2C2A6B" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
+          </sc-for>
+        </sc-for>
+      </div>
+    </sc-if>
   </nav>
 
   <main id="main">
@@ -255,9 +304,95 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </div>
     </section>
 
+    <!-- WHAT BRINGS YOU HERE? -->
+    <section aria-labelledby="entry-heading" style="max-width:1150px;margin:0 auto;padding:64px 24px 20px">
+      <h2 id="entry-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0;text-wrap:balance">What brings you here?</h2>
+      <p style="font-size:16px;color:#6C6A9E;margin:10px 0 30px;max-width:640px">Start wherever you are. Each route leads to the part of ŪPIRI built for it.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <sc-for list="{{ entryPoints }}" as="e" hint-placeholder-count="6">
+          <button onClick="{{ e.go }}" style="text-align:left;display:flex;flex-direction:column;gap:12px;padding:28px 26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -30px rgba(29,27,75,0.3);cursor:pointer;transition:transform .18s ease, box-shadow .18s ease" style-hover="transform:translateY(-3px);box-shadow:0 30px 66px -30px rgba(29,27,75,0.42)">
+            <span aria-hidden="true" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B">
+              <svg width="22" height="22" viewBox="{{ e.vb }}" fill="none" stroke="currentColor" stroke-width="{{ e.sw }}" stroke-linecap="round" stroke-linejoin="round">
+                <sc-for list="{{ e.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+              </svg>
+            </span>
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18.5px;color:#2C2A6B">{{ e.t }}</span>
+            <span style="font-size:14px;line-height:1.55;color:#4A4880;flex:1">{{ e.d }}</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#B35A08">
+              {{ e.cta }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- EXPLORE PULMONARY CARE (§3) -->
+    <section aria-labelledby="explore-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
+      <h2 id="explore-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Explore pulmonary care</h2>
+      <p style="font-size:16px;color:#6C6A9E;margin:10px 0 30px;max-width:640px">Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <sc-for list="{{ topicGroups }}" as="gr" hint-placeholder-count="7">
+          <section style="padding:24px 26px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.75);backdrop-filter:blur(14px);box-shadow:0 20px 50px -30px rgba(29,27,75,0.3)">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.01em;color:#B35A08;margin:0 0 12px">{{ gr.g }}</h3>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ gr.items }}" as="i" hint-placeholder-count="3">
+                <li><button onClick="{{ i.open }}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:11px;border:none;background:transparent;cursor:pointer;font-size:14.5px;font-weight:600;color:#2C2A6B" style-hover="background:rgba(44,42,107,0.06)">
+                  {{ i.n }}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B0AECB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                </button></li>
+              </sc-for>
+            </ul>
+          </section>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- FIND THE RIGHT SPECIALIST -->
+    <section aria-labelledby="spec-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+        <div>
+          <h2 id="spec-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Find the right lung specialist</h2>
+          <p style="font-size:16px;color:#6C6A9E;margin:10px 0 0;max-width:620px">Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.</p>
+        </div>
+        <button onClick="{{ goFind }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+          See all specialists
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <sc-for list="{{ homeDocs }}" as="d" hint-placeholder-count="3">
+            <article style="display:flex;flex-direction:column;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);box-shadow:0 22px 54px -30px rgba(29,27,75,0.34)">
+              <div style="display:flex;gap:16px;align-items:flex-start">
+                <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:72px;height:72px;border-radius:20px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#2C2A6B">
+                  {{ d.initials }}
+                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
+                </span>
+                <div style="min-width:0">
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
+                  <p style="font-size:12.5px;line-height:1.45;color:#4A4880;margin:5px 0 0">{{ d.desig }}</p>
+                  <p style="font-size:11.5px;color:#8A88B8;margin:6px 0 0">{{ d.unit }} · {{ d.exp }} experience</p>
+                </div>
+              </div>
+              <p style="font-size:11.5px;color:#6C6A9E;margin:12px 0 0">{{ d.qual }}</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+                <sc-for list="{{ d.condChips }}" as="c" hint-placeholder-count="3">
+                  <span style="font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ c.t }}</span>
+                </sc-for>
+              </div>
+              <p style="font-size:11.5px;color:#8A88B8;margin:10px 0 14px">Speaks {{ d.langLine }}</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                <button onClick="{{ d.open }}" style="padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">View profile</button>
+                <a href="{{ d.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452)" style-hover="color:#fff;transform:translateY(-1px)">Book appointment</a>
+              </div>
+            </article>
+        </sc-for>
+      </div>
+    </section>
+
     <!-- MODULES -->
     <section style="max-width:1150px;margin:0 auto;padding:80px 24px 20px">
-      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;letter-spacing:-0.02em;color:#2C2A6B;margin:0;text-align:center">Where would you like to start?</h2>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;letter-spacing:-0.02em;color:#2C2A6B;margin:0;text-align:center">Patient tools</h2>
       <p style="font-family:'Noto Sans Telugu',sans-serif;text-align:center;color:#8A88B8;font-size:14px;margin:10px 0 44px">మీ ఊపిరికి భరోసా</p>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:22px">
         <button onClick="{{ goRisk }}" style="text-align:left;display:flex;flex-direction:column;gap:14px;padding:32px;border-radius:28px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3);cursor:pointer;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-6px);box-shadow:0 36px 74px -28px rgba(29,27,75,0.42)">
@@ -370,71 +505,6 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <p style="margin:0;font-size:14px;line-height:1.55;color:#4A4880">From the Nodule Board: real pathways, anonymised, explained.</p>
           <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#F5821F;margin-top:auto">Open<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
         </button>
-      </div>
-    </section>
-
-    <!-- WHAT BRINGS YOU HERE? -->
-    <section aria-labelledby="entry-heading" style="max-width:1150px;margin:0 auto;padding:64px 24px 20px">
-      <h2 id="entry-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0;text-wrap:balance">What brings you here?</h2>
-      <p style="font-size:16px;color:#6C6A9E;margin:10px 0 30px;max-width:640px">Start wherever you are. Each route leads to the part of ŪPIRI built for it.</p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
-        <sc-for list="{{ entryPoints }}" as="e" hint-placeholder-count="6">
-          <button onClick="{{ e.go }}" style="text-align:left;display:flex;flex-direction:column;gap:12px;padding:28px 26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -30px rgba(29,27,75,0.3);cursor:pointer;transition:transform .18s ease, box-shadow .18s ease" style-hover="transform:translateY(-3px);box-shadow:0 30px 66px -30px rgba(29,27,75,0.42)">
-            <span aria-hidden="true" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B">
-              <svg width="22" height="22" viewBox="{{ e.vb }}" fill="none" stroke="currentColor" stroke-width="{{ e.sw }}" stroke-linecap="round" stroke-linejoin="round">
-                <sc-for list="{{ e.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
-              </svg>
-            </span>
-            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18.5px;color:#2C2A6B">{{ e.t }}</span>
-            <span style="font-size:14px;line-height:1.55;color:#4A4880;flex:1">{{ e.d }}</span>
-            <span style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#B35A08">
-              {{ e.cta }}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-            </span>
-          </button>
-        </sc-for>
-      </div>
-    </section>
-
-    <!-- FIND THE RIGHT SPECIALIST -->
-    <section aria-labelledby="spec-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
-        <div>
-          <h2 id="spec-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Find the right lung specialist</h2>
-          <p style="font-size:16px;color:#6C6A9E;margin:10px 0 0;max-width:620px">Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.</p>
-        </div>
-        <button onClick="{{ goFind }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
-          See all specialists
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-        </button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
-        <sc-for list="{{ homeDocs }}" as="d" hint-placeholder-count="3">
-            <article style="display:flex;flex-direction:column;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);box-shadow:0 22px 54px -30px rgba(29,27,75,0.34)">
-              <div style="display:flex;gap:16px;align-items:flex-start">
-                <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:72px;height:72px;border-radius:20px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#2C2A6B">
-                  {{ d.initials }}
-                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
-                </span>
-                <div style="min-width:0">
-                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
-                  <p style="font-size:12.5px;line-height:1.45;color:#4A4880;margin:5px 0 0">{{ d.desig }}</p>
-                  <p style="font-size:11.5px;color:#8A88B8;margin:6px 0 0">{{ d.unit }} · {{ d.exp }} experience</p>
-                </div>
-              </div>
-              <p style="font-size:11.5px;color:#6C6A9E;margin:12px 0 0">{{ d.qual }}</p>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-                <sc-for list="{{ d.condChips }}" as="c" hint-placeholder-count="3">
-                  <span style="font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ c.t }}</span>
-                </sc-for>
-              </div>
-              <p style="font-size:11.5px;color:#8A88B8;margin:10px 0 14px">Speaks {{ d.langLine }}</p>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
-                <button onClick="{{ d.open }}" style="padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">View profile</button>
-                <a href="{{ d.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452)" style-hover="color:#fff;transform:translateY(-1px)">Book appointment</a>
-              </div>
-            </article>
-        </sc-for>
       </div>
     </section>
 
@@ -2728,7 +2798,8 @@ class Component extends DCLogic {
     alSel: new Date().getMonth(),
     khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics', khPlaying: null,
     brandLogo: null,
-    docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false
+    docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false,
+    menu: null, mobileNav: false
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -2962,6 +3033,17 @@ class Component extends DCLogic {
     { id: 'v-nagarjuna-maturu', name: 'Dr. V Nagarjuna Maturu', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-v-nagarjuna-maturu/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr.-Nagarjuna-Maturu-V.png', desig: 'Senior Consultant, Clinical and Interventional Pulmonology', qual: 'MD, DM (Pulmonary & Critical Care Medicine), FCCP (USA), FAPSR', langs: ['English', 'Hindi', 'Telugu'], exp: '19 Yrs', timings: 'Day time OPD: MON – SAT : 11:00 AM – 05:00 PM', expertise: 'Bronchoscopy and Endobronchial Ultrasonography (EBUS): Trained in both linear and radial EBUS, and has performed over 1000 bronchoscopies and 150 EBUS procedures., Medical thoracoscopy: Well-versed in…', about: 'Dr V. Nagarjuna Maturu is a Senior Consultant, Clinical and Interventional Pulmonology, at Yashoda Hospitals, Hitec City, with over 18 years of experience. | He is a skilled pulmonologist specialising in the diagnosis and management of respiratory diseases, with particular expertise in minimally invasive pulmonology procedures for both adults and children.', edu: 'MD, DM (Pulmonary & Critical Care Medicine), FCCP (USA), FAPSR', hist: '', services: 'Diagnostic Procedures Bronchoalveolar lavage Endobronchial biopsy Transbronchial lung biopsy Transbronchial cryo-lung biopsy Endobronchial ultrasound-guided TBNA (Linear EBUS) Radial EBUS-guided biopsy of peripheral lung nodules Cryobiopsy for peripheral pulmonary nodules Navigational bronchoscopy for peripheral lung nodules Diagnostic medical thoracoscopy (Pleuroscopy) Therapeutic Procedures Airway foreign body removal Endobronchial tumor removal (benign and malignant) Tracheobronchial stenting Tracheobronchial dilation for benign airway stenosis Bronchial thermoplasty for refractory asthma Bronchoscopic thermal vapor ablation for severe emphysema Therapeutic whole lung lavage for pulmonary alveolar proteinosis Bronchoscopic closure of airway fistulae Thoracoscopic adhesiolysis and pleurodesis Indwelling pleural catheter placement Pediatric Pulmonology Pediatric Bronchoscopy Foreign Body Removal from the Pediatric Airway Evaluation of Congenital Airway Disorders Management of Chronic Lung Disease of Prematurity Pediatric Sleep Breathing Disorders Advanced Pulmonary Care Advanced & critical respiratory care', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'lung-cancer', 'lung-nodules', 'interventional-pulmonology', 'bronchoscopy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Bronchial thermoplasty', 'Pleural procedures', 'Critical care'], paed: true },
     { id: 'v-pratibh-prasad', name: 'Dr. V Pratibh Prasad', unit: 'Hitec City', url: 'https://www.yashodahospitals.com/doctor/hitec-city/pulmonology/dr-v-pratibh-prasad/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2023/08/Dr-V-Pratibh-Prasad.png', desig: 'Consultant Clinical and Interventional Pulmonologist', qual: 'MBBS, DNB (Pulmonary Medicine), SCE-Resp Medicine (UK), Fellowship in Interventional Pulmonology', langs: ['English', 'Hindi', 'Telugu'], exp: '10 Yrs', timings: 'Day time OPD: MON – SAT : 9:00 AM – 4:00 PM', expertise: 'Obstructive Airway Diseases: Asthma, Allergy, COPD, Interstitial Lung Diseases, Respiratory Infections: Tuberculosis, Covid-19, Pneumonia, Interventional Pulmonology: Diagnostic and Therapeutic Bronch…', about: 'Dr. V Pratibh Prasad is a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Hitec City, with over 9 years of experience. | He has a keen interest in Interventional Pulmonology and specialises in the treatment and management of Pulmonary Infections, Interstitial Lung Diseases, Severe Asthma, and COPD, among others.', edu: '2019-2020: Fellowship in Interventional Pulmonology, Yashoda Hospitals 2017: SCE Respiratory Medicine, Royal College of Physicians, UK 2014-2017: DNB Pulmonary Medicine, P. D. Hinduja National Hospital & Medical Research Centre, Mumbai 2006-2011: MBBS, SVS Medical College, Mahabubnagar', hist: 'Currently working as a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Hitec City 2020-2022: Associate Consultant, Pulmonary Medicine, Yashoda Hospitals, Somajiguda 2018-2019: Consultant Pulmonologist, Mayo Hospitals, Chandigarh 2017-2018: Senior Resident, Pulmonary Medicine, Government General and Chest Hospital, Osmania Medical College, Hyderabad 2014-2017: Junior Resident, Pulmonary Medicine, P. D. Hinduja National Hospital & Medical Research Centre, Mumbai', services: 'Pulmonology Outpatient and Inpatient Services Advanced Pulmonary Function Tests Advanced Sleep Diagnostics Diagnostic Bronchoscopy Medical Thoracoscopy Linear and Radial EBUS Rigid Bronchoscopy: Central Airway Obstruction Management, Airway Stenting, Cryo Lung Biopsy Bronchoscopic Management of Hemoptysis Bronchoscopic Management of Broncho-Pleural Fistula and Tracheo-Eesophageal Fistula Whole Lung Lavage Asthma', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Pulmonary function testing'], paed: false },
     { id: 'y-soma-sai-kiran', name: 'Dr. Y. Soma Sai Kiran', unit: 'Secunderabad', url: 'https://www.yashodahospitals.com/doctor/secunderabad/pulmonology/dr-y-soma-sai-kiran/', img: 'https://www.yashodahospitals.com/wp-content/uploads/2025/03/Web-Profile-Photo-Dr.-Y.-Soma-Sai-Kiran-1.png', desig: 'Consultant Clinical & Interventional Pulmonologist', qual: 'MD, DM (Pulmonary, Critical Care, and Sleep Medicine), AIIMS.', langs: ['English', 'Telugu', 'Hindi'], exp: '10 Yrs', timings: 'Day time OPD: Mon to Sat : 09:00 AM – 4:00 PM', expertise: 'copd, ILD, Pulmonary hypertension, Pulmonary embolism, Lung cancer, Sleep disorders', about: 'Dr Y. Soma Sai Kiran is a Consultant Clinical and Interventional Pulmonologist at Yashoda Hospitals, Secunderabad. He is a skilled pulmonologist with special expertise in treating pulmonary concerns with advanced minimally invasive treatment techniques in both adults and children.', edu: '2022 - 2025: DM (pulmonary, critical care, and sleep medicine), AIIMS, Raipur. 2017 - 2020: MD, Guntur Medical College, Guntur, Andhra Pradesh 2010 - 2016: MBBS, Maharajah Institute of Medical Sciences, Vizianagaram', hist: '', services: 'Respiratory Diseases Management Advanced Pulmonary Function Tests Skin Allergy Testing Level 1 Polysomnography Bronchoscopy (Flexible and Rigid) Thoracoscopy Endobronchial Ultrasound (Convex and Radial) Airway Stenting Critical Care Tumor Debulking Cryobiopsy and APC Pulmonary Rehabilitation Severe asthma Paediatric Pulmonology: Treatment and Management of Asthma Bronchiectasis Persistent or recurrent cough Recurrent chest infections Airway-related problems Exercise-related problems Cystic fibrosis Congenital lung abnormalities TB Sleep-related problems Any other respiratory problems causing concern in children or young adults', conds: ['asthma', 'severe-asthma', 'copd', 'ild', 'pulmonary-fibrosis', 'lung-cancer', 'pulmonary-hypertension', 'interventional-pulmonology', 'bronchoscopy', 'pulmonary-function-testing', 'cpet', 'allergy', 'sleep-medicine', 'respiratory-infections'], procs: ['Bronchoscopy', 'EBUS', 'Cryobiopsy', 'Thoracoscopy', 'Airway stenting', 'Pulmonary function testing', 'Sleep study', 'Allergy testing', 'Critical care'], paed: true }
+  ];
+
+  /* ============ HOMEPAGE: EXPLORE PULMONARY CARE (§3) ============ */
+  TOPIC_GROUPS = [
+    { g: 'Airways', ids: ['asthma', 'severe-asthma', 'copd'] },
+    { g: 'Lung tissue', ids: ['ild', 'pulmonary-fibrosis'] },
+    { g: 'Lung cancer & nodules', ids: ['lung-nodules', 'lung-cancer'] },
+    { g: 'Lung circulation', ids: ['pulmonary-hypertension'] },
+    { g: 'Sleep & allergy', ids: ['sleep-medicine', 'allergy'] },
+    { g: 'Infections & prevention', ids: ['respiratory-infections', 'smoking-cessation', 'occupational-lung-disease'] },
+    { g: 'Diagnostics & procedures', ids: ['pulmonary-function-testing', 'cpet', 'bronchoscopy', 'interventional-pulmonology', 'lung-transplantation'] }
   ];
 
   /* ============ HOMEPAGE: WHAT BRINGS YOU HERE? ============ */
@@ -3433,6 +3515,10 @@ class Component extends DCLogic {
     try { const d = JSON.parse(localStorage.getItem('upiri2:rendo')); if (d) patch.rd = d; } catch (e) { }
     this.setState(patch);
     this.syncUrl(patch.route || 'home', patch.khTopic, true);
+    document.addEventListener('click', () => { if (this.state.menu) this.setState({ menu: null }); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && (this.state.menu || this.state.mobileNav)) this.setState({ menu: null, mobileNav: false });
+    });
     window.addEventListener('popstate', () => {
       const r = this.routeFromPath(location.pathname);
       this.setState({ route: r.route, khTopic: r.khTopic, docId: r.docId || null });
@@ -3983,6 +4069,72 @@ class Component extends DCLogic {
       curClubs: (s.route === 'clubs' || s.route === 'club') ? 'page' : 'false',
       curJourney: s.route === 'journey' ? 'page' : 'false', curRendo: s.route === 'rendo' ? 'page' : 'false',
       curKnowledge: s.route === 'knowledge' ? 'page' : 'false', curAlumni: s.route === 'alumni' ? 'page' : 'false',
+
+      /* ---- explore pulmonary care ---- */
+      topicGroups: this.TOPIC_GROUPS.map(gr => ({
+        g: gr.g,
+        items: gr.ids.map(id => {
+          const t = this.KH_TOPICS.find(x => x.id === id);
+          return { n: t.n, open: () => this.goTopic(id) };
+        })
+      })),
+
+      /* ---- navigation (§14) ---- */
+      menuCare: s.menu === 'care', menuTools: s.menu === 'tools', menuDocs: s.menu === 'docs',
+      careExp: s.menu === 'care' ? 'true' : 'false', toolsExp: s.menu === 'tools' ? 'true' : 'false', docsExp: s.menu === 'docs' ? 'true' : 'false',
+      toggleCare: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'care' ? null : 'care' }); },
+      toggleTools: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'tools' ? null : 'tools' }); },
+      toggleDocs: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'docs' ? null : 'docs' }); },
+      navCareSt: this.navSt(['knowledge', 'journey', 'clubs', 'club', 'allergy'].includes(s.route)),
+      navToolsSt: this.navSt(['risk', 'triage', 'breath', 'rendo', 'shikhar'].includes(s.route)),
+      navDocsSt: this.navSt(['alumni', 'doctors', 'case'].includes(s.route)),
+      mobileNavOpen: s.mobileNav, mobileNavClosed: !s.mobileNav,
+      toggleMobileNav: (e) => { if (e) e.stopPropagation(); this.setState({ mobileNav: !s.mobileNav, menu: null }); },
+      navItems: [
+        { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
+        { t: 'Nodule Journey', go: () => this.go('journey'), grp: 'care' },
+        { t: 'Breath Clubs', go: () => this.go('clubs'), grp: 'care' },
+        { t: 'Allergy Calendar', go: () => this.go('allergy'), grp: 'care' },
+        { t: 'Risk Check', go: () => this.go('risk'), grp: 'tools' },
+        { t: 'Symptom Checker', go: () => this.go('triage'), grp: 'tools' },
+        { t: 'Lung Age', go: () => this.go('breath'), grp: 'tools' },
+        { t: 'Rendo Ūpiri — quit smoking', go: () => this.go('rendo'), grp: 'tools' },
+        { t: 'Shikhar — altitude check', go: () => this.go('shikhar'), grp: 'tools' },
+        { t: 'ŪPIRI Clinical Network', go: () => this.go('alumni'), grp: 'docs' },
+        { t: 'Refer a patient', go: () => this.go('doctors'), grp: 'docs' },
+        { t: 'Case of the Month', go: () => this.go('case'), grp: 'docs' }
+      ].map(i => ({
+        t: i.t, grp: i.grp,
+        inCare: i.grp === 'care', inTools: i.grp === 'tools', inDocs: i.grp === 'docs',
+        go: () => { this.setState({ menu: null, mobileNav: false }); i.go(); }
+      })),
+
+      navSections: [
+        { g: 'Explore care', keys: ['care'] },
+        { g: 'Doctors', keys: ['find'] },
+        { g: 'Tools', keys: ['tools'] },
+        { g: 'For doctors', keys: ['docs'] }
+      ].map(sec => ({
+        g: sec.g,
+        items: sec.keys[0] === 'find'
+          ? [{ t: 'Find a specialist', go: () => { this.setState({ mobileNav: false }); this.go('find'); } },
+             { t: 'Knowledge Hub', go: () => { this.setState({ mobileNav: false }); this.go('knowledge'); } }]
+          : [
+            { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
+            { t: 'Nodule Journey', go: () => this.go('journey'), grp: 'care' },
+            { t: 'Breath Clubs', go: () => this.go('clubs'), grp: 'care' },
+            { t: 'Allergy Calendar', go: () => this.go('allergy'), grp: 'care' },
+            { t: 'Risk Check', go: () => this.go('risk'), grp: 'tools' },
+            { t: 'Symptom Checker', go: () => this.go('triage'), grp: 'tools' },
+            { t: 'Lung Age', go: () => this.go('breath'), grp: 'tools' },
+            { t: 'Rendo Ūpiri — quit smoking', go: () => this.go('rendo'), grp: 'tools' },
+            { t: 'Shikhar — altitude check', go: () => this.go('shikhar'), grp: 'tools' },
+            { t: 'ŪPIRI Clinical Network', go: () => this.go('alumni'), grp: 'docs' },
+            { t: 'Refer a patient', go: () => this.go('doctors'), grp: 'docs' },
+            { t: 'Case of the Month', go: () => this.go('case'), grp: 'docs' }
+          ].filter(i => sec.keys.includes(i.grp))
+            .map(i => ({ t: i.t, go: () => { this.setState({ mobileNav: false, menu: null }); i.go(); } }))
+      })),
 
       /* ---- specialist finder ---- */
       isFind: s.route === 'find' && !s.docId,
