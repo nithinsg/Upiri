@@ -6,9 +6,20 @@
 <title>ŪPIRI 2.0 — Precision Pulmonary Care</title>
 <meta name="description" content="ŪPIRI Precision Pulmonary Care: lung risk check, breath score, nodule journey, Rendo Ūpiri quit challenge, condition clubs, symptom triage and altitude readiness.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script src="/support.js"></script>
+<link rel="canonical" href="https://upiri.vercel.app/">
+<meta name="theme-color" content="#2C2A6B">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="ŪPIRI · Yashoda Hospitals">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ŪPIRI 2.0 — Precision Pulmonary Care">
+<meta property="og:description" content="Lung risk check, breath score, nodule journey, condition clubs and the Yashoda Knowledge Hub.">
+<meta property="og:url" content="https://upiri.vercel.app/">
+<meta property="og:image" content="https://upiri.vercel.app/favicon.svg">
+<meta name="twitter:card" content="summary">
+<script src="/support.js" defer></script>
 </head>
 <body>
+<a href="#main" style="position:absolute;left:-9999px;top:0;z-index:100;padding:12px 20px;border-radius:0 0 12px 0;background:#2C2A6B;color:#fff;font:600 14px/1 system-ui,sans-serif;text-decoration:none" onfocus="this.style.left='0'" onblur="this.style.left='-9999px'">Skip to content</a>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,6 +46,12 @@ input,select{font-family:inherit;color:#1D1B4B}
 @keyframes glowPulse{0%,100%{opacity:.45}50%{opacity:.9}}
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 @media print{body.print-cert *{visibility:hidden}body.print-cert .certificate,body.print-cert .certificate *{visibility:visible}body.print-cert .certificate{position:fixed;left:24px;top:24px;right:24px}}
+
+/* The navbar link row absorbs any squeeze by scrolling, so the space selector
+   and the Book CTA are never pushed off the right edge at any width. */
+x-dc [data-r="nav-links"]{min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+x-dc [data-r="nav-links"]::-webkit-scrollbar{display:none}
+x-dc [data-r="nav-links"]>button{flex:0 0 auto}
 
 /* ---------------------------------------------------------------------------
    Small-screen layout. The design is authored with inline styles for a desktop
@@ -65,6 +82,14 @@ input,select{font-family:inherit;color:#1D1B4B}
   x-dc [data-r="nav-pill"]{flex-wrap:wrap;row-gap:6px;border-radius:24px !important;padding:8px 10px !important}
   x-dc [data-r="nav-sep"]{display:none !important}
   x-dc [data-r="nav-links"]{order:3;width:100%;flex:1 0 100% !important;overflow-x:auto;scrollbar-width:none}
+}
+@media (max-width:1460px){
+  /* the Yashoda lockup costs width; drop its unit line, then the lockup itself */
+  x-dc [data-r="nav-brand"]>span>span:last-child{display:none}
+  x-dc [data-r="nav-links"]>button{padding:8px 9px !important;font-size:13px !important}
+}
+@media (max-width:1150px){
+  x-dc [data-r="nav-brand"]{display:none !important}
 }
 @media (max-width:1180px){
   x-dc [data-r="nav-links"]{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -106,21 +131,32 @@ input,select{font-family:inherit;color:#1D1B4B}
 <div style="min-height:100vh;background:radial-gradient(1000px 640px at 88% -8%, rgba(245,130,31,0.10), transparent 60%), radial-gradient(1100px 760px at -12% 34%, rgba(94,130,232,0.13), transparent 62%), radial-gradient(900px 640px at 60% 112%, rgba(44,42,107,0.09), transparent 60%), #EDF2F8">
 
   <!-- FLOATING GLASS NAVBAR -->
-  <div data-r="nav" style="position:fixed;top:16px;left:0;right:0;z-index:50;display:flex;justify-content:center;padding:0 24px">
+  <nav aria-label="Main" data-r="nav" style="position:fixed;top:16px;left:0;right:0;z-index:50;display:flex;justify-content:center;padding:0 24px">
     <div data-r="nav-pill" style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.74);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.9);border-radius:999px;padding:8px 10px 8px 16px;box-shadow:0 18px 50px -18px rgba(29,27,75,0.38);max-width:1150px;width:100%">
       <button onClick="{{ goHome }}" aria-label="ŪPIRI home" style="display:flex;align-items:center;gap:10px;background:transparent;border:none;cursor:pointer;padding:2px 6px 2px 0">
         <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true" style="color:#2C2A6B"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M46 5v18c0 6-3 9-7 12"></path><path d="M54 5v18c0 6 3 9 7 12"></path><path d="M44 40c-2-9-9-13-17-8C16 39 8 57 9 73c1 12 8 19 18 17 10-2 16-11 17-24v-26z"></path><path d="M56 40c2-9 9-13 17-8 11 7 19 25 18 41-1 12-8 19-18 17-10-2-16-11-17-24v-26z"></path><path d="M39 35c-1 6-3 11-7 15" stroke-width="3.2"></path><path d="M36 43l-8 4" stroke-width="3.2"></path><path d="M32 50c-1 5-3 9-6 12" stroke-width="3.2"></path><path d="M61 35c1 6 3 11 7 15" stroke-width="3.2"></path><path d="M64 43l8 4" stroke-width="3.2"></path><path d="M68 50c1 5 3 9 6 12" stroke-width="3.2"></path></g><g fill="#F5821F"><path d="M35 32c-2-5-1-9 3-12 2 5 1 9-3 12z"></path><path d="M27 49c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M25 64c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M65 32c2-5 1-9-3-12-2 5-1 9 3 12z"></path><path d="M73 49c5 2 9 1 12-3-5-2-9-1-12 3z"></path><path d="M75 64c5 2 9 1 12-3-5-2-9-1-12 3z"></path></g></svg>
         <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;white-space:nowrap;color:#1D1B4B">ŪPIRI <span style="font-family:'Noto Sans Telugu',sans-serif;font-size:13px;font-weight:600;color:#F5821F">ఊపిరి</span></span>
       </button>
+      <span data-r="nav-brand" style="display:flex;align-items:center;gap:7px;padding-left:9px;margin-left:2px;border-left:1px solid rgba(44,42,107,0.16)">
+        <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ false }}">
+          <img src="{{ brandLogo }}" alt="{{ brandAlt }}" width="86" height="22" style="height:22px;width:auto;display:block">
+        </sc-if>
+        <sc-if value="{{ brandNoLogo }}" hint-placeholder-val="{{ true }}">
+          <span style="display:flex;flex-direction:column;line-height:1.05">
+            <span style="font-size:11.5px;font-weight:800;letter-spacing:0.01em;color:#2C2A6B;white-space:nowrap">{{ brandName }}</span>
+            <span style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#8A88B8">{{ brandUnit }}</span>
+          </span>
+        </sc-if>
+      </span>
       <div data-r="nav-sep" style="width:1px;height:24px;background:rgba(44,42,107,0.14);margin:0 8px"></div>
       <div data-r="nav-links" style="display:flex;align-items:center;gap:2px;flex:1">
-        <button onClick="{{ goRisk }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Risk Check</button>
-        <button onClick="{{ goBreath }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Lung Age</button>
-        <button onClick="{{ goClubs }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Clubs</button>
-        <button onClick="{{ goJourney }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Nodule Journey</button>
-        <button onClick="{{ goRendo }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Rendo Ūpiri</button>
-        <button onClick="{{ goKnowledge }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Knowledge Hub</button>
-        <button onClick="{{ goAlumni }}" style="padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;color:#2C2A6B;background:transparent;border:none;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(44,42,107,0.08)">Clinical Network</button>
+        <button onClick="{{ goRisk }}" aria-current="{{ curRisk }}" style="{{ navRisk }}" style-hover="background:rgba(44,42,107,0.08)">Risk Check</button>
+        <button onClick="{{ goBreath }}" aria-current="{{ curBreath }}" style="{{ navBreath }}" style-hover="background:rgba(44,42,107,0.08)">Lung Age</button>
+        <button onClick="{{ goClubs }}" aria-current="{{ curClubs }}" style="{{ navClubs }}" style-hover="background:rgba(44,42,107,0.08)">Clubs</button>
+        <button onClick="{{ goJourney }}" aria-current="{{ curJourney }}" style="{{ navJourney }}" style-hover="background:rgba(44,42,107,0.08)">Nodule Journey</button>
+        <button onClick="{{ goRendo }}" aria-current="{{ curRendo }}" style="{{ navRendo }}" style-hover="background:rgba(44,42,107,0.08)">Rendo Ūpiri</button>
+        <button onClick="{{ goKnowledge }}" aria-current="{{ curKnowledge }}" style="{{ navKnowledge }}" style-hover="background:rgba(44,42,107,0.08)">Knowledge Hub</button>
+        <button onClick="{{ goAlumni }}" aria-current="{{ curAlumni }}" style="{{ navAlumni }}" style-hover="background:rgba(44,42,107,0.08)">Clinical Network</button>
       </div>
       <select data-r="nav-space" value="{{ spaceValue }}" onChange="{{ pickSpace }}" aria-label="Choose your ŪPIRI space" style="appearance:none;-webkit-appearance:none;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;color:#2C2A6B;cursor:pointer;outline:none">
         <option value="people">People · ప్రజలు</option>
@@ -133,8 +169,9 @@ input,select{font-family:inherit;color:#1D1B4B}
         Book
       </a>
     </div>
-  </div>
+  </nav>
 
+  <main id="main">
   <!-- ============ HOME ============ -->
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
   <div data-screen-label="Home">
@@ -1815,6 +1852,15 @@ input,select{font-family:inherit;color:#1D1B4B}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
         </button>
         <span style="font-size:12px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#B35A08">For doctors</span>
+        <span style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#8A88B8;padding-left:12px;border-left:1px solid rgba(44,42,107,0.16)">
+          <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ brandLogo }}" alt="{{ brandAlt }}" width="72" height="18" style="height:18px;width:auto">
+          </sc-if>
+          <sc-if value="{{ brandNoLogo }}" hint-placeholder-val="{{ true }}">
+            <span style="font-weight:800;color:#2C2A6B">{{ brandName }}</span>
+          </sc-if>
+          · {{ brandUnit }}
+        </span>
       </section>
       <section style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:48px;align-items:center;margin-bottom:64px">
         <div style="animation:fadeUp .5s ease both">
@@ -1998,6 +2044,15 @@ input,select{font-family:inherit;color:#1D1B4B}
           <div>
             <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,3.8vw,42px);letter-spacing:-0.025em;line-height:1.1;color:#1D1B4B;margin:0">Yashoda Knowledge Hub</h1>
             <p style="font-size:13.5px;color:#F5821F;font-weight:700;margin:4px 0 0">Trusted pulmonary knowledge from Yashoda experts.</p>
+            <p style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#8A88B8;margin:7px 0 0">
+              <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ brandLogo }}" alt="{{ brandAlt }}" width="72" height="18" style="height:18px;width:auto">
+              </sc-if>
+              <sc-if value="{{ brandNoLogo }}" hint-placeholder-val="{{ true }}">
+                <span style="font-weight:800;color:#2C2A6B">{{ brandName }}</span>
+              </sc-if>
+              · {{ brandUnit }}
+            </p>
           </div>
         </div>
         <p style="font-size:16px;line-height:1.6;color:#4A4880;margin:0 0 24px;max-width:760px;text-wrap:pretty">Explore trusted information, expert insights, clinical cases, videos and resources across pulmonary medicine.</p>
@@ -2112,15 +2167,21 @@ input,select{font-family:inherit;color:#1D1B4B}
                   <span style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,0.25)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2A6B" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
                   </span>
-                  <span style="position:absolute;right:10px;bottom:10px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,0.55);color:#fff">--:--</span>
                 </div>
                 <div style="padding:18px 20px">
                   <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.35;color:#2C2A6B;margin:0 0 8px">{{ v.t }}</h3>
-                  <p style="font-size:12.5px;color:#6C6A9E;margin:0">{{ v.topicName }} · Expert name to be added</p>
-                  <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ true }}">
-                    <p style="font-size:11px;color:#8A88B8;margin:8px 0 0">Placeholder — video URL to be added</p>
+                  <p style="font-size:12.5px;color:#6C6A9E;margin:0">{{ v.topicName }}</p>
+                  <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
+                    <p style="font-size:11.5px;color:#8A88B8;margin:5px 0 0">Yashoda Hospitals · YouTube</p>
+                    <a href="{{ v.url }}" target="_blank" rel="noreferrer" aria-label="{{ v.aria }}" style="display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:#2C2A6B" style-hover="color:#fff;transform:translateY(-1px)">
+                      Watch on YouTube
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>
+                    </a>
                   </sc-if>
-                  <button onClick="{{ v.open }}" style="margin-top:12px;padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">Open topic</button>
+                  <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ false }}">
+                    <p style="font-size:11px;color:#8A88B8;margin:8px 0 0">Placeholder — video to be added</p>
+                  </sc-if>
+                  <button onClick="{{ v.open }}" style="margin-top:10px;margin-left:8px;padding:8px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">Open topic</button>
                 </div>
               </article>
             </sc-for>
@@ -2249,7 +2310,14 @@ input,select{font-family:inherit;color:#1D1B4B}
                 </span>
                 <div>
                   <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.35;color:#2C2A6B;margin:0">{{ v.t }}</h3>
-                  <p style="font-size:12px;color:#8A88B8;margin:4px 0 0">Expert name and video URL to be added</p>
+                  <sc-if value="{{ v.hasVideo }}" hint-placeholder-val="{{ true }}">
+                    <a href="{{ v.url }}" target="_blank" rel="noreferrer" aria-label="{{ v.aria }}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#2C2A6B;margin:5px 0 0;text-decoration:underline">
+                      Watch on YouTube · Yashoda Hospitals
+                    </a>
+                  </sc-if>
+                  <sc-if value="{{ v.placeholder }}" hint-placeholder-val="{{ false }}">
+                    <p style="font-size:12px;color:#8A88B8;margin:4px 0 0">Placeholder — video to be added</p>
+                  </sc-if>
                 </div>
               </article>
             </sc-for>
@@ -2284,6 +2352,8 @@ input,select{font-family:inherit;color:#1D1B4B}
   </div>
   </sc-if>
 
+  </main>
+
   <!-- FOOTER -->
   <footer style="background:linear-gradient(160deg,#232159,#1D1B4B)">
     <div style="max-width:1150px;margin:0 auto;padding:56px 24px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:36px;font-size:14px;color:#C9D2E6">
@@ -2293,6 +2363,17 @@ input,select{font-family:inherit;color:#1D1B4B}
           <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:#fff">ŪPIRI Lung Check</span>
         </div>
         <p style="font-family:'Noto Sans Telugu',sans-serif;color:#F5A159;margin:0">మీ ఊపిరికి భరోసా</p>
+        <a href="{{ brandSite }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:9px;margin-top:14px;padding:10px 16px;border-radius:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);color:#fff;text-decoration:none" style-hover="background:rgba(255,255,255,0.14);color:#fff">
+          <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ brandLogo }}" alt="{{ brandAlt }}" width="104" height="26" style="height:26px;width:auto;display:block">
+          </sc-if>
+          <sc-if value="{{ brandNoLogo }}" hint-placeholder-val="{{ true }}">
+            <span style="display:flex;flex-direction:column;line-height:1.1">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:800;color:#fff">{{ brandName }}</span>
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8FA0C8">A unit of Yashoda {{ brandUnit }}</span>
+            </span>
+          </sc-if>
+        </a>
         <p style="margin:6px 0 0;font-size:12px">Two minutes. One X-ray. A lifetime of breath.</p>
         <p style="margin:10px 0 0;font-size:12px">Emergency: <a href="tel:105910" style="font-weight:700;text-decoration:underline;color:#fff">105910</a></p>
       </div>
@@ -2524,6 +2605,22 @@ class Component extends DCLogic {
     const [x0, y0] = this.polar(cx, cy, r, a0), [x1, y1] = this.polar(cx, cy, r, a1);
     return 'M ' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ' A ' + r + ' ' + r + ' 0 ' + (a1 - a0 > 180 ? 1 : 0) + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2);
   }
+
+  /* ============ BRAND ============
+     ŪPIRI is a Yashoda Hospitals service, so the Yashoda identity appears beside
+     the ŪPIRI mark in the navbar, the footer, and on both doctor-facing sections.
+
+     >>> TO DROP IN THE REAL LOGO: put the file in public/ and set logoSrc below.
+     Everything switches from the text lockup to the image automatically; nothing
+     else needs editing. No Yashoda logo asset shipped with this repo, so the
+     text lockup is what renders today. <<< */
+  BRAND = {
+    logoSrc: '',                       /* e.g. '/yashoda-logo.svg' */
+    logoAlt: 'Yashoda Hospitals',
+    name: 'Yashoda Hospitals',
+    unit: 'Pulmonology',
+    site: 'https://www.yashodahospitals.com'
+  };
 
   /* ============ ŪPIRI CLINICAL NETWORK (/alumni) ============ */
   NET_WHY = [
@@ -2781,16 +2878,40 @@ class Component extends DCLogic {
     { t: 'Allergic rhinitis and asthma: one airway', topic: 'allergy', cat: 'Articles', read: '5 min', placeholder: true },
     { t: 'Staging lung cancer: why it decides everything', topic: 'lung-cancer', cat: 'Expert Insights', read: '9 min', placeholder: true }
   ];
+  /* Real Yashoda Hospitals YouTube videos, sourced by web search and mapped to topics.
+     `yt` is the video id; entries without one stay placeholders until a video exists.
+     NOTE: YouTube is unreachable from the build environment, so these ids were not
+     opened and confirmed — spot-check them once before promoting the page. */
   KH_VIDEOS = [
-    { t: 'Inhaler technique, step by step', topic: 'asthma', placeholder: true },
-    { t: 'Reading a peak flow diary', topic: 'asthma', placeholder: true },
-    { t: 'Pursed-lip breathing demonstration', topic: 'copd', placeholder: true },
-    { t: 'What happens during a bronchoscopy', topic: 'bronchoscopy', placeholder: true },
-    { t: 'EBUS explained for referring physicians', topic: 'interventional-pulmonology', placeholder: true },
-    { t: 'Home oxygen: practical guidance', topic: 'ild', placeholder: true },
+    { t: 'Inhalation Therapy & Inhalation Devices', topic: 'asthma', yt: 'Qqfsh6rFQDo' },
+    { t: 'Asthma Treatment in Hyderabad, India', topic: 'severe-asthma', yt: '6LG0IyIiSAo' },
+    { t: 'Treatment for Lung Disease', topic: 'copd', yt: 'fMrLWquHAgU' },
+    { t: 'Lung Transplant Surgery — Systemic Sclerosis & ILD', topic: 'ild', yt: 'FovZEt-huiE' },
+    { t: 'Bilateral Lung Transplant for Fibrotic Interstitial Lung Disease', topic: 'ild', yt: 'oj-W8KysTCc' },
+    { t: 'Idiopathic Pulmonary Fibrosis (IPF) Awareness', topic: 'pulmonary-fibrosis', yt: 'jfL60bQbNeQ' },
+    { t: 'Lung Cancer: Types & Treatment', topic: 'lung-cancer', yt: 'oObj7U9YV7A' },
+    { t: 'Treatment for Lung Cancer', topic: 'lung-cancer', yt: '7qfGLoFtAWw' },
+    { t: 'Lung Cancer Awareness and Prevention', topic: 'lung-cancer', yt: '8KE1xSSpORg' },
+    { t: 'Top 10 Lung Cancer Facts', topic: 'lung-cancer', yt: '8bfcpE8mJc4' },
+    { t: 'Smoking & Lung Cancer Connection', topic: 'smoking-cessation', yt: '80ZXCE2dl6Q' },
+    { t: 'Treatment for Obstructive Sleep Apnea', topic: 'sleep-medicine', yt: 'yfNqrG3rSo0' },
+    { t: 'Obstructive Sleep Apnea — Screening & Diagnosis, an update', topic: 'sleep-medicine', yt: 'W2AJKk2Weu0' },
+    { t: 'Sleep Apnea Webinar — Sleep Medicine & Sleep Disorders', topic: 'sleep-medicine', yt: 'a48R6Jpho60' },
+    { t: 'Yashoda Sleep Institute', topic: 'sleep-medicine', yt: '8MNYfHbSusE' },
+    { t: 'Management of Pneumonia & LRTI', topic: 'respiratory-infections', yt: 'OvYMbLIGrWM' },
+    { t: 'The Old and the New of Sedation in Bronchoscopy', topic: 'bronchoscopy', yt: 'nCvjvlPudZQ' },
+    { t: 'BRONCHUS 2025 — Advancing Interventional Pulmonology', topic: 'interventional-pulmonology', yt: '3ObqTHpIPYc' },
+    { t: 'Linear EBUS — An Update', topic: 'interventional-pulmonology', yt: 'FeymGMfLuQo' },
+    { t: 'Double Lung Transplant', topic: 'lung-transplantation', yt: '8GvoTippoZc' },
+    { t: 'Lung Transplant Surgery — Post-TB Bronchiectasis', topic: 'lung-transplantation', yt: 'kpoxKYjfEKQ' },
+    { t: 'Success Cases Series of Lung Transplant in India', topic: 'lung-transplantation', yt: '353Mz7wfBuI' },
+    { t: 'Department of Heart & Lung', topic: 'lung-transplantation', yt: 'DQy0Y_PvNNs' },
+    { t: 'Pulmonary & Critical Care — Basics & Beyond', topic: 'pulmonary-function-testing', yt: 'GM9HO-Qh_QA' },
+    { t: 'Lung nodule assessment explained', topic: 'lung-nodules', placeholder: true },
+    { t: 'Understanding pulmonary hypertension', topic: 'pulmonary-hypertension', placeholder: true },
     { t: 'Preparing for a CPET', topic: 'cpet', placeholder: true },
-    { t: 'Setting up CPAP at home', topic: 'sleep-medicine', placeholder: true },
-    { t: 'Lung nodule surveillance explained', topic: 'lung-nodules', placeholder: true }
+    { t: 'Managing respiratory allergy at home', topic: 'allergy', placeholder: true },
+    { t: 'Silica and occupational lung disease', topic: 'occupational-lung-disease', placeholder: true }
   ];
   KH_CASES = [
     { t: 'Persistent wheeze in a young adult', topic: 'asthma', lvl: 'Foundation', d: 'A case built around diagnostic confirmation and inhaler technique before escalation.', placeholder: true },
@@ -2836,15 +2957,60 @@ class Component extends DCLogic {
     } catch (e) { /* file:// has no history API origin — navigation still works in-app */ }
     this.applyMeta(route, topic);
   }
+  ORIGIN = 'https://upiri.vercel.app';
+  headTag(sel, make) {
+    let el = document.head.querySelector(sel);
+    if (!el) { el = make(); document.head.appendChild(el); }
+    return el;
+  }
   applyMeta(route, topic) {
     const t = topic && this.KH_TOPICS.find(x => x.id === topic);
     const pair = t
       ? [t.n + ' — Yashoda Knowledge Hub', t.ov.slice(0, 155)]
       : (this.META[route] || this.META.home);
+    const url = this.ORIGIN + this.pathFor(route, topic);
+
     document.title = pair[0];
-    let m = document.querySelector('meta[name="description"]');
-    if (!m) { m = document.createElement('meta'); m.setAttribute('name', 'description'); document.head.appendChild(m); }
-    m.setAttribute('content', pair[1]);
+    this.headTag('meta[name="description"]', () => {
+      const m = document.createElement('meta'); m.setAttribute('name', 'description'); return m;
+    }).setAttribute('content', pair[1]);
+    this.headTag('link[rel="canonical"]', () => {
+      const l = document.createElement('link'); l.setAttribute('rel', 'canonical'); return l;
+    }).setAttribute('href', url);
+    [['og:title', pair[0]], ['og:description', pair[1]], ['og:url', url]].forEach(([prop, val]) => {
+      this.headTag('meta[property="' + prop + '"]', () => {
+        const m = document.createElement('meta'); m.setAttribute('property', prop); return m;
+      }).setAttribute('content', val);
+    });
+    this.applySchema(route, t, url, pair);
+  }
+  /* Structured data, rewritten per route. Conditions get MedicalWebPage so the
+     Knowledge Hub can be understood as a medical reference rather than marketing. */
+  applySchema(route, t, url, pair) {
+    const publisher = {
+      '@type': 'MedicalOrganization', name: this.BRAND.name,
+      department: { '@type': 'MedicalOrganization', name: this.BRAND.name + ' ' + this.BRAND.unit },
+      url: this.BRAND.site
+    };
+    const data = t
+      ? {
+        '@context': 'https://schema.org', '@type': 'MedicalWebPage', name: pair[0], description: pair[1],
+        url, inLanguage: 'en', publisher, lastReviewed: undefined,
+        about: { '@type': 'MedicalCondition', name: t.n, description: t.ov,
+          signOrSymptom: t.sym.map(x => ({ '@type': 'MedicalSignOrSymptom', name: x })) },
+        significantLink: this.ORIGIN + '/knowledge-hub'
+      }
+      : {
+        '@context': 'https://schema.org', '@type': 'WebPage', name: pair[0], description: pair[1],
+        url, inLanguage: 'en', publisher,
+        isPartOf: { '@type': 'WebSite', name: 'ŪPIRI · ' + this.BRAND.name, url: this.ORIGIN }
+      };
+    const el = this.headTag('script[data-schema]', () => {
+      const s = document.createElement('script');
+      s.type = 'application/ld+json'; s.setAttribute('data-schema', '');
+      return s;
+    });
+    el.textContent = JSON.stringify(data);
   }
 
   componentDidMount() {
@@ -3006,6 +3172,10 @@ class Component extends DCLogic {
     return sel
       ? { display: 'flex', alignItems: 'center', gap: '14px', width: '100%', textAlign: 'left', padding: '18px 22px', borderRadius: '18px', fontSize: '16.5px', fontWeight: 600, cursor: 'pointer', transition: 'all .18s ease', background: '#2C2A6B', color: '#fff', border: '2px solid #2C2A6B', boxShadow: '0 16px 34px -14px rgba(44,42,107,0.55)', transform: 'translateY(-1px)' }
       : { display: 'flex', alignItems: 'center', gap: '14px', width: '100%', textAlign: 'left', padding: '18px 22px', borderRadius: '18px', fontSize: '16.5px', fontWeight: 600, cursor: 'pointer', transition: 'all .18s ease', background: 'rgba(255,255,255,0.85)', color: '#2C2A6B', border: '2px solid rgba(44,42,107,0.14)', boxShadow: '0 6px 18px -10px rgba(29,27,75,0.18)' };
+  }
+  navSt(active) {
+    const base = 'padding:8px 12px;border-radius:999px;font-weight:600;font-size:13.5px;white-space:nowrap;border:none;cursor:pointer;transition:background .15s ease;';
+    return base + (active ? 'color:#fff;background:#2C2A6B' : 'color:#2C2A6B;background:transparent');
   }
   pillSt(sel) {
     return sel
@@ -3248,7 +3418,12 @@ class Component extends DCLogic {
     const khArticles = this.KH_ARTICLES
       .filter(a => catInTab(a.cat))
       .map(a => ({ t: a.t, cat: a.cat, read: a.read, topicId: a.topic, topicName: topicName(a.topic), placeholder: !!a.placeholder }));
-    const khVideos = this.KH_VIDEOS.map(v => ({ t: v.t, topicId: v.topic, topicName: topicName(v.topic), placeholder: !!v.placeholder }));
+    const ytUrl = id => 'https://www.youtube.com/watch?v=' + id;
+    const khVideos = this.KH_VIDEOS.map(v => ({
+      t: v.t, topicId: v.topic, topicName: topicName(v.topic),
+      hasVideo: !!v.yt, placeholder: !v.yt, url: v.yt ? ytUrl(v.yt) : '',
+      aria: 'Watch “' + v.t + '” on the Yashoda Hospitals YouTube channel (opens in a new tab)'
+    }));
     const khCases = this.KH_CASES.map(c => ({ t: c.t, d: c.d, lvl: c.lvl, topicId: c.topic, topicName: topicName(c.topic), placeholder: !!c.placeholder }));
 
     /* client-side search across topics, articles, videos and cases */
@@ -3334,6 +3509,21 @@ class Component extends DCLogic {
       isChamp: days >= 90, champOpen: s.champOpen, openChamp: this.openChamp, closeChamp: this.closeChamp, printCert: this.printCert,
       checkinLabel: days >= 90 ? 'Claim certificate + free check' : 'Book CO test check-in',
       certName: (rd && rd.name) || 'Friend of ŪPIRI', certQuit: rd ? this.dShort(rd.quitDate) : '', awarded,
+      /* ---- active nav state ---- */
+      navRisk: this.navSt(s.route === 'risk'), navBreath: this.navSt(s.route === 'breath'),
+      navClubs: this.navSt(s.route === 'clubs' || s.route === 'club'),
+      navJourney: this.navSt(s.route === 'journey'), navRendo: this.navSt(s.route === 'rendo'),
+      navKnowledge: this.navSt(s.route === 'knowledge'), navAlumni: this.navSt(s.route === 'alumni'),
+      curRisk: s.route === 'risk' ? 'page' : 'false', curBreath: s.route === 'breath' ? 'page' : 'false',
+      curClubs: (s.route === 'clubs' || s.route === 'club') ? 'page' : 'false',
+      curJourney: s.route === 'journey' ? 'page' : 'false', curRendo: s.route === 'rendo' ? 'page' : 'false',
+      curKnowledge: s.route === 'knowledge' ? 'page' : 'false', curAlumni: s.route === 'alumni' ? 'page' : 'false',
+
+      /* ---- Yashoda brand lockup ---- */
+      brandHasLogo: !!this.BRAND.logoSrc, brandNoLogo: !this.BRAND.logoSrc,
+      brandLogo: this.BRAND.logoSrc, brandAlt: this.BRAND.logoAlt,
+      brandName: this.BRAND.name, brandUnit: this.BRAND.unit, brandSite: this.BRAND.site,
+
       /* ---- clinical network (/alumni) ---- */
       isAlumni: s.route === 'alumni',
       goAlumni: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('alumni'); },
@@ -3371,7 +3561,11 @@ class Component extends DCLogic {
       tpTx: tp ? tp.tx.map(t => ({ t })) : [], tpSpec: tp ? tp.spec.map(t => ({ t })) : [],
       tpAdv: tp ? tp.adv.map(t => ({ t })) : [], tpSvc: tp ? tp.svc.map(t => ({ t })) : [],
       tpArticles: tp ? this.KH_ARTICLES.filter(a => a.topic === tp.id).map(a => ({ ...a, topicName: tp.n })) : [],
-      tpVideos: tp ? this.KH_VIDEOS.filter(v => v.topic === tp.id).map(v => ({ ...v, topicName: tp.n })) : [],
+      tpVideos: tp ? this.KH_VIDEOS.filter(v => v.topic === tp.id).map(v => ({
+        ...v, topicName: tp.n, hasVideo: !!v.yt, placeholder: !v.yt,
+        url: v.yt ? 'https://www.youtube.com/watch?v=' + v.yt : '',
+        aria: 'Watch “' + v.t + '” on the Yashoda Hospitals YouTube channel (opens in a new tab)'
+      })) : [],
       tpCases: tp ? this.KH_CASES.filter(c => c.topic === tp.id).map(c => ({ ...c, topicName: tp.n })) : [],
       tpHasArticles: tp ? this.KH_ARTICLES.some(a => a.topic === tp.id) : false,
       tpHasVideos: tp ? this.KH_VIDEOS.some(v => v.topic === tp.id) : false,
