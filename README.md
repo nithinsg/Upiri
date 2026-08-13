@@ -83,6 +83,25 @@ Both new sections are data-driven — the card markup is written once and repeat
 Adding an article is one entry in `KH_ARTICLES`; adding a condition is one entry in
 `KH_TOPICS` and its detail page, related content and search entry all follow.
 
+## Brand
+
+ŪPIRI is a Yashoda Hospitals service, so the Yashoda identity sits beside the ŪPIRI mark in
+the navbar and footer and on both doctor-facing sections.
+
+**No Yashoda logo asset ships with this repo**, so a styled text lockup renders today. To
+swap in the real logo: drop the file in `public/` and set `logoSrc` in the `BRAND` object at
+the top of the `<script type="text/x-dc">` block. Every placement switches from text to
+image automatically — nothing else needs editing.
+
+`public/favicon.svg` is the ŪPIRI lungs mark (it was previously the default Vite logo).
+
+## Videos
+
+`KH_VIDEOS` maps topics to real Yashoda Hospitals YouTube videos via a `yt` video id;
+entries without one stay visible placeholders. Cards link out to YouTube rather than
+embedding an iframe — no third-party script, and a bad link fails visibly instead of
+silently loading the wrong content.
+
 ## Before launch
 
 - The `wa.me/91XXXXXXXXXX` link in `public/index.html` is a placeholder — every "Book on
@@ -94,6 +113,10 @@ Adding an article is one entry in `KH_ARTICLES`; adding a condition is one entry
   each topic page says so.
 - Everything marked "Placeholder" needs real content: article bodies and dates, video URLs
   and expert names, full clinical cases, and Clinical Council member names.
+- **The Yashoda logo file is missing** — supply it and set `BRAND.logoSrc`.
+- **The YouTube video ids need one spot-check pass.** They were sourced by web search;
+  YouTube is unreachable from the build environment, so none was opened and confirmed.
+- Six topics still have no video: lung nodules, pulmonary hypertension, CPET, allergy,
+  occupational lung disease and PFT-specific content.
 - Knowledge Hub topic text is rendered client-side. For search-engine indexing of the 18
-  topic pages, add a prerender step that writes static HTML per topic — see the SEO note in
-  the commit history.
+  topic pages, add a prerender step that writes static HTML per topic.
