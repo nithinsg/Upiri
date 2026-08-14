@@ -79,6 +79,28 @@ wrapped in an inert `<template data-dc-template>` (otherwise the browser tries t
 appended to the export's own `<helmet>` block, since the design is authored for a desktop
 canvas with inline styles only. **Re-exports need the same two edits.**
 
+## The homepage
+
+The page opens with the question the patient already has, in their own words, rather than
+with categories of information. Hero: **ŪPIRI** → *Yashoda Pulmonology · Precision and
+Personalized Pulmonary Care* → "Have a question about your breathing? Start here." Then
+**"What brings you here today?"** and six questions, each leading straight into the ŪPIRI
+experience that answers it:
+
+| Question | Next step |
+|---|---|
+| I've been coughing for a while… | symptom checker, **cough already ticked** |
+| I feel breathless… | symptom checker, **breathlessness already ticked** |
+| I have asthma. Am I really in control? | the Asthma Club control diary |
+| I have COPD… | the COPD condition page |
+| My scan showed a lung nodule… | the nodule journey |
+| I want to understand my lungs better… | the risk check |
+
+`QUESTIONS` holds the text; `renderVals` maps each `k` to its action, so changing a question
+or where it leads is one line. Educational directories (conditions, tests, the Knowledge Hub)
+follow underneath — the homepage leads with *need → question → next step*, not
+*category → article*.
+
 ## Content data
 
 Both new sections are data-driven — the card markup is written once and repeated with
@@ -95,7 +117,8 @@ Both new sections are data-driven — the card markup is written once and repeat
 | `KH_ARTICLES`, `KH_VIDEOS`, `KH_CASES` | Article / video / case libraries, related lists, search |
 | `KH_ICONS` | Shared stroke icons, reused across topics |
 | `KH_SYMPTOMS`, `KH_CATEGORIES`, `KH_SUGGESTED` | Intent-grouped search and the Knowledge Hub category bands |
-| `TOPIC_GROUPS`, `ENTRY_POINTS` | Homepage "Explore pulmonary care" and "What brings you here?" |
+| `QUESTIONS` | The homepage "What brings you here today?" cards |
+| `TOPIC_GROUPS` | The homepage "Conditions we treat" directory |
 | `DOCTORS` | Specialist finder, profiles, and condition/procedure cross-links |
 | `PROCEDURES` | Tests & procedures pages, with `dp` matching doctors who perform them |
 | `LANGS`, `I18N` | The language chooser and every translated string (see below) |
@@ -119,21 +142,42 @@ On boot the page probes for the mark and only swaps the text lockup for the imag
 has actually loaded, so a missing or renamed file can never render broken in production.
 `BRAND` at the top of the component holds the filenames, the name and the unit.
 
+The Yashoda mark **turns continuously** in the navbar — `markSpin`, one linear infinite
+rotation, no easing and no hover variation, transform-only so it stays on the compositor.
+
 ## Navigation
+
+Every top-level item navigates on click. Only **Tools** and **Profile** open a menu, and
+each of their entries is a real destination — nothing in the bar is a label that looks
+tappable and then does nothing.
+
+| Item | Goes to |
+|---|---|
+| Explore Care | `/knowledge-hub` — conditions, articles, videos, guides |
+| Doctors | `/doctors` — the specialist finder |
+| Tests & Procedures | `/tests-and-procedures` |
+| Tools ▾ | the eight patient experiences (risk check, symptom checker, lung age, nodule journey, breath clubs, allergy calendar, Rendo Ūpiri, Shikhar) |
+| Profile ▾ | People `/` · Doctors `/for-doctors` · Corporate `/for-corporates` · Schools `/for-schools` |
+
+**Profile** replaced the old space `<select>`, and absorbed the former *For Doctors* menu:
+the Clinical Network and Case of the Month now sit on the doctor space page itself, so each
+piece of content has exactly one home.
 
 One pill, three widths:
 
-- **≥1151px** — ŪPIRI lockup · Yashoda lockup · grouped menus · space selector · language ·
-  Book.
+- **≥1151px** — ŪPIRI lockup · Yashoda lockup · nav items · Profile · language · Book.
 - **901–1150px** — the Yashoda lockup drops out first, since it costs the most width.
 - **≤900px** — a phone toolbar: menu button on the left, **ŪPIRI centred in the pill**, and
-  the **Yashoda mark plus the Book CTA on the right**. The grouped menus, the space selector
-  and the language button move into the sheet behind the menu button, which also carries the
-  full Yashoda lockup. Below 520px the ŪPIRI lockup stacks (ŪPIRI over ఊపిరి); below 360px
-  the brand centres in the space it has rather than in the pill, so it can never collide.
+  the **Yashoda mark plus the Book CTA on the right**. Nav items, Profile and the language
+  button move into the sheet behind the menu button, which also carries the full Yashoda
+  lockup. Below 520px the ŪPIRI lockup stacks (ŪPIRI over ఊపిరి); below 380px the Book CTA
+  becomes its icon (`font-size:0`, so its name survives in the accessibility tree) rather
+  than the brand giving up the centre.
 
-The centring is measured against the pill itself rather than against whatever happens to sit
-either side, so it holds as labels change length between languages.
+The centring is `left:50%` + `translate(-50%)` measured **on the pill**, not the leftover
+flex space, so the lockup holds its position however wide the menu button, the CTA or the
+translated labels become — verified at 360/375/393/412/430/768/820px, menu open and closed,
+in every language.
 
 ## Videos
 
