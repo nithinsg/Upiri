@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --root public",
     "build": "node scripts/prerender.mjs dist",
+    "vercel-build": "playwright install chromium && node scripts/prerender.mjs dist",
     "lint": "oxlint"
   },
   "dependencies": {
