@@ -18,11 +18,40 @@
  *   <helmet>                    hoisted into <head> at boot
  *   hint-placeholder-*          editor-only hints, stripped
  *
+ * An optional translator (window.__dcSetTranslator) is applied to every string
+ * on its way into the DOM, so the page can be read in another language without
+ * the template being rewritten.
+ *
  * Rendering patches the live DOM in place (nodes are reused across renders) so
  * focus, caret position and CSS animations survive a state update.
  */
 (function () {
   'use strict';
+
+  /* ---------------- translation ----------------
+     The page is authored in English. The app can install a translator that maps
+     a rendered string to the reader's language; with none installed every string
+     passes through untouched, so English costs nothing. The hook sits where text
+     reaches the DOM, which covers both static markup and {{ }} values, and it
+     preserves the whitespace around a string so markup indentation survives. */
+
+  var translator = null;
+  var TRIM = /^([\s\uFEFF]*)([\s\S]*?)([\s\uFEFF]*)$/;
+  var T_ATTRS = { 'aria-label': 1, placeholder: 1, title: 1, alt: 1 };
+
+  function setTranslator(fn) {
+    translator = typeof fn === 'function' ? fn : null;
+  }
+
+  function tx(s) {
+    if (!translator || !s) return s;
+    var m = TRIM.exec(s);
+    if (!m || !m[2]) return s;
+    var r = translator(m[2]);
+    return (!r || r === m[2]) ? s : m[1] + r + m[3];
+  }
+
+  window.__dcSetTranslator = setTranslator;
 
   /* ---------------- style objects ---------------- */
 
@@ -133,7 +162,7 @@
     var formControl = tag === 'input' || tag === 'select' || tag === 'textarea';
     var ins = {
       t: 'el', proto: proto, tag: tag,
-      dyn: [], events: [], hover: null, styleParts: null,
+      dyn: [], tattr: null, events: [], hover: null, styleParts: null,
       staticStyle: node.getAttribute('style') || '', valuePath: null,
       children: compileChildren(node)
     };
@@ -167,7 +196,11 @@
         if (vp) { ins.valuePath = vp; proto.removeAttribute(name); }
         continue;
       }
-      if (value.indexOf('{{') === -1) continue; // plain static attribute, keep as cloned
+      if (value.indexOf('{{') === -1) {
+        /* reader-facing static attributes go through the translator too */
+        if (T_ATTRS[lower]) (ins.tattr || (ins.tattr = [])).push({ name: name, v: value });
+        continue; // otherwise a plain static attribute, kept as cloned
+      }
 
       if (lower === 'style') ins.styleParts = parseParts(value);
       else ins.dyn.push({ name: name, parts: parseParts(value) });
@@ -197,12 +230,14 @@
 
   function renderInstr(ins, ctx, scope, out) {
     if (ins.t === 'text') {
-      if (!ctx.node) ctx.node = document.createTextNode(ins.v);
+      var lit = tx(ins.v);
+      if (!ctx.node) { ctx.node = document.createTextNode(lit); ctx.last = lit; }
+      else if (ctx.last !== lit) { ctx.node.nodeValue = lit; ctx.last = lit; }
       out.push(ctx.node);
       return;
     }
     if (ins.t === 'itext') {
-      var text = interp(ins.parts, scope);
+      var text = tx(interp(ins.parts, scope));
       if (!ctx.node) { ctx.node = document.createTextNode(text); ctx.last = text; }
       else if (ctx.last !== text) { ctx.node.nodeValue = text; ctx.last = text; }
       out.push(ctx.node);
@@ -243,9 +278,20 @@
     for (var d = 0; d < ins.dyn.length; d++) {
       var a = ins.dyn[d];
       var av = interp(a.parts, scope);
+      if (T_ATTRS[a.name.toLowerCase()]) av = tx(av);
       if (ctx['a_' + a.name] !== av) {
         ctx['a_' + a.name] = av;
         ctx.node.setAttribute(a.name, av);
+      }
+    }
+
+    if (ins.tattr) {
+      for (var ta = 0; ta < ins.tattr.length; ta++) {
+        var t0 = ins.tattr[ta], tv = tx(t0.v);
+        if (ctx['a_' + t0.name] !== tv) {
+          ctx['a_' + t0.name] = tv;
+          ctx.node.setAttribute(t0.name, tv);
+        }
       }
     }
 
@@ -401,7 +447,7 @@
 
     render();
     if (typeof app.componentDidMount === 'function') app.componentDidMount();
-    window.__dc = { app: app, render: render };
+    window.__dc = { app: app, render: render, setTranslator: setTranslator };
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
