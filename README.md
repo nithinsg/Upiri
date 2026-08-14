@@ -22,9 +22,15 @@ deploy** — kept in the repo for reference and history, but no longer built or 
 ```bash
 npm install
 npm run dev    # http://localhost:5173 — serves public/ unbuilt
-npm run build  # prerender every route into dist/
+npm run build  # prerender every route into dist/ (~30s)
 npm run lint
 ```
+
+Vercel runs `npm run vercel-build`, which is `npm run build` with a
+`playwright install chromium` in front of it — the build image ships the Playwright
+package but not its browser, and without that step the prerender cannot launch one.
+The prerender drops every request that is not to its own local server, so no webfont,
+thumbnail or third-party outage can slow the build down or fail it.
 
 `public/index.html` loads `/support.js` from the site root, so it needs to be served over
 HTTP rather than opened straight from disk.
