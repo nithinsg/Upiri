@@ -97,9 +97,13 @@ experience that answers it:
 | I want to understand my lungs better… | the risk check |
 
 `QUESTIONS` holds the text; `renderVals` maps each `k` to its action, so changing a question
-or where it leads is one line. Educational directories (conditions, tests, the Knowledge Hub)
-follow underneath — the homepage leads with *need → question → next step*, not
-*category → article*.
+or where it leads is one line.
+
+Section order follows *need → next step → depth*: questions, then the specialist finder and
+the patient tools, then the signature nodule pathway, and only then the directories
+(conditions, tests). On a phone the hero's decorative lung stage and drifting dust are
+hidden and the capability chips become one scrolling row, so "What brings you here today?"
+reaches the first screen instead of sitting a screen and a half down.
 
 ## Content data
 
@@ -221,11 +225,26 @@ te, kn, bn and `x-default`), while the canonical stays language-neutral.
 **The translations themselves are pending review** by Yashoda Pulmonology alongside the
 English text.
 
+## Accessibility
+
+- Keyboard: every control is a real `button`/`a`, and `:focus-visible` draws one explicit
+  3px marigold ring outside the control — the browser default was easy to lose against the
+  glass surfaces. Escape closes any open menu.
+- Touch: sheet rows and chips carry a 44px minimum height.
+- Contrast: every text/background pair on the flat surfaces meets WCAG AA, verified by
+  computing the ratio for each rendered text node. The palette was adjusted to get there —
+  secondary ink `#8A88B8→#6966A4`, sub-copy `#6C6A9E→#69679C`, card CTAs `#B35A08→#A95508`,
+  and the status colours `#2F8F5B→#27784C`, `#C98A00→#916300`, `#CE4438→#BE3A2F`. Text over
+  the hero gradient is checked by hand against its darkest and lightest stops; the ŪPIRI
+  wordmark is exempt as logotype (WCAG 1.4.3).
+- Nothing depends on hover: menus open on click, and every top-level nav item navigates.
+
 ## Before launch
 
-- The `wa.me/91XXXXXXXXXX` link in `public/index.html` is a placeholder — every "Book on
-  WhatsApp" CTA is dead until the real ŪPIRI booking line is set. Same placeholder lives in
-  `src/config.js` as `WHATSAPP_NUMBER`.
+- **The `wa.me/91XXXXXXXXXX` link is a placeholder.** Every "Book" CTA opens WhatsApp against
+  a number that does not exist — and the homepage is now built end to end around giving the
+  patient a next step, so this is the single most damaging gap left. One constant in `wal()`
+  in `public/index.html`; the same placeholder lives in `src/config.js` as `WHATSAPP_NUMBER`.
 - `BRAND_TAGLINE_TE` in `src/config.js` is a placeholder pending brand-team confirmation.
 - The tools are awareness aids, pending clinical validation and medico-legal sign-off.
 - **Knowledge Hub topic text is a draft pending clinical review** by Yashoda Pulmonology;
