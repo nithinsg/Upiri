@@ -92,6 +92,16 @@ input,select{font-family:inherit;color:#1D1B4B}
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
 @media print{body.print-cert *{visibility:hidden}body.print-cert .certificate,body.print-cert .certificate *{visibility:visible}body.print-cert .certificate{position:fixed;left:24px;top:24px;right:24px}}
 
+/* Reading language: the page stack is Latin-first, so when a local language is
+   chosen the matching Noto face leads it. Headings carry their own inline family,
+   so they get the script face appended as a fallback rather than replaced. */
+html[lang="te"] x-dc{font-family:'Noto Sans Telugu','Inter',system-ui,sans-serif}
+html[lang="kn"] x-dc{font-family:'Noto Sans Kannada','Inter',system-ui,sans-serif}
+html[lang="bn"] x-dc{font-family:'Noto Sans Bengali','Inter',system-ui,sans-serif}
+html[lang="te"] x-dc [style*="Bricolage"]{font-family:'Bricolage Grotesque','Noto Sans Telugu',sans-serif !important}
+html[lang="kn"] x-dc [style*="Bricolage"]{font-family:'Bricolage Grotesque','Noto Sans Kannada',sans-serif !important}
+html[lang="bn"] x-dc [style*="Bricolage"]{font-family:'Bricolage Grotesque','Noto Sans Bengali',sans-serif !important}
+
 /* The navbar link row absorbs any squeeze by scrolling, so the space selector
    and the Book CTA are never pushed off the right edge at any width. */
 x-dc [data-r="nav-links"]{min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -134,12 +144,25 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   x-dc [data-r="nav-links"]>button{padding:8px 9px !important;font-size:13px !important}
 }
 @media (max-width:900px){
-  /* grouped menus collapse into a single sheet on phones */
+  /* Phone toolbar: menu button left · ŪPIRI centred · Yashoda mark + Book right.
+     The brand is centred against the pill itself rather than against whatever
+     happens to sit either side of it, so it stays put as the sides change. */
   x-dc [data-r="nav-links"]{display:none !important}
-  x-dc [data-r="nav-burger"]{display:flex !important}
   x-dc [data-r="nav-space"]{display:none !important}
+  x-dc [data-r="nav-lang-wrap"]{display:none !important}   /* language lives in the sheet */
+  x-dc [data-r="nav-pill"]{position:relative;flex-wrap:nowrap !important;justify-content:space-between;
+    padding:8px 10px !important}
+  x-dc [data-r="nav-burger"]{display:flex !important;order:1;flex:0 0 auto}
+  x-dc [data-r="nav-home"]{order:2;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    padding:0 !important;gap:7px !important}
+  /* the parent brand rides in the toolbar as its mark; the full lockup is in the sheet */
+  x-dc [data-r="nav-brand"]{display:flex !important;order:3;margin-left:auto !important;
+    padding-left:0 !important;border-left:none !important}
+  x-dc [data-r="nav-brand"]>span{display:none !important}
+  x-dc [data-r="nav-pill"] [data-r="brand-mark"]{height:26px !important}
+  x-dc [data-r="nav-book"]{order:4}
 }
-@media (max-width:1150px){
+@media (min-width:901px) and (max-width:1150px){
   x-dc [data-r="nav-brand"]{display:none !important}
 }
 @media (max-width:1180px){
@@ -175,6 +198,20 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
 @media (max-width:520px){
   x-dc [style*="repeat(4"]{grid-template-columns:repeat(2,1fr) !important}
   x-dc [style*="font-size:clamp"]{overflow-wrap:break-word}
+  /* the centred brand has the narrowest toolbars to live in: stack the lockup so
+     it can never run into the menu button or the Book CTA */
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]{display:flex;flex-direction:column;align-items:center;
+    line-height:1.05;font-size:17px !important}
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]>span{font-size:11px !important}
+  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:24px !important;height:24px !important}
+  x-dc [data-r="nav-book"]{padding:7px 11px !important}
+}
+@media (max-width:359px){
+  /* Narrower than this a strictly centred lockup cannot coexist with the Yashoda
+     mark and the Book CTA, so the brand centres in the space that is left rather
+     than running underneath them. */
+  x-dc [data-r="nav-home"]{position:static !important;transform:none !important;margin:0 auto !important}
+  x-dc [data-r="nav-brand"]{margin-left:0 !important}
 }
 </style>
 </helmet>
@@ -184,9 +221,9 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   <!-- FLOATING GLASS NAVBAR -->
   <nav aria-label="Main" data-r="nav" style="position:fixed;top:16px;left:0;right:0;z-index:50;display:flex;justify-content:center;padding:0 24px">
     <div data-r="nav-pill" style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.74);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.9);border-radius:999px;padding:8px 10px 8px 16px;box-shadow:0 18px 50px -18px rgba(29,27,75,0.38);max-width:1150px;width:100%">
-      <button onClick="{{ goHome }}" aria-label="ŪPIRI home" style="display:flex;align-items:center;gap:10px;background:transparent;border:none;cursor:pointer;padding:2px 6px 2px 0">
+      <button data-r="nav-home" onClick="{{ goHome }}" aria-label="ŪPIRI home" style="display:flex;align-items:center;gap:10px;background:transparent;border:none;cursor:pointer;padding:2px 6px 2px 0">
         <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true" style="color:#2C2A6B"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M46 5v18c0 6-3 9-7 12"></path><path d="M54 5v18c0 6 3 9 7 12"></path><path d="M44 40c-2-9-9-13-17-8C16 39 8 57 9 73c1 12 8 19 18 17 10-2 16-11 17-24v-26z"></path><path d="M56 40c2-9 9-13 17-8 11 7 19 25 18 41-1 12-8 19-18 17-10-2-16-11-17-24v-26z"></path><path d="M39 35c-1 6-3 11-7 15" stroke-width="3.2"></path><path d="M36 43l-8 4" stroke-width="3.2"></path><path d="M32 50c-1 5-3 9-6 12" stroke-width="3.2"></path><path d="M61 35c1 6 3 11 7 15" stroke-width="3.2"></path><path d="M64 43l8 4" stroke-width="3.2"></path><path d="M68 50c1 5 3 9 6 12" stroke-width="3.2"></path></g><g fill="#F5821F"><path d="M35 32c-2-5-1-9 3-12 2 5 1 9-3 12z"></path><path d="M27 49c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M25 64c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M65 32c2-5 1-9-3-12-2 5-1 9 3 12z"></path><path d="M73 49c5 2 9 1 12-3-5-2-9-1-12 3z"></path><path d="M75 64c5 2 9 1 12-3-5-2-9-1-12 3z"></path></g></svg>
-        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;white-space:nowrap;color:#1D1B4B">ŪPIRI <span style="font-family:'Noto Sans Telugu',sans-serif;font-size:13px;font-weight:600;color:#F5821F">ఊపిరి</span></span>
+        <span data-r="nav-word" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;white-space:nowrap;color:#1D1B4B">ŪPIRI <span style="font-family:'Noto Sans Telugu',sans-serif;font-size:13px;font-weight:600;color:#F5821F">ఊపిరి</span></span>
       </button>
       <span data-r="nav-brand" style="display:flex;align-items:center;gap:7px;padding-left:9px;margin-left:2px;border-left:1px solid rgba(44,42,107,0.16)">
         <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ true }}">
@@ -247,6 +284,26 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         <option value="corporates">Corporates</option>
         <option value="schools">Schools</option>
       </select>
+      <span data-r="nav-lang-wrap" style="position:relative;display:inline-block;margin-left:6px">
+        <button data-r="nav-lang" onClick="{{ toggleLang }}" aria-haspopup="true" aria-expanded="{{ langExp }}" aria-label="Choose language" style="display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:rgba(44,42,107,0.12)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span>{{ langShort }}</span>
+        </button>
+        <sc-if value="{{ menuLang }}" hint-placeholder-val="{{ false }}">
+          <span data-r="menu" style="position:absolute;top:calc(100% + 10px);right:0;z-index:60;min-width:252px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
+            <sc-for list="{{ langOpts }}" as="l" hint-placeholder-count="4">
+              <button onClick="{{ l.pick }}" aria-current="{{ l.cur }}" style="{{ l.st }}" style-hover="background:rgba(44,42,107,0.07)">
+                <span style="font-size:14.5px;font-weight:700;color:#2C2A6B">{{ l.native }}</span>
+                <span style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#8A88B8">{{ l.name }}</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{ mtShow }}" hint-placeholder-val="{{ true }}">
+              <span style="display:block;padding:10px 12px 6px;border-top:1px solid rgba(44,42,107,0.1);margin-top:6px;font-size:11px;line-height:1.55;color:#8A88B8">Navigation, buttons and headings are translated. Medical text stays in English until a Yashoda clinician has checked the translation.</span>
+              <a href="{{ mtHref }}" target="_blank" rel="noreferrer" style="padding:2px 12px 6px;font-size:11.5px;font-weight:700;color:#5E82E8;text-decoration:none">Machine-translate the whole page ↗</a>
+            </sc-if>
+          </span>
+        </sc-if>
+      </span>
       <a data-r="nav-book" href="{{ wa.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;margin-left:8px;padding:9px 20px;border-radius:999px;font-weight:700;font-size:13.5px;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 10px 26px -10px rgba(245,130,31,0.65);transition:transform .15s ease, box-shadow .15s ease" style-hover="transform:translateY(-1px) scale(1.03);box-shadow:0 14px 32px -10px rgba(245,130,31,0.8);color:#fff">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
         Book
@@ -254,12 +311,31 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
     </div>
     <sc-if value="{{ mobileNavOpen }}" hint-placeholder-val="{{ false }}">
       <div data-r="nav-sheet" style="position:fixed;top:96px;left:12px;right:12px;z-index:70;max-height:70vh;overflow-y:auto;padding:12px;border-radius:24px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 30px 70px -20px rgba(29,27,75,0.45)">
+        <div data-r="sheet-lang" style="display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 10px;border-bottom:1px solid rgba(44,42,107,0.1);margin-bottom:8px">
+          <span style="width:100%;padding:4px 6px 6px;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#8A88B8">Language</span>
+          <sc-for list="{{ langOpts }}" as="l" hint-placeholder-count="4">
+            <button onClick="{{ l.pick }}" aria-current="{{ l.cur }}" style="{{ l.chip }}">{{ l.native }}</button>
+          </sc-for>
+          <sc-if value="{{ mtShow }}" hint-placeholder-val="{{ true }}">
+            <span style="width:100%;padding:8px 6px 0;font-size:11px;line-height:1.55;color:#8A88B8">Navigation, buttons and headings are translated. Medical text stays in English until a Yashoda clinician has checked the translation.</span>
+            <a href="{{ mtHref }}" target="_blank" rel="noreferrer" style="padding:6px;font-size:11.5px;font-weight:700;color:#5E82E8;text-decoration:none">Machine-translate the whole page ↗</a>
+          </sc-if>
+        </div>
         <sc-for list="{{ navSections }}" as="sec" hint-placeholder-count="3">
           <div style="padding:8px 10px 4px;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#8A88B8">{{ sec.g }}</div>
           <sc-for list="{{ sec.items }}" as="i" hint-placeholder-count="4">
             <button onClick="{{ i.go }}" style="display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:15px;font-weight:600;color:#2C2A6B" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
           </sc-for>
         </sc-for>
+        <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:9px;padding:12px 10px 4px;border-top:1px solid rgba(44,42,107,0.1);margin-top:8px">
+            <img data-r="brand-mark" src="{{ brandLogo }}" alt="" width="24" height="20" style="height:20px;width:auto">
+            <span style="display:flex;flex-direction:column;line-height:1.1">
+              <span style="font-size:12px;font-weight:800;color:#2C2A6B">{{ brandName }}</span>
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#8A88B8">{{ brandUnit }}</span>
+            </span>
+          </div>
+        </sc-if>
       </div>
     </sc-if>
   </nav>
@@ -3059,7 +3135,8 @@ class Component extends DCLogic {
     khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics', khPlaying: null,
     brandLogo: null,
     docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false,
-    menu: null, mobileNav: false, procId: null
+    menu: null, mobileNav: false, procId: null,
+    lang: 'en'
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -3273,6 +3350,357 @@ class Component extends DCLogic {
     name: 'Yashoda Hospitals',
     unit: 'Pulmonology',
     site: 'https://www.yashodahospitals.com'
+  };
+
+  /* ---------------------------------------------------------------------------
+     Reading language.
+
+     The page is authored in English. `I18N` holds hand-written translations, and
+     the runtime looks every string up by its exact English text on its way into
+     the DOM (see support.js), so a string with no entry simply stays in English
+     instead of breaking the page. The set covered is what a reader navigates by:
+     menus, buttons, headings, prompts, filters and the safety notices.
+
+     Clinical body copy is deliberately NOT auto-translated. A wrong word in a
+     symptom list or a treatment description is a patient-safety problem, and
+     these languages need a Yashoda clinician to sign the wording off. Until then
+     the language menu says exactly that, and offers Google's machine translation
+     of the whole page as an explicit, clearly-labelled choice.
+
+     THESE TRANSLATIONS ARE PENDING REVIEW by Yashoda Pulmonology alongside the
+     English text.
+     --------------------------------------------------------------------------- */
+  LANGS = [
+    { c: 'en', native: 'English', name: 'English' },
+    { c: 'te', native: 'తెలుగు', name: 'Telugu' },
+    { c: 'kn', native: 'ಕನ್ನಡ', name: 'Kannada' },
+    { c: 'bn', native: 'বাংলা', name: 'Bengali' }
+  ];
+
+  I18N = {
+    te: {
+      /* navigation */
+      'Explore Care ▾': 'సంరక్షణ ▾', 'Doctors': 'వైద్యులు', 'Knowledge Hub': 'నాలెడ్జ్ హబ్',
+      'Tools ▾': 'టూల్స్ ▾', 'For Doctors ▾': 'వైద్యుల కోసం ▾', 'Book': 'బుక్ చేయండి',
+      'Menu': 'మెనూ', 'Main': 'ప్రధాన', 'ŪPIRI home': 'ఊపిరి హోమ్',
+      'Choose your ŪPIRI space': 'మీ ఊపిరి విభాగాన్ని ఎంచుకోండి', 'Choose language': 'భాషను ఎంచుకోండి',
+      'Language': 'భాష', 'ŪPIRI sections': 'ఊపిరి విభాగాలు',
+      'People · ప్రజలు': 'ప్రజలు', 'Corporates': 'కార్పొరేట్‌లు', 'Schools': 'పాఠశాలలు',
+      'Conditions': 'వ్యాధులు', 'Tests & Procedures': 'పరీక్షలు & ప్రక్రియలు',
+      'Nodule Journey': 'నాడ్యూల్ ప్రయాణం', 'Breath Clubs': 'ఊపిరి క్లబ్‌లు',
+      'Allergy Calendar': 'అలర్జీ క్యాలెండర్', 'Risk Check': 'రిస్క్ చెక్',
+      'Symptom Checker': 'లక్షణాల పరిశీలన', 'Lung Age': 'ఊపిరితిత్తుల వయసు',
+      'Rendo Ūpiri — quit smoking': 'రెండో ఊపిరి — పొగ మానేయండి',
+      'Shikhar — altitude check': 'శిఖరం — ఎత్తుల పరీక్ష',
+      'ŪPIRI Clinical Network': 'ఊపిరి క్లినికల్ నెట్‌వర్క్', 'Refer a patient': 'రోగిని రెఫర్ చేయండి',
+      'Case of the Month': 'ఈ నెల కేసు', 'Explore care': 'సంరక్షణ', 'Tools': 'టూల్స్',
+      'For doctors': 'వైద్యుల కోసం', 'Find a specialist': 'నిపుణుడిని కనుగొనండి',
+      /* hero */
+      'Yashoda Pulmonology': 'యశోద పల్మనాలజీ',
+      'Precision and Personalized Pulmonary Care': 'కచ్చితమైన, వ్యక్తిగత ఊపిరితిత్తుల సంరక్షణ',
+      'Your lungs.': 'మీ ఊపిరితిత్తులు.',
+      'One place to understand them better.': 'వాటిని బాగా అర్థం చేసుకోవడానికి ఒకే చోటు.',
+      'Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.': 'ఊపిరితిత్తుల వ్యాధులను తెలుసుకోండి, మీ పరీక్షలు, ప్రక్రియలు అర్థం చేసుకోండి, ఉపయోగకరమైన టూల్స్ వాడండి, యశోద హాస్పిటల్స్ నుండి ఊపిరితిత్తుల సంరక్షణ పొందండి.',
+      'Explore a condition': 'వ్యాధిని చూడండి', 'Book an appointment': 'అపాయింట్‌మెంట్ బుక్ చేయండి',
+      'Quick tools:': 'త్వరిత టూల్స్:', 'Quit Smoking': 'పొగ మానేయండి', 'scroll': 'స్క్రోల్',
+      /* what brings you here */
+      'What brings you here?': 'మీరు ఇక్కడికి ఎందుకు వచ్చారు?',
+      'Start wherever you are. Each route leads to the part of ŪPIRI built for it.': 'మీరు ఎక్కడ ఉన్నా అక్కడి నుండే మొదలుపెట్టండి. ప్రతి దారి ఊపిరిలోని సరైన భాగానికి తీసుకెళ్తుంది.',
+      'I have symptoms': 'నాకు లక్షణాలు ఉన్నాయి',
+      'Cough, breathlessness, wheeze or chest discomfort.': 'దగ్గు, ఊపిరి ఆడకపోవడం, పిల్లికూతలు లేదా ఛాతీలో ఇబ్బంది.',
+      'Check my symptoms': 'నా లక్షణాలను చూడండి', 'I have been diagnosed': 'నాకు వ్యాధి నిర్ధారణ అయ్యింది',
+      'Asthma, COPD, ILD, pulmonary hypertension and more.': 'ఉబ్బసం, COPD, ILD, పల్మనరీ హైపర్‌టెన్షన్ మరియు ఇతరాలు.',
+      'Find my condition': 'నా వ్యాధిని కనుగొనండి', 'My scan showed something': 'నా స్కాన్‌లో ఏదో కనిపించింది',
+      'A nodule, an abnormal X-ray or CT, or a lung lesion.': 'నాడ్యూల్, అసాధారణ ఎక్స్-రే లేదా సీటీ, లేదా ఊపిరితిత్తుల గాయం.',
+      'Understand the pathway': 'మార్గాన్ని అర్థం చేసుకోండి', 'I want to learn': 'నేను తెలుసుకోవాలి',
+      'Articles, videos, guides and answers to common questions.': 'వ్యాసాలు, వీడియోలు, గైడ్‌లు మరియు సాధారణ ప్రశ్నలకు సమాధానాలు.',
+      'Open the Knowledge Hub': 'నాలెడ్జ్ హబ్ తెరవండి', 'I want to check my lungs': 'నా ఊపిరితిత్తులను పరీక్షించుకోవాలి',
+      'Risk check, lung age and a symptom checker you can use now.': 'రిస్క్ చెక్, ఊపిరితిత్తుల వయసు, లక్షణాల పరిశీలన — ఇప్పుడే వాడండి.',
+      'Use the tools': 'టూల్స్ వాడండి', 'I want to stop smoking': 'నేను పొగ మానేయాలి',
+      'A structured quit programme with support and follow-up.': 'మద్దతు, ఫాలో-అప్‌తో కూడిన ప్రణాళికాబద్ధమైన మానేసే కార్యక్రమం.',
+      'Start Rendo Ūpiri': 'రెండో ఊపిరి మొదలుపెట్టండి',
+      /* explore pulmonary care */
+      'Explore pulmonary care': 'ఊపిరితిత్తుల సంరక్షణను చూడండి',
+      'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'పద్దెనిమిది వ్యాధులు, పరీక్షలు, ప్రక్రియలు — ఊపిరితిత్తులు పనిచేసే విధంగా వర్గీకరించబడ్డాయి, మీది వెంటనే కనుగొనడానికి.',
+      'Airways': 'శ్వాసనాళాలు', 'Lung tissue': 'ఊపిరితిత్తుల కణజాలం',
+      'Lung cancer & nodules': 'ఊపిరితిత్తుల క్యాన్సర్ & నాడ్యూల్స్', 'Lung circulation': 'ఊపిరితిత్తుల రక్తప్రసరణ',
+      'Sleep & allergy': 'నిద్ర & అలర్జీ', 'Infections & prevention': 'ఇన్ఫెక్షన్లు & నివారణ',
+      'Diagnostics & procedures': 'నిర్ధారణ పరీక్షలు & ప్రక్రియలు',
+      'Open topic': 'అంశాన్ని తెరవండి', 'Open': 'తెరవండి', 'Explore': 'చూడండి', 'Read the topic': 'అంశాన్ని చదవండి',
+      /* condition names in common use */
+      'Asthma': 'ఉబ్బసం', 'Severe Asthma': 'తీవ్రమైన ఉబ్బసం', 'Lung Cancer': 'ఊపిరితిత్తుల క్యాన్సర్',
+      'Lung Nodules': 'ఊపిరితిత్తుల నాడ్యూల్స్', 'Pulmonary Fibrosis': 'పల్మనరీ ఫైబ్రోసిస్',
+      'Pulmonary Hypertension': 'పల్మనరీ హైపర్‌టెన్షన్', 'Sleep Medicine': 'నిద్ర వైద్యం',
+      'Allergy & Respiratory Allergy': 'అలర్జీ & శ్వాస సంబంధ అలర్జీ', 'Respiratory Infections': 'శ్వాసకోశ ఇన్ఫెక్షన్లు',
+      'Smoking Cessation': 'పొగ మానేయడం', 'Occupational Lung Disease': 'వృత్తిపరమైన ఊపిరితిత్తుల వ్యాధి',
+      'Lung Transplantation': 'ఊపిరితిత్తుల మార్పిడి', 'Interventional Pulmonology': 'ఇంటర్వెన్షనల్ పల్మనాలజీ',
+      'Bronchoscopy': 'బ్రాంకోస్కోపీ', 'Pulmonary Function Testing': 'ఊపిరితిత్తుల పనితీరు పరీక్ష',
+      'CPET / Exercise Testing': 'CPET / వ్యాయామ పరీక్ష',
+      /* specialists */
+      'Find the right lung specialist': 'సరైన ఊపిరితిత్తుల నిపుణుడిని కనుగొనండి',
+      'Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.': 'హైదరాబాద్ అంతటా యశోద పల్మనాలజీ కన్సల్టెంట్లు — వ్యాధి, ప్రక్రియ, ప్రాంతం, భాష ఆధారంగా వెతకండి.',
+      'See all specialists': 'అందరు నిపుణులను చూడండి', 'View profile': 'ప్రొఫైల్ చూడండి',
+      'Book appointment': 'అపాయింట్‌మెంట్ బుక్ చేయండి', 'Find a lung specialist': 'ఊపిరితిత్తుల నిపుణుడిని కనుగొనండి',
+      'All conditions': 'అన్ని వ్యాధులు', 'All locations': 'అన్ని ప్రాంతాలు', 'All languages': 'అన్ని భాషలు',
+      'Sees children': 'పిల్లలను చూస్తారు', 'Clear filters': 'ఫిల్టర్లు తొలగించండి',
+      /* knowledge hub */
+      'Understand your lungs': 'మీ ఊపిరితిత్తులను అర్థం చేసుకోండి',
+      'Search the Knowledge Hub': 'నాలెడ్జ్ హబ్‌లో వెతకండి', 'What would you like to know?': 'మీరు ఏమి తెలుసుకోవాలి?',
+      'Try:': 'ప్రయత్నించండి:', 'All': 'అన్నీ', 'Articles': 'వ్యాసాలు', 'Videos': 'వీడియోలు',
+      'Clinical Cases': 'క్లినికల్ కేసులు', 'Patient Guides': 'రోగుల గైడ్‌లు', 'Expert Insights': 'నిపుణుల విశ్లేషణ',
+      'Featured': 'ప్రత్యేకం', 'Common conditions': 'సాధారణ వ్యాధులు',
+      'The conditions we see most often': 'మేము ఎక్కువగా చూసే వ్యాధులు',
+      'Specialist & advanced care': 'నిపుణుల & అధునాతన సంరక్షణ',
+      'Where subspecialty input changes the outcome': 'ఉప-ప్రత్యేకత ఫలితాన్ని మార్చే చోటు',
+      'How your lungs get measured and sampled': 'మీ ఊపిరితిత్తులను ఎలా కొలుస్తారు, నమూనా ఎలా తీస్తారు',
+      'Prevention & lifestyle': 'నివారణ & జీవనశైలి',
+      'What keeps lungs well, and what harms them': 'ఊపిరితిత్తులను ఏది కాపాడుతుంది, ఏది హాని చేస్తుంది',
+      'External source': 'బాహ్య మూలం', 'In preparation': 'తయారీలో ఉంది', 'Video in production': 'వీడియో తయారీలో ఉంది',
+      'Back': 'వెనక్కి', 'Explore case': 'కేసు చూడండి', 'What to expect': 'ఏమి ఆశించాలి',
+      'Are you a doctor?': 'మీరు వైద్యులా?', 'Visit the Clinical Network': 'క్లినికల్ నెట్‌వర్క్‌ను సందర్శించండి',
+      /* tests and procedures */
+      'Tests & procedures': 'పరీక్షలు & ప్రక్రియలు', 'See all tests': 'అన్ని పరీక్షలను చూడండి',
+      'If a test has been suggested, read what it actually involves before the day.': 'పరీక్ష సూచించినట్లయితే, ఆ రోజుకు ముందే అందులో ఏమి జరుగుతుందో చదవండి.',
+      /* tools */
+      'Patient tools': 'రోగుల టూల్స్', 'Priority pathway': 'ప్రాధాన్య మార్గం', '90-day challenge': '90 రోజుల ఛాలెంజ్',
+      'Guidance': 'మార్గదర్శకం', 'Member portal': 'సభ్యుల పోర్టల్', 'Monthly': 'నెలవారీ',
+      'Physicians & patients': 'వైద్యులు & రోగులు', 'New': 'కొత్త', '2 min': '2 నిమిషాలు',
+      /* safety and language notices */
+      'Important': 'ముఖ్యమైనది', 'Emergency:': 'అత్యవసరం:',
+      'The tools here are awareness and self-management aids, not medical diagnosis; they are pending final clinical validation and medico-legal sign-off by the Yashoda Hospitals pulmonology department. In an emergency (severe breathlessness, chest pain, blue lips), call 105910 or go to the nearest emergency department immediately. AI reads assist — a qualified radiologist and pulmonologist make every clinical decision.': 'ఇక్కడి టూల్స్ అవగాహన, స్వీయ-నిర్వహణ కోసం మాత్రమే; ఇవి వైద్య నిర్ధారణ కాదు. యశోద హాస్పిటల్స్ పల్మనాలజీ విభాగం నుండి తుది క్లినికల్ ధృవీకరణ, వైద్య-చట్టపరమైన ఆమోదం ఇంకా రావలసి ఉంది. అత్యవసర పరిస్థితిలో (తీవ్రమైన ఊపిరి ఇబ్బంది, ఛాతీ నొప్పి, పెదవులు నీలంగా మారడం) వెంటనే 105910కి కాల్ చేయండి లేదా సమీపంలోని అత్యవసర విభాగానికి వెళ్లండి. AI రీడ్‌లు సహాయం మాత్రమే చేస్తాయి — ప్రతి క్లినికల్ నిర్ణయాన్ని అర్హత గల రేడియాలజిస్ట్, పల్మనాలజిస్ట్ తీసుకుంటారు.',
+      'Navigation, buttons and headings are translated. Medical text stays in English until a Yashoda clinician has checked the translation.': 'నావిగేషన్, బటన్లు, శీర్షికలు అనువదించబడ్డాయి. యశోద వైద్యులు అనువాదాన్ని పరిశీలించే వరకు వైద్య సమాచారం ఇంగ్లీషులోనే ఉంటుంది.',
+      'Trusted pulmonary knowledge from Yashoda experts.': 'యశోద నిపుణుల నుండి విశ్వసనీయ ఊపిరితిత్తుల సమాచారం.',
+      'Trusted pulmonary information from Yashoda Hospitals — explained simply, clearly and by topic.': 'యశోద హాస్పిటల్స్ నుండి విశ్వసనీయ ఊపిరితిత్తుల సమాచారం — సులభంగా, స్పష్టంగా, అంశాల వారీగా.',
+      'Medical information pending review by Yashoda Pulmonology': 'వైద్య సమాచారం యశోద పల్మనాలజీ పరిశీలన కోసం ఎదురుచూస్తోంది',
+      'Why am I breathless?': 'నాకు ఊపిరి ఎందుకు ఆడటం లేదు?', 'What is a lung nodule?': 'ఊపిరితిత్తుల నాడ్యూల్ అంటే ఏమిటి?',
+      'What does spirometry mean?': 'స్పైరోమెట్రీ అంటే ఏమిటి?', 'Can asthma be controlled?': 'ఉబ్బసాన్ని అదుపులో ఉంచవచ్చా?',
+      /* condition, doctor and procedure page furniture */
+      'Home': 'హోమ్', 'Breadcrumb': 'మార్గం', 'Yashoda Knowledge Hub': 'యశోద నాలెడ్జ్ హబ్',
+      'Overview': 'సారాంశం', 'Symptoms': 'లక్షణాలు', 'Diagnosis': 'నిర్ధారణ', 'Treatment': 'చికిత్స',
+      'When to see a specialist': 'నిపుణుడిని ఎప్పుడు కలవాలి', 'When to seek advanced care': 'అధునాతన చికిత్స ఎప్పుడు అవసరం',
+      'Relevant Yashoda services': 'సంబంధిత యశోద సేవలు', 'Related articles': 'సంబంధిత వ్యాసాలు',
+      'Related videos': 'సంబంధిత వీడియోలు', 'Related clinical cases': 'సంబంధిత క్లినికల్ కేసులు',
+      'Meet the specialists': 'నిపుణులను కలవండి', 'Book a consult': 'కన్సల్టేషన్ బుక్ చేయండి',
+      'All topics': 'అన్ని అంశాలు', 'Back to the Knowledge Hub': 'నాలెడ్జ్ హబ్‌కు తిరిగి',
+      'Yashoda profile': 'యశోద ప్రొఫైల్', 'Languages': 'భాషలు', 'OPD timings': 'OPD సమయాలు', 'About': 'గురించి',
+      'Conditions treated': 'చికిత్స చేసే వ్యాధులు', 'Procedures': 'ప్రక్రియలు', 'Education': 'విద్య',
+      'Experience': 'అనుభవం', 'All specialists': 'అందరు నిపుణులు',
+      'What is it?': 'ఇది ఏమిటి?', 'Why is it done?': 'ఎందుకు చేస్తారు?', 'What happens?': 'ఏమి జరుగుతుంది?',
+      'How long does it take?': 'ఎంత సమయం పడుతుంది?', 'Is it painful?': 'నొప్పిగా ఉంటుందా?',
+      'How should I prepare?': 'ఎలా సిద్ధం కావాలి?', 'What happens afterwards?': 'తర్వాత ఏమి జరుగుతుంది?',
+      'When would a doctor recommend it?': 'వైద్యుడు దీన్ని ఎప్పుడు సూచిస్తారు?',
+      'Related conditions': 'సంబంధిత వ్యాధులు', 'Which Yashoda specialists perform it': 'దీన్ని చేసే యశోద నిపుణులు',
+      'Ask about this test': 'ఈ పరీక్ష గురించి అడగండి', 'All tests': 'అన్ని పరీక్షలు',
+      'Machine-translate the whole page ↗': 'పూర్తి పేజీని యంత్ర అనువాదం చేయండి ↗'
+    },
+    kn: {
+      'Explore Care ▾': 'ಆರೈಕೆ ▾', 'Doctors': 'ವೈದ್ಯರು', 'Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್',
+      'Tools ▾': 'ಟೂಲ್ಸ್ ▾', 'For Doctors ▾': 'ವೈದ್ಯರಿಗಾಗಿ ▾', 'Book': 'ಬುಕ್ ಮಾಡಿ',
+      'Menu': 'ಮೆನು', 'Main': 'ಮುಖ್ಯ', 'ŪPIRI home': 'ಊಪಿರಿ ಮುಖಪುಟ',
+      'Choose your ŪPIRI space': 'ನಿಮ್ಮ ಊಪಿರಿ ವಿಭಾಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ', 'Choose language': 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+      'Language': 'ಭಾಷೆ', 'ŪPIRI sections': 'ಊಪಿರಿ ವಿಭಾಗಗಳು',
+      'People · ప్రజలు': 'ಜನರು', 'Corporates': 'ಕಾರ್ಪೊರೇಟ್‌ಗಳು', 'Schools': 'ಶಾಲೆಗಳು',
+      'Conditions': 'ಕಾಯಿಲೆಗಳು', 'Tests & Procedures': 'ಪರೀಕ್ಷೆಗಳು & ಪ್ರಕ್ರಿಯೆಗಳು',
+      'Nodule Journey': 'ನಾಡ್ಯೂಲ್ ಪ್ರಯಾಣ', 'Breath Clubs': 'ಉಸಿರಾಟ ಕ್ಲಬ್‌ಗಳು',
+      'Allergy Calendar': 'ಅಲರ್ಜಿ ಕ್ಯಾಲೆಂಡರ್', 'Risk Check': 'ರಿಸ್ಕ್ ಚೆಕ್',
+      'Symptom Checker': 'ಲಕ್ಷಣ ಪರಿಶೀಲನೆ', 'Lung Age': 'ಶ್ವಾಸಕೋಶದ ವಯಸ್ಸು',
+      'Rendo Ūpiri — quit smoking': 'ರೆಂಡೋ ಊಪಿರಿ — ಧೂಮಪಾನ ಬಿಡಿ',
+      'Shikhar — altitude check': 'ಶಿಖರ್ — ಎತ್ತರದ ಪರೀಕ್ಷೆ',
+      'ŪPIRI Clinical Network': 'ಊಪಿರಿ ಕ್ಲಿನಿಕಲ್ ನೆಟ್‌ವರ್ಕ್', 'Refer a patient': 'ರೋಗಿಯನ್ನು ರೆಫರ್ ಮಾಡಿ',
+      'Case of the Month': 'ಈ ತಿಂಗಳ ಪ್ರಕರಣ', 'Explore care': 'ಆರೈಕೆ', 'Tools': 'ಟೂಲ್ಸ್',
+      'For doctors': 'ವೈದ್ಯರಿಗಾಗಿ', 'Find a specialist': 'ತಜ್ಞರನ್ನು ಹುಡುಕಿ',
+      'Yashoda Pulmonology': 'ಯಶೋದಾ ಪಲ್ಮನಾಲಜಿ',
+      'Precision and Personalized Pulmonary Care': 'ನಿಖರವಾದ ಮತ್ತು ವೈಯಕ್ತಿಕ ಶ್ವಾಸಕೋಶ ಆರೈಕೆ',
+      'Your lungs.': 'ನಿಮ್ಮ ಶ್ವಾಸಕೋಶಗಳು.',
+      'One place to understand them better.': 'ಅವುಗಳನ್ನು ಚೆನ್ನಾಗಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಒಂದೇ ಸ್ಥಳ.',
+      'Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.': 'ಶ್ವಾಸಕೋಶದ ಕಾಯಿಲೆಗಳನ್ನು ತಿಳಿಯಿರಿ, ನಿಮ್ಮ ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ, ಪ್ರಾಯೋಗಿಕ ಟೂಲ್ಸ್ ಬಳಸಿ, ಮತ್ತು ಯಶೋದಾ ಆಸ್ಪತ್ರೆಯಿಂದ ಶ್ವಾಸಕೋಶ ಆರೈಕೆ ಪಡೆಯಿರಿ.',
+      'Explore a condition': 'ಕಾಯಿಲೆಯನ್ನು ನೋಡಿ', 'Book an appointment': 'ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ',
+      'Quick tools:': 'ತ್ವರಿತ ಟೂಲ್ಸ್:', 'Quit Smoking': 'ಧೂಮಪಾನ ಬಿಡಿ', 'scroll': 'ಸ್ಕ್ರಾಲ್',
+      'What brings you here?': 'ನೀವು ಇಲ್ಲಿಗೆ ಏಕೆ ಬಂದಿದ್ದೀರಿ?',
+      'Start wherever you are. Each route leads to the part of ŪPIRI built for it.': 'ನೀವು ಎಲ್ಲಿದ್ದೀರೋ ಅಲ್ಲಿಂದಲೇ ಶುರು ಮಾಡಿ. ಪ್ರತಿ ದಾರಿಯೂ ಊಪಿರಿಯ ಸರಿಯಾದ ಭಾಗಕ್ಕೆ ಕರೆದೊಯ್ಯುತ್ತದೆ.',
+      'I have symptoms': 'ನನಗೆ ಲಕ್ಷಣಗಳಿವೆ',
+      'Cough, breathlessness, wheeze or chest discomfort.': 'ಕೆಮ್ಮು, ಉಸಿರಾಟದ ತೊಂದರೆ, ಸೀಟಿ ಶಬ್ದ ಅಥವಾ ಎದೆಯಲ್ಲಿ ಅಸ್ವಸ್ಥತೆ.',
+      'Check my symptoms': 'ನನ್ನ ಲಕ್ಷಣಗಳನ್ನು ಪರಿಶೀಲಿಸಿ', 'I have been diagnosed': 'ನನಗೆ ರೋಗನಿರ್ಣಯವಾಗಿದೆ',
+      'Asthma, COPD, ILD, pulmonary hypertension and more.': 'ಅಸ್ತಮಾ, COPD, ILD, ಪಲ್ಮನರಿ ಹೈಪರ್‌ಟೆನ್ಷನ್ ಮತ್ತು ಇನ್ನಷ್ಟು.',
+      'Find my condition': 'ನನ್ನ ಕಾಯಿಲೆಯನ್ನು ಹುಡುಕಿ', 'My scan showed something': 'ನನ್ನ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಏನೋ ಕಂಡಿದೆ',
+      'A nodule, an abnormal X-ray or CT, or a lung lesion.': 'ನಾಡ್ಯೂಲ್, ಅಸಹಜ ಎಕ್ಸ್-ರೇ ಅಥವಾ ಸಿಟಿ, ಅಥವಾ ಶ್ವಾಸಕೋಶದ ಗಾಯ.',
+      'Understand the pathway': 'ಮಾರ್ಗವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ', 'I want to learn': 'ನಾನು ತಿಳಿಯಬೇಕು',
+      'Articles, videos, guides and answers to common questions.': 'ಲೇಖನಗಳು, ವೀಡಿಯೊಗಳು, ಮಾರ್ಗದರ್ಶಿಗಳು ಮತ್ತು ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಗಳು.',
+      'Open the Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್ ತೆರೆಯಿರಿ', 'I want to check my lungs': 'ನನ್ನ ಶ್ವಾಸಕೋಶವನ್ನು ಪರೀಕ್ಷಿಸಬೇಕು',
+      'Risk check, lung age and a symptom checker you can use now.': 'ರಿಸ್ಕ್ ಚೆಕ್, ಶ್ವಾಸಕೋಶದ ವಯಸ್ಸು ಮತ್ತು ಲಕ್ಷಣ ಪರಿಶೀಲನೆ — ಈಗಲೇ ಬಳಸಿ.',
+      'Use the tools': 'ಟೂಲ್ಸ್ ಬಳಸಿ', 'I want to stop smoking': 'ನಾನು ಧೂಮಪಾನ ಬಿಡಬೇಕು',
+      'A structured quit programme with support and follow-up.': 'ಬೆಂಬಲ ಮತ್ತು ಫಾಲೋ-ಅಪ್ ಇರುವ ಯೋಜಿತ ಧೂಮಪಾನ ತ್ಯಜಿಸುವ ಕಾರ್ಯಕ್ರಮ.',
+      'Start Rendo Ūpiri': 'ರೆಂಡೋ ಊಪಿರಿ ಪ್ರಾರಂಭಿಸಿ',
+      'Explore pulmonary care': 'ಶ್ವಾಸಕೋಶ ಆರೈಕೆಯನ್ನು ನೋಡಿ',
+      'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'ಹದಿನೆಂಟು ಕಾಯಿಲೆಗಳು, ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗಳು — ಶ್ವಾಸಕೋಶ ಕೆಲಸ ಮಾಡುವ ರೀತಿಯಲ್ಲಿ ಜೋಡಿಸಲಾಗಿದೆ, ನಿಮ್ಮದನ್ನು ಬೇಗ ಹುಡುಕಲು.',
+      'Airways': 'ಶ್ವಾಸನಾಳಗಳು', 'Lung tissue': 'ಶ್ವಾಸಕೋಶದ ಅಂಗಾಂಶ',
+      'Lung cancer & nodules': 'ಶ್ವಾಸಕೋಶದ ಕ್ಯಾನ್ಸರ್ & ನಾಡ್ಯೂಲ್‌ಗಳು', 'Lung circulation': 'ಶ್ವಾಸಕೋಶದ ರಕ್ತಪರಿಚಲನೆ',
+      'Sleep & allergy': 'ನಿದ್ರೆ & ಅಲರ್ಜಿ', 'Infections & prevention': 'ಸೋಂಕುಗಳು & ತಡೆಗಟ್ಟುವಿಕೆ',
+      'Diagnostics & procedures': 'ರೋಗನಿರ್ಣಯ & ಪ್ರಕ್ರಿಯೆಗಳು',
+      'Open topic': 'ವಿಷಯ ತೆರೆಯಿರಿ', 'Open': 'ತೆರೆಯಿರಿ', 'Explore': 'ನೋಡಿ', 'Read the topic': 'ವಿಷಯ ಓದಿ',
+      'Asthma': 'ಅಸ್ತಮಾ', 'Severe Asthma': 'ತೀವ್ರ ಅಸ್ತಮಾ', 'Lung Cancer': 'ಶ್ವಾಸಕೋಶದ ಕ್ಯಾನ್ಸರ್',
+      'Lung Nodules': 'ಶ್ವಾಸಕೋಶದ ನಾಡ್ಯೂಲ್‌ಗಳು', 'Pulmonary Fibrosis': 'ಪಲ್ಮನರಿ ಫೈಬ್ರೋಸಿಸ್',
+      'Pulmonary Hypertension': 'ಪಲ್ಮನರಿ ಹೈಪರ್‌ಟೆನ್ಷನ್', 'Sleep Medicine': 'ನಿದ್ರಾ ವೈದ್ಯಕೀಯ',
+      'Allergy & Respiratory Allergy': 'ಅಲರ್ಜಿ & ಉಸಿರಾಟದ ಅಲರ್ಜಿ', 'Respiratory Infections': 'ಉಸಿರಾಟದ ಸೋಂಕುಗಳು',
+      'Smoking Cessation': 'ಧೂಮಪಾನ ತ್ಯಜಿಸುವಿಕೆ', 'Occupational Lung Disease': 'ವೃತ್ತಿಪರ ಶ್ವಾಸಕೋಶ ಕಾಯಿಲೆ',
+      'Lung Transplantation': 'ಶ್ವಾಸಕೋಶ ಕಸಿ', 'Interventional Pulmonology': 'ಇಂಟರ್ವೆನ್ಷನಲ್ ಪಲ್ಮನಾಲಜಿ',
+      'Bronchoscopy': 'ಬ್ರಾಂಕೋಸ್ಕೋಪಿ', 'Pulmonary Function Testing': 'ಶ್ವಾಸಕೋಶ ಕಾರ್ಯ ಪರೀಕ್ಷೆ',
+      'CPET / Exercise Testing': 'CPET / ವ್ಯಾಯಾಮ ಪರೀಕ್ಷೆ',
+      'Find the right lung specialist': 'ಸರಿಯಾದ ಶ್ವಾಸಕೋಶ ತಜ್ಞರನ್ನು ಹುಡುಕಿ',
+      'Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.': 'ಹೈದರಾಬಾದ್‌ನಾದ್ಯಂತ ಯಶೋದಾ ಪಲ್ಮನಾಲಜಿ ಸಲಹೆಗಾರರು — ಕಾಯಿಲೆ, ಪ್ರಕ್ರಿಯೆ, ಸ್ಥಳ ಮತ್ತು ಭಾಷೆಯ ಪ್ರಕಾರ ಹುಡುಕಿ.',
+      'See all specialists': 'ಎಲ್ಲಾ ತಜ್ಞರನ್ನು ನೋಡಿ', 'View profile': 'ಪ್ರೊಫೈಲ್ ನೋಡಿ',
+      'Book appointment': 'ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ', 'Find a lung specialist': 'ಶ್ವಾಸಕೋಶ ತಜ್ಞರನ್ನು ಹುಡುಕಿ',
+      'All conditions': 'ಎಲ್ಲಾ ಕಾಯಿಲೆಗಳು', 'All locations': 'ಎಲ್ಲಾ ಸ್ಥಳಗಳು', 'All languages': 'ಎಲ್ಲಾ ಭಾಷೆಗಳು',
+      'Sees children': 'ಮಕ್ಕಳನ್ನು ನೋಡುತ್ತಾರೆ', 'Clear filters': 'ಫಿಲ್ಟರ್‌ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ',
+      'Understand your lungs': 'ನಿಮ್ಮ ಶ್ವಾಸಕೋಶವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ',
+      'Search the Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್‌ನಲ್ಲಿ ಹುಡುಕಿ', 'What would you like to know?': 'ನೀವು ಏನು ತಿಳಿಯಲು ಬಯಸುತ್ತೀರಿ?',
+      'Try:': 'ಪ್ರಯತ್ನಿಸಿ:', 'All': 'ಎಲ್ಲಾ', 'Articles': 'ಲೇಖನಗಳು', 'Videos': 'ವೀಡಿಯೊಗಳು',
+      'Clinical Cases': 'ಕ್ಲಿನಿಕಲ್ ಪ್ರಕರಣಗಳು', 'Patient Guides': 'ರೋಗಿಗಳ ಮಾರ್ಗದರ್ಶಿಗಳು', 'Expert Insights': 'ತಜ್ಞರ ಒಳನೋಟ',
+      'Featured': 'ವಿಶೇಷ', 'Common conditions': 'ಸಾಮಾನ್ಯ ಕಾಯಿಲೆಗಳು',
+      'The conditions we see most often': 'ನಾವು ಹೆಚ್ಚಾಗಿ ನೋಡುವ ಕಾಯಿಲೆಗಳು',
+      'Specialist & advanced care': 'ತಜ್ಞ & ಸುಧಾರಿತ ಆರೈಕೆ',
+      'Where subspecialty input changes the outcome': 'ಉಪ-ವಿಶೇಷತೆ ಫಲಿತಾಂಶವನ್ನು ಬದಲಿಸುವ ಕಡೆ',
+      'How your lungs get measured and sampled': 'ನಿಮ್ಮ ಶ್ವಾಸಕೋಶವನ್ನು ಹೇಗೆ ಅಳೆಯಲಾಗುತ್ತದೆ ಮತ್ತು ಮಾದರಿ ಹೇಗೆ ತೆಗೆಯಲಾಗುತ್ತದೆ',
+      'Prevention & lifestyle': 'ತಡೆಗಟ್ಟುವಿಕೆ & ಜೀವನಶೈಲಿ',
+      'What keeps lungs well, and what harms them': 'ಶ್ವಾಸಕೋಶವನ್ನು ಯಾವುದು ಚೆನ್ನಾಗಿಡುತ್ತದೆ, ಯಾವುದು ಹಾನಿ ಮಾಡುತ್ತದೆ',
+      'External source': 'ಬಾಹ್ಯ ಮೂಲ', 'In preparation': 'ಸಿದ್ಧತೆಯಲ್ಲಿದೆ', 'Video in production': 'ವೀಡಿಯೊ ತಯಾರಿಕೆಯಲ್ಲಿದೆ',
+      'Back': 'ಹಿಂದಕ್ಕೆ', 'Explore case': 'ಪ್ರಕರಣ ನೋಡಿ', 'What to expect': 'ಏನನ್ನು ನಿರೀಕ್ಷಿಸಬೇಕು',
+      'Are you a doctor?': 'ನೀವು ವೈದ್ಯರೇ?', 'Visit the Clinical Network': 'ಕ್ಲಿನಿಕಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಭೇಟಿ ನೀಡಿ',
+      'Tests & procedures': 'ಪರೀಕ್ಷೆಗಳು & ಪ್ರಕ್ರಿಯೆಗಳು', 'See all tests': 'ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳನ್ನು ನೋಡಿ',
+      'If a test has been suggested, read what it actually involves before the day.': 'ಪರೀಕ್ಷೆಯನ್ನು ಸೂಚಿಸಿದ್ದರೆ, ಆ ದಿನಕ್ಕೂ ಮೊದಲು ಅದರಲ್ಲಿ ಏನಾಗುತ್ತದೆ ಎಂಬುದನ್ನು ಓದಿ.',
+      'Patient tools': 'ರೋಗಿಗಳ ಟೂಲ್ಸ್', 'Priority pathway': 'ಆದ್ಯತಾ ಮಾರ್ಗ', '90-day challenge': '90 ದಿನಗಳ ಸವಾಲು',
+      'Guidance': 'ಮಾರ್ಗದರ್ಶನ', 'Member portal': 'ಸದಸ್ಯರ ಪೋರ್ಟಲ್', 'Monthly': 'ಮಾಸಿಕ',
+      'Physicians & patients': 'ವೈದ್ಯರು & ರೋಗಿಗಳು', 'New': 'ಹೊಸದು', '2 min': '2 ನಿಮಿಷ',
+      'Important': 'ಮುಖ್ಯ', 'Emergency:': 'ತುರ್ತು:',
+      'The tools here are awareness and self-management aids, not medical diagnosis; they are pending final clinical validation and medico-legal sign-off by the Yashoda Hospitals pulmonology department. In an emergency (severe breathlessness, chest pain, blue lips), call 105910 or go to the nearest emergency department immediately. AI reads assist — a qualified radiologist and pulmonologist make every clinical decision.': 'ಇಲ್ಲಿನ ಟೂಲ್ಸ್ ಅರಿವು ಮತ್ತು ಸ್ವಯಂ-ನಿರ್ವಹಣೆಗಾಗಿ ಮಾತ್ರ; ಇವು ವೈದ್ಯಕೀಯ ರೋಗನಿರ್ಣಯವಲ್ಲ. ಯಶೋದಾ ಆಸ್ಪತ್ರೆಯ ಪಲ್ಮನಾಲಜಿ ವಿಭಾಗದಿಂದ ಅಂತಿಮ ಕ್ಲಿನಿಕಲ್ ದೃಢೀಕರಣ ಮತ್ತು ವೈದ್ಯಕೀಯ-ಕಾನೂನು ಅನುಮೋದನೆ ಇನ್ನೂ ಬಾಕಿ ಇದೆ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ (ತೀವ್ರ ಉಸಿರಾಟದ ತೊಂದರೆ, ಎದೆ ನೋವು, ತುಟಿಗಳು ನೀಲಿಯಾಗುವುದು) ತಕ್ಷಣ 105910 ಗೆ ಕರೆ ಮಾಡಿ ಅಥವಾ ಹತ್ತಿರದ ತುರ್ತು ವಿಭಾಗಕ್ಕೆ ಹೋಗಿ. AI ಓದುವಿಕೆ ಸಹಾಯ ಮಾತ್ರ — ಪ್ರತಿ ಕ್ಲಿನಿಕಲ್ ನಿರ್ಧಾರವನ್ನು ಅರ್ಹ ರೇಡಿಯಾಲಜಿಸ್ಟ್ ಮತ್ತು ಪಲ್ಮನಾಲಜಿಸ್ಟ್ ತೆಗೆದುಕೊಳ್ಳುತ್ತಾರೆ.',
+      'Navigation, buttons and headings are translated. Medical text stays in English until a Yashoda clinician has checked the translation.': 'ನ್ಯಾವಿಗೇಷನ್, ಬಟನ್‌ಗಳು ಮತ್ತು ಶೀರ್ಷಿಕೆಗಳು ಅನುವಾದಗೊಂಡಿವೆ. ಯಶೋದಾ ವೈದ್ಯರು ಅನುವಾದವನ್ನು ಪರಿಶೀಲಿಸುವವರೆಗೆ ವೈದ್ಯಕೀಯ ಪಠ್ಯ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿಯೇ ಇರುತ್ತದೆ.',
+      'Trusted pulmonary knowledge from Yashoda experts.': 'ಯಶೋದಾ ತಜ್ಞರಿಂದ ವಿಶ್ವಾಸಾರ್ಹ ಶ್ವಾಸಕೋಶ ಮಾಹಿತಿ.',
+      'Trusted pulmonary information from Yashoda Hospitals — explained simply, clearly and by topic.': 'ಯಶೋದಾ ಆಸ್ಪತ್ರೆಯಿಂದ ವಿಶ್ವಾಸಾರ್ಹ ಶ್ವಾಸಕೋಶ ಮಾಹಿತಿ — ಸರಳವಾಗಿ, ಸ್ಪಷ್ಟವಾಗಿ, ವಿಷಯವಾರು.',
+      'Medical information pending review by Yashoda Pulmonology': 'ವೈದ್ಯಕೀಯ ಮಾಹಿತಿ ಯಶೋದಾ ಪಲ್ಮನಾಲಜಿ ಪರಿಶೀಲನೆಗೆ ಬಾಕಿ ಇದೆ',
+      'Why am I breathless?': 'ನನಗೆ ಉಸಿರಾಟದ ತೊಂದರೆ ಏಕೆ?', 'What is a lung nodule?': 'ಶ್ವಾಸಕೋಶದ ನಾಡ್ಯೂಲ್ ಎಂದರೇನು?',
+      'What does spirometry mean?': 'ಸ್ಪೈರೋಮೆಟ್ರಿ ಎಂದರೇನು?', 'Can asthma be controlled?': 'ಅಸ್ತಮಾವನ್ನು ನಿಯಂತ್ರಿಸಬಹುದೇ?',
+      'Home': 'ಮುಖಪುಟ', 'Breadcrumb': 'ಮಾರ್ಗಸೂಚಿ', 'Yashoda Knowledge Hub': 'ಯಶೋದಾ ನಾಲೆಡ್ಜ್ ಹಬ್',
+      'Overview': 'ಅವಲೋಕನ', 'Symptoms': 'ಲಕ್ಷಣಗಳು', 'Diagnosis': 'ರೋಗನಿರ್ಣಯ', 'Treatment': 'ಚಿಕಿತ್ಸೆ',
+      'When to see a specialist': 'ತಜ್ಞರನ್ನು ಯಾವಾಗ ಭೇಟಿಯಾಗಬೇಕು', 'When to seek advanced care': 'ಸುಧಾರಿತ ಚಿಕಿತ್ಸೆ ಯಾವಾಗ ಬೇಕು',
+      'Relevant Yashoda services': 'ಸಂಬಂಧಿತ ಯಶೋದಾ ಸೇವೆಗಳು', 'Related articles': 'ಸಂಬಂಧಿತ ಲೇಖನಗಳು',
+      'Related videos': 'ಸಂಬಂಧಿತ ವೀಡಿಯೊಗಳು', 'Related clinical cases': 'ಸಂಬಂಧಿತ ಕ್ಲಿನಿಕಲ್ ಪ್ರಕರಣಗಳು',
+      'Meet the specialists': 'ತಜ್ಞರನ್ನು ಭೇಟಿಯಾಗಿ', 'Book a consult': 'ಸಮಾಲೋಚನೆ ಬುಕ್ ಮಾಡಿ',
+      'All topics': 'ಎಲ್ಲಾ ವಿಷಯಗಳು', 'Back to the Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್‌ಗೆ ಹಿಂತಿರುಗಿ',
+      'Yashoda profile': 'ಯಶೋದಾ ಪ್ರೊಫೈಲ್', 'Languages': 'ಭಾಷೆಗಳು', 'OPD timings': 'OPD ಸಮಯ', 'About': 'ಪರಿಚಯ',
+      'Conditions treated': 'ಚಿಕಿತ್ಸೆ ನೀಡುವ ಕಾಯಿಲೆಗಳು', 'Procedures': 'ಪ್ರಕ್ರಿಯೆಗಳು', 'Education': 'ಶಿಕ್ಷಣ',
+      'Experience': 'ಅನುಭವ', 'All specialists': 'ಎಲ್ಲಾ ತಜ್ಞರು',
+      'What is it?': 'ಇದು ಏನು?', 'Why is it done?': 'ಏಕೆ ಮಾಡಲಾಗುತ್ತದೆ?', 'What happens?': 'ಏನಾಗುತ್ತದೆ?',
+      'How long does it take?': 'ಎಷ್ಟು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ?', 'Is it painful?': 'ನೋವಾಗುತ್ತದೆಯೇ?',
+      'How should I prepare?': 'ಹೇಗೆ ಸಿದ್ಧವಾಗಬೇಕು?', 'What happens afterwards?': 'ನಂತರ ಏನಾಗುತ್ತದೆ?',
+      'When would a doctor recommend it?': 'ವೈದ್ಯರು ಇದನ್ನು ಯಾವಾಗ ಸೂಚಿಸುತ್ತಾರೆ?',
+      'Related conditions': 'ಸಂಬಂಧಿತ ಕಾಯಿಲೆಗಳು', 'Which Yashoda specialists perform it': 'ಇದನ್ನು ಮಾಡುವ ಯಶೋದಾ ತಜ್ಞರು',
+      'Ask about this test': 'ಈ ಪರೀಕ್ಷೆಯ ಬಗ್ಗೆ ಕೇಳಿ', 'All tests': 'ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳು',
+      'Machine-translate the whole page ↗': 'ಪೂರ್ಣ ಪುಟವನ್ನು ಯಂತ್ರ ಅನುವಾದ ಮಾಡಿ ↗'
+    },
+    bn: {
+      'Explore Care ▾': 'চিকিৎসা ▾', 'Doctors': 'ডাক্তার', 'Knowledge Hub': 'নলেজ হাব',
+      'Tools ▾': 'টুলস ▾', 'For Doctors ▾': 'ডাক্তারদের জন্য ▾', 'Book': 'বুক করুন',
+      'Menu': 'মেনু', 'Main': 'প্রধান', 'ŪPIRI home': 'ঊপিরি হোম',
+      'Choose your ŪPIRI space': 'আপনার ঊপিরি বিভাগ বেছে নিন', 'Choose language': 'ভাষা নির্বাচন করুন',
+      'Language': 'ভাষা', 'ŪPIRI sections': 'ঊপিরি বিভাগসমূহ',
+      'People · ప్రజలు': 'সাধারণ মানুষ', 'Corporates': 'কর্পোরেট', 'Schools': 'স্কুল',
+      'Conditions': 'রোগসমূহ', 'Tests & Procedures': 'পরীক্ষা ও প্রক্রিয়া',
+      'Nodule Journey': 'নডিউল যাত্রা', 'Breath Clubs': 'শ্বাস ক্লাব',
+      'Allergy Calendar': 'অ্যালার্জি ক্যালেন্ডার', 'Risk Check': 'ঝুঁকি যাচাই',
+      'Symptom Checker': 'উপসর্গ যাচাই', 'Lung Age': 'ফুসফুসের বয়স',
+      'Rendo Ūpiri — quit smoking': 'রেন্ডো ঊপিরি — ধূমপান ছাড়ুন',
+      'Shikhar — altitude check': 'শিখর — উচ্চতা পরীক্ষা',
+      'ŪPIRI Clinical Network': 'ঊপিরি ক্লিনিক্যাল নেটওয়ার্ক', 'Refer a patient': 'রোগী রেফার করুন',
+      'Case of the Month': 'এই মাসের কেস', 'Explore care': 'চিকিৎসা', 'Tools': 'টুলস',
+      'For doctors': 'ডাক্তারদের জন্য', 'Find a specialist': 'বিশেষজ্ঞ খুঁজুন',
+      'Yashoda Pulmonology': 'যশোদা পালমোনোলজি',
+      'Precision and Personalized Pulmonary Care': 'নির্ভুল ও ব্যক্তিগত ফুসফুস চিকিৎসা',
+      'Your lungs.': 'আপনার ফুসফুস।',
+      'One place to understand them better.': 'এগুলি আরও ভালোভাবে বোঝার একটিই জায়গা।',
+      'Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.': 'ফুসফুসের রোগ জানুন, আপনার পরীক্ষা ও প্রক্রিয়া বুঝুন, কাজে লাগে এমন টুলস ব্যবহার করুন, এবং যশোদা হাসপাতাল থেকে ফুসফুসের চিকিৎসা নিন।',
+      'Explore a condition': 'একটি রোগ দেখুন', 'Book an appointment': 'অ্যাপয়েন্টমেন্ট বুক করুন',
+      'Quick tools:': 'দ্রুত টুলস:', 'Quit Smoking': 'ধূমপান ছাড়ুন', 'scroll': 'স্ক্রল',
+      'What brings you here?': 'আপনি কী কারণে এসেছেন?',
+      'Start wherever you are. Each route leads to the part of ŪPIRI built for it.': 'আপনি যেখানেই আছেন সেখান থেকেই শুরু করুন। প্রতিটি পথ ঊপিরির সঠিক অংশে নিয়ে যায়।',
+      'I have symptoms': 'আমার উপসর্গ আছে',
+      'Cough, breathlessness, wheeze or chest discomfort.': 'কাশি, শ্বাসকষ্ট, শ্বাসে সাঁই সাঁই শব্দ বা বুকে অস্বস্তি।',
+      'Check my symptoms': 'আমার উপসর্গ যাচাই করুন', 'I have been diagnosed': 'আমার রোগ নির্ণয় হয়েছে',
+      'Asthma, COPD, ILD, pulmonary hypertension and more.': 'অ্যাজমা, COPD, ILD, পালমোনারি হাইপারটেনশন এবং আরও।',
+      'Find my condition': 'আমার রোগ খুঁজুন', 'My scan showed something': 'আমার স্ক্যানে কিছু ধরা পড়েছে',
+      'A nodule, an abnormal X-ray or CT, or a lung lesion.': 'একটি নডিউল, অস্বাভাবিক এক্স-রে বা সিটি, অথবা ফুসফুসের ক্ষত।',
+      'Understand the pathway': 'পথটি বুঝে নিন', 'I want to learn': 'আমি জানতে চাই',
+      'Articles, videos, guides and answers to common questions.': 'নিবন্ধ, ভিডিও, গাইড এবং সাধারণ প্রশ্নের উত্তর।',
+      'Open the Knowledge Hub': 'নলেজ হাব খুলুন', 'I want to check my lungs': 'আমি আমার ফুসফুস পরীক্ষা করতে চাই',
+      'Risk check, lung age and a symptom checker you can use now.': 'ঝুঁকি যাচাই, ফুসফুসের বয়স ও উপসর্গ যাচাই — এখনই ব্যবহার করুন।',
+      'Use the tools': 'টুলস ব্যবহার করুন', 'I want to stop smoking': 'আমি ধূমপান ছাড়তে চাই',
+      'A structured quit programme with support and follow-up.': 'সহায়তা ও ফলো-আপ সহ একটি সুসংগঠিত ধূমপান ত্যাগ কর্মসূচি।',
+      'Start Rendo Ūpiri': 'রেন্ডো ঊপিরি শুরু করুন',
+      'Explore pulmonary care': 'ফুসফুসের চিকিৎসা দেখুন',
+      'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'আঠারোটি রোগ, পরীক্ষা ও প্রক্রিয়া — ফুসফুস যেভাবে কাজ করে সেভাবেই সাজানো, যাতে আপনারটি দ্রুত খুঁজে পান।',
+      'Airways': 'শ্বাসনালী', 'Lung tissue': 'ফুসফুসের কলা',
+      'Lung cancer & nodules': 'ফুসফুসের ক্যান্সার ও নডিউল', 'Lung circulation': 'ফুসফুসের রক্তসঞ্চালন',
+      'Sleep & allergy': 'ঘুম ও অ্যালার্জি', 'Infections & prevention': 'সংক্রমণ ও প্রতিরোধ',
+      'Diagnostics & procedures': 'রোগনির্ণয় ও প্রক্রিয়া',
+      'Open topic': 'বিষয় খুলুন', 'Open': 'খুলুন', 'Explore': 'দেখুন', 'Read the topic': 'বিষয়টি পড়ুন',
+      'Asthma': 'অ্যাজমা', 'Severe Asthma': 'তীব্র অ্যাজমা', 'Lung Cancer': 'ফুসফুসের ক্যান্সার',
+      'Lung Nodules': 'ফুসফুসের নডিউল', 'Pulmonary Fibrosis': 'পালমোনারি ফাইব্রোসিস',
+      'Pulmonary Hypertension': 'পালমোনারি হাইপারটেনশন', 'Sleep Medicine': 'ঘুমের চিকিৎসা',
+      'Allergy & Respiratory Allergy': 'অ্যালার্জি ও শ্বাসতন্ত্রের অ্যালার্জি', 'Respiratory Infections': 'শ্বাসতন্ত্রের সংক্রমণ',
+      'Smoking Cessation': 'ধূমপান ত্যাগ', 'Occupational Lung Disease': 'পেশাগত ফুসফুস রোগ',
+      'Lung Transplantation': 'ফুসফুস প্রতিস্থাপন', 'Interventional Pulmonology': 'ইন্টারভেনশনাল পালমোনোলজি',
+      'Bronchoscopy': 'ব্রঙ্কোস্কোপি', 'Pulmonary Function Testing': 'ফুসফুসের কার্যকারিতা পরীক্ষা',
+      'CPET / Exercise Testing': 'CPET / ব্যায়াম পরীক্ষা',
+      'Find the right lung specialist': 'সঠিক ফুসফুস বিশেষজ্ঞ খুঁজুন',
+      'Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.': 'হায়দরাবাদ জুড়ে যশোদা পালমোনোলজি কনসালট্যান্ট — রোগ, প্রক্রিয়া, স্থান ও ভাষা অনুযায়ী খুঁজুন।',
+      'See all specialists': 'সব বিশেষজ্ঞ দেখুন', 'View profile': 'প্রোফাইল দেখুন',
+      'Book appointment': 'অ্যাপয়েন্টমেন্ট বুক করুন', 'Find a lung specialist': 'ফুসফুস বিশেষজ্ঞ খুঁজুন',
+      'All conditions': 'সব রোগ', 'All locations': 'সব স্থান', 'All languages': 'সব ভাষা',
+      'Sees children': 'শিশুদের দেখেন', 'Clear filters': 'ফিল্টার মুছুন',
+      'Understand your lungs': 'আপনার ফুসফুস বুঝুন',
+      'Search the Knowledge Hub': 'নলেজ হাবে খুঁজুন', 'What would you like to know?': 'আপনি কী জানতে চান?',
+      'Try:': 'চেষ্টা করুন:', 'All': 'সব', 'Articles': 'নিবন্ধ', 'Videos': 'ভিডিও',
+      'Clinical Cases': 'ক্লিনিক্যাল কেস', 'Patient Guides': 'রোগীর গাইড', 'Expert Insights': 'বিশেষজ্ঞের বিশ্লেষণ',
+      'Featured': 'বিশেষ', 'Common conditions': 'সাধারণ রোগ',
+      'The conditions we see most often': 'যে রোগগুলি আমরা সবচেয়ে বেশি দেখি',
+      'Specialist & advanced care': 'বিশেষজ্ঞ ও উন্নত চিকিৎসা',
+      'Where subspecialty input changes the outcome': 'যেখানে উপ-বিশেষজ্ঞের মত ফলাফল বদলে দেয়',
+      'How your lungs get measured and sampled': 'আপনার ফুসফুস কীভাবে মাপা হয় ও নমুনা নেওয়া হয়',
+      'Prevention & lifestyle': 'প্রতিরোধ ও জীবনযাপন',
+      'What keeps lungs well, and what harms them': 'কী ফুসফুস ভালো রাখে, আর কী ক্ষতি করে',
+      'External source': 'বাহ্যিক উৎস', 'In preparation': 'প্রস্তুতির পর্যায়ে', 'Video in production': 'ভিডিও তৈরি হচ্ছে',
+      'Back': 'ফিরে যান', 'Explore case': 'কেস দেখুন', 'What to expect': 'কী আশা করবেন',
+      'Are you a doctor?': 'আপনি কি ডাক্তার?', 'Visit the Clinical Network': 'ক্লিনিক্যাল নেটওয়ার্ক দেখুন',
+      'Tests & procedures': 'পরীক্ষা ও প্রক্রিয়া', 'See all tests': 'সব পরীক্ষা দেখুন',
+      'If a test has been suggested, read what it actually involves before the day.': 'কোনো পরীক্ষা পরামর্শ দেওয়া হলে, সেই দিনের আগেই তাতে আসলে কী হয় তা পড়ে নিন।',
+      'Patient tools': 'রোগীর টুলস', 'Priority pathway': 'অগ্রাধিকার পথ', '90-day challenge': '৯০ দিনের চ্যালেঞ্জ',
+      'Guidance': 'নির্দেশনা', 'Member portal': 'সদস্য পোর্টাল', 'Monthly': 'মাসিক',
+      'Physicians & patients': 'চিকিৎসক ও রোগী', 'New': 'নতুন', '2 min': '২ মিনিট',
+      'Important': 'গুরুত্বপূর্ণ', 'Emergency:': 'জরুরি:',
+      'The tools here are awareness and self-management aids, not medical diagnosis; they are pending final clinical validation and medico-legal sign-off by the Yashoda Hospitals pulmonology department. In an emergency (severe breathlessness, chest pain, blue lips), call 105910 or go to the nearest emergency department immediately. AI reads assist — a qualified radiologist and pulmonologist make every clinical decision.': 'এখানকার টুলস সচেতনতা ও নিজে সামলানোর সহায়ক, চিকিৎসাগত রোগনির্ণয় নয়; যশোদা হাসপাতালের পালমোনোলজি বিভাগের চূড়ান্ত ক্লিনিক্যাল যাচাই ও চিকিৎসা-আইনি অনুমোদন এখনও বাকি। জরুরি অবস্থায় (তীব্র শ্বাসকষ্ট, বুকে ব্যথা, ঠোঁট নীল হয়ে যাওয়া) সঙ্গে সঙ্গে 105910 নম্বরে ফোন করুন বা নিকটতম জরুরি বিভাগে যান। AI শুধু সহায়তা করে — প্রতিটি ক্লিনিক্যাল সিদ্ধান্ত নেন যোগ্য রেডিওলজিস্ট ও পালমোনোলজিস্ট।',
+      'Navigation, buttons and headings are translated. Medical text stays in English until a Yashoda clinician has checked the translation.': 'নেভিগেশন, বোতাম ও শিরোনাম অনুবাদ করা হয়েছে। যশোদার চিকিৎসক অনুবাদ যাচাই না করা পর্যন্ত চিকিৎসা সংক্রান্ত লেখা ইংরেজিতেই থাকবে।',
+      'Trusted pulmonary knowledge from Yashoda experts.': 'যশোদার বিশেষজ্ঞদের কাছ থেকে নির্ভরযোগ্য ফুসফুস তথ্য।',
+      'Trusted pulmonary information from Yashoda Hospitals — explained simply, clearly and by topic.': 'যশোদা হাসপাতাল থেকে নির্ভরযোগ্য ফুসফুস তথ্য — সহজ, স্পষ্ট ও বিষয়ভিত্তিক।',
+      'Medical information pending review by Yashoda Pulmonology': 'চিকিৎসা তথ্য যশোদা পালমোনোলজির পর্যালোচনার অপেক্ষায়',
+      'Why am I breathless?': 'আমার শ্বাসকষ্ট কেন?', 'What is a lung nodule?': 'ফুসফুসের নডিউল কী?',
+      'What does spirometry mean?': 'স্পাইরোমেট্রি মানে কী?', 'Can asthma be controlled?': 'অ্যাজমা কি নিয়ন্ত্রণ করা যায়?',
+      'Home': 'হোম', 'Breadcrumb': 'পথনির্দেশ', 'Yashoda Knowledge Hub': 'যশোদা নলেজ হাব',
+      'Overview': 'সংক্ষিপ্ত বিবরণ', 'Symptoms': 'উপসর্গ', 'Diagnosis': 'রোগনির্ণয়', 'Treatment': 'চিকিৎসা',
+      'When to see a specialist': 'কখন বিশেষজ্ঞ দেখাবেন', 'When to seek advanced care': 'কখন উন্নত চিকিৎসা নেবেন',
+      'Relevant Yashoda services': 'প্রাসঙ্গিক যশোদা পরিষেবা', 'Related articles': 'সম্পর্কিত নিবন্ধ',
+      'Related videos': 'সম্পর্কিত ভিডিও', 'Related clinical cases': 'সম্পর্কিত ক্লিনিক্যাল কেস',
+      'Meet the specialists': 'বিশেষজ্ঞদের সঙ্গে পরিচিত হন', 'Book a consult': 'পরামর্শ বুক করুন',
+      'All topics': 'সব বিষয়', 'Back to the Knowledge Hub': 'নলেজ হাবে ফিরুন',
+      'Yashoda profile': 'যশোদা প্রোফাইল', 'Languages': 'ভাষা', 'OPD timings': 'OPD সময়', 'About': 'পরিচিতি',
+      'Conditions treated': 'যেসব রোগের চিকিৎসা করেন', 'Procedures': 'প্রক্রিয়া', 'Education': 'শিক্ষা',
+      'Experience': 'অভিজ্ঞতা', 'All specialists': 'সব বিশেষজ্ঞ',
+      'What is it?': 'এটি কী?', 'Why is it done?': 'কেন করা হয়?', 'What happens?': 'কী হয়?',
+      'How long does it take?': 'কতক্ষণ সময় লাগে?', 'Is it painful?': 'ব্যথা হয় কি?',
+      'How should I prepare?': 'কীভাবে প্রস্তুতি নেব?', 'What happens afterwards?': 'পরে কী হয়?',
+      'When would a doctor recommend it?': 'ডাক্তার কখন এটি পরামর্শ দেন?',
+      'Related conditions': 'সম্পর্কিত রোগ', 'Which Yashoda specialists perform it': 'যশোদার যেসব বিশেষজ্ঞ এটি করেন',
+      'Ask about this test': 'এই পরীক্ষা সম্পর্কে জিজ্ঞাসা করুন', 'All tests': 'সব পরীক্ষা',
+      'Machine-translate the whole page ↗': 'সম্পূর্ণ পৃষ্ঠা মেশিন-অনুবাদ করুন ↗'
+    }
   };
 
   /* Yashoda pulmonology consultants, transcribed from the department's own listing.
@@ -3862,7 +4290,23 @@ class Component extends DCLogic {
         const m = document.createElement('meta'); m.setAttribute('property', prop); return m;
       }).setAttribute('content', val);
     });
+    this.applyAlternates(url);
     this.applySchema(route, t, url, pair, d, pc);
+  }
+  /* Every route reads in four languages off the same URL, so each one advertises
+     the others. English is the x-default: it is the language the copy is in. */
+  applyAlternates(url) {
+    this.LANGS.forEach(l => {
+      const href = l.c === 'en' ? url : url + '?lang=' + l.c;
+      this.headTag('link[rel="alternate"][hreflang="' + l.c + '"]', () => {
+        const el = document.createElement('link');
+        el.setAttribute('rel', 'alternate'); el.setAttribute('hreflang', l.c); return el;
+      }).setAttribute('href', href);
+    });
+    this.headTag('link[rel="alternate"][hreflang="x-default"]', () => {
+      const el = document.createElement('link');
+      el.setAttribute('rel', 'alternate'); el.setAttribute('hreflang', 'x-default'); return el;
+    }).setAttribute('href', url);
   }
   /* Breadcrumbs mirror the visible trail so crawlers see the same hierarchy. */
   crumbs(route, t, d, pc) {
@@ -3965,9 +4409,71 @@ class Component extends DCLogic {
     probe.src = src;
   }
 
+  /* ---- reading language ---- */
+  langOf(code) { return this.LANGS.find(l => l.c === code) || this.LANGS[0]; }
+  langKnown(code) { return code === 'en' || !!this.I18N[code]; }
+  /* The translator is installed on the runtime, which applies it to every string
+     on its way into the DOM. English installs none, so it costs nothing. */
+  installTranslator(code) {
+    const dict = this.I18N[code];
+    const set = window.__dcSetTranslator;
+    if (typeof set === 'function') set(dict ? (s => dict[s]) : null);
+    try { document.documentElement.lang = code; } catch (e) { /* no document */ }
+    this.ensureFont(code);
+  }
+  /* The base stylesheet carries Latin and Telugu. The other scripts are fetched
+     only if a reader actually asks for them, so English pays nothing for them. */
+  FONTS = { kn: 'Noto+Sans+Kannada', bn: 'Noto+Sans+Bengali' };
+  ensureFont(code) {
+    const fam = this.FONTS[code];
+    if (!fam || document.getElementById('font-' + code)) return;
+    const l = document.createElement('link');
+    l.id = 'font-' + code;
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + fam + ':wght@400;600;700;800&display=swap';
+    document.head.appendChild(l);
+  }
+  setLang = (code) => {
+    if (!this.langKnown(code)) return;
+    this.installTranslator(code);
+    try { localStorage.setItem('upiri:lang', code); } catch (e) { /* private mode */ }
+    try {
+      const u = new URL(location.href);
+      if (code === 'en') u.searchParams.delete('lang'); else u.searchParams.set('lang', code);
+      history.replaceState(history.state, '', u.pathname + u.search);
+    } catch (e) { /* file:// has no history origin */ }
+    this.setState({ lang: code, menu: null, mobileNav: false });
+  };
+  /* Google's translation proxy, for the clinical text this page does not itself
+     translate. Clearly labelled as machine translation wherever it is offered. */
+  mtUrl(code) {
+    const host = this.ORIGIN.replace(/^https?:\/\//, '').replace(/\./g, '-');
+    return 'https://' + host + '.translate.goog' + location.pathname +
+      '?_x_tr_sl=en&_x_tr_tl=' + code + '&_x_tr_hl=' + code;
+  }
+  langSt(sel) {
+    return {
+      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '1px',
+      textAlign: 'left', padding: '9px 13px', borderRadius: '12px', border: 'none', cursor: 'pointer',
+      background: sel ? 'rgba(44,42,107,0.09)' : 'transparent'
+    };
+  }
+  langChipSt(sel) {
+    return {
+      padding: '9px 15px', borderRadius: '999px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+      border: sel ? '2px solid #2C2A6B' : '2px solid rgba(44,42,107,0.14)',
+      background: sel ? '#2C2A6B' : 'rgba(255,255,255,0.9)', color: sel ? '#fff' : '#2C2A6B'
+    };
+  }
+
   componentDidMount() {
     this.findBrandLogo();
     const patch = { qd: new Date().toISOString().slice(0, 10) };
+    /* the URL wins over the remembered choice, so a shared link reads as sent */
+    let lang = null;
+    try { lang = new URLSearchParams(location.search).get('lang'); } catch (e) { /* no URLSearchParams */ }
+    try { lang = lang || localStorage.getItem('upiri:lang'); } catch (e) { /* private mode */ }
+    if (lang && this.langKnown(lang)) { patch.lang = lang; this.installTranslator(lang); }
     const start = this.props.startScreen;
     const fromUrl = this.routeFromPath(location.pathname);
     if (start && start !== 'home') patch.route = start;
@@ -4630,6 +5136,19 @@ class Component extends DCLogic {
       navDocsSt: this.navSt(['alumni', 'doctors', 'case'].includes(s.route)),
       mobileNavOpen: s.mobileNav, mobileNavClosed: !s.mobileNav,
       toggleMobileNav: (e) => { if (e) e.stopPropagation(); this.setState({ mobileNav: !s.mobileNav, menu: null }); },
+
+      /* ---- reading language ---- */
+      menuLang: s.menu === 'lang',
+      langExp: s.menu === 'lang' ? 'true' : 'false',
+      toggleLang: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'lang' ? null : 'lang' }); },
+      langShort: this.langOf(s.lang).native,
+      langOpts: this.LANGS.map(l => ({
+        native: l.native, name: l.name, cur: l.c === s.lang ? 'true' : 'false',
+        st: this.langSt(l.c === s.lang), chip: this.langChipSt(l.c === s.lang),
+        pick: (e) => { if (e) e.stopPropagation(); this.setLang(l.c); }
+      })),
+      mtShow: s.lang !== 'en',
+      mtHref: this.mtUrl(s.lang === 'en' ? 'te' : s.lang),
       navItems: [
         { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
         { t: 'Tests & Procedures', go: () => this.go('procs'), grp: 'care' },
