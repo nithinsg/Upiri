@@ -53,16 +53,16 @@ input,select{font-family:inherit;color:#1D1B4B}
    Motion. Restrained by design: entrances are short, loops are slow and wide,
    and everything below is disabled outright under prefers-reduced-motion.
    --------------------------------------------------------------------------- */
-@keyframes markBloom{0%{transform:scale(.72) rotate(-22deg);opacity:0}60%{transform:scale(1.06) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
-@keyframes markSway{0%,100%{transform:rotate(-2.5deg) scale(1)}50%{transform:rotate(2.5deg) scale(1.04)}}
+@keyframes markSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes airflow{to{stroke-dashoffset:-38}}
 @keyframes revealUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 @keyframes pulseRing{0%{transform:scale(.9);opacity:.55}70%{transform:scale(1.25);opacity:0}100%{opacity:0}}
 
 @media (prefers-reduced-motion: no-preference){
-  /* the Yashoda mark blooms in once, then breathes very slowly */
-  x-dc [data-r="brand-mark"]{animation:markBloom .9s cubic-bezier(.16,1,.3,1) both, markSway 9s ease-in-out 1.2s infinite;transform-origin:50% 60%}
-  x-dc [data-r="nav-pill"]:hover [data-r="brand-mark"]{animation:markSway 2.4s ease-in-out infinite}
+  /* The Yashoda mark turns continuously at one constant speed: linear, infinite,
+     no easing and no hover variation, so it reads as a steady presence rather
+     than an effect. A transform-only animation stays on the compositor. */
+  x-dc [data-r="brand-mark"]{animation:markSpin 20s linear infinite;transform-origin:50% 50%;will-change:transform}
 
   /* sections arrive as they scroll into view, where the browser supports it */
   @supports (animation-timeline: view()){
@@ -153,8 +153,13 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   x-dc [data-r="nav-pill"]{position:relative;flex-wrap:nowrap !important;justify-content:space-between;
     padding:8px 10px !important}
   x-dc [data-r="nav-burger"]{display:flex !important;order:1;flex:0 0 auto}
+  /* Centred against the pill itself — left:50% + translate(-50%) is measured on
+     the pill, so the lockup does not drift when the menu button or the CTA
+     changes width (language, icon-only CTA, open or closed menu). */
   x-dc [data-r="nav-home"]{order:2;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    padding:0 !important;gap:7px !important}
+    padding:0 !important;gap:8px !important}
+  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:32px !important;height:32px !important}
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]{font-size:20px !important}
   /* the parent brand rides in the toolbar as its mark; the full lockup is in the sheet */
   x-dc [data-r="nav-brand"]{display:flex !important;order:3;margin-left:auto !important;
     padding-left:0 !important;border-left:none !important}
@@ -201,17 +206,17 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   /* the centred brand has the narrowest toolbars to live in: stack the lockup so
      it can never run into the menu button or the Book CTA */
   x-dc [data-r="nav-pill"] [data-r="nav-word"]{display:flex;flex-direction:column;align-items:center;
-    line-height:1.05;font-size:17px !important}
-  x-dc [data-r="nav-pill"] [data-r="nav-word"]>span{font-size:11px !important}
-  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:24px !important;height:24px !important}
+    line-height:1.05;font-size:18.5px !important}
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]>span{font-size:12px !important}
+  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:30px !important;height:30px !important}
   x-dc [data-r="nav-book"]{padding:7px 11px !important}
 }
-@media (max-width:359px){
-  /* Narrower than this a strictly centred lockup cannot coexist with the Yashoda
-     mark and the Book CTA, so the brand centres in the space that is left rather
-     than running underneath them. */
-  x-dc [data-r="nav-home"]{position:static !important;transform:none !important;margin:0 auto !important}
-  x-dc [data-r="nav-brand"]{margin-left:0 !important}
+@media (max-width:380px){
+  /* The centred lockup keeps its width on the narrowest phones; the CTA gives way
+     instead, becoming its icon. font-size:0 hides the label visually while the
+     text stays in the accessibility tree as the button's name. */
+  x-dc [data-r="nav-book"]{font-size:0 !important;gap:0 !important;padding:10px !important;border-radius:50% !important}
+  x-dc [data-r="nav-book"] svg{width:16px;height:16px}
 }
 </style>
 </helmet>
@@ -236,40 +241,15 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </span>
       <div data-r="nav-sep" style="width:1px;height:24px;background:rgba(44,42,107,0.14);margin:0 8px"></div>
       <div data-r="nav-links" style="display:flex;align-items:center;gap:2px;flex:1">
-        <span style="position:relative;display:inline-block">
-          <button onClick="{{ toggleCare }}" aria-haspopup="true" aria-expanded="{{ careExp }}" style="{{ navCareSt }}" style-hover="background:rgba(44,42,107,0.08)">Explore Care ▾</button>
-          <sc-if value="{{ menuCare }}" hint-placeholder-val="{{ false }}">
-            <span data-r="menu" style="position:absolute;top:calc(100% + 10px);left:0;z-index:60;min-width:230px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
-              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="4">
-                <sc-if value="{{ i.inCare }}" hint-placeholder-val="{{ true }}">
-                  <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
-                </sc-if>
-              </sc-for>
-            </span>
-          </sc-if>
-        </span>
+        <button onClick="{{ goKnowledge }}" aria-current="{{ curKnowledge }}" style="{{ navCareSt }}" style-hover="background:rgba(44,42,107,0.08)">Explore Care</button>
         <button onClick="{{ goFind }}" aria-current="{{ curFind }}" style="{{ navFind }}" style-hover="background:rgba(44,42,107,0.08)">Doctors</button>
-        <button onClick="{{ goKnowledge }}" aria-current="{{ curKnowledge }}" style="{{ navKnowledge }}" style-hover="background:rgba(44,42,107,0.08)">Knowledge Hub</button>
+        <button onClick="{{ goProcs }}" aria-current="{{ curProcs }}" style="{{ navProcs }}" style-hover="background:rgba(44,42,107,0.08)">Tests &amp; Procedures</button>
         <span style="position:relative;display:inline-block">
           <button onClick="{{ toggleTools }}" aria-haspopup="true" aria-expanded="{{ toolsExp }}" style="{{ navToolsSt }}" style-hover="background:rgba(44,42,107,0.08)">Tools ▾</button>
           <sc-if value="{{ menuTools }}" hint-placeholder-val="{{ false }}">
             <span data-r="menu" style="position:absolute;top:calc(100% + 10px);left:0;z-index:60;min-width:240px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
-              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="5">
-                <sc-if value="{{ i.inTools }}" hint-placeholder-val="{{ true }}">
-                  <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
-                </sc-if>
-              </sc-for>
-            </span>
-          </sc-if>
-        </span>
-        <span style="position:relative;display:inline-block">
-          <button onClick="{{ toggleDocs }}" aria-haspopup="true" aria-expanded="{{ docsExp }}" style="{{ navDocsSt }}" style-hover="background:rgba(44,42,107,0.08)">For Doctors ▾</button>
-          <sc-if value="{{ menuDocs }}" hint-placeholder-val="{{ false }}">
-            <span data-r="menu" style="position:absolute;top:calc(100% + 10px);right:0;z-index:60;min-width:230px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
-              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="3">
-                <sc-if value="{{ i.inDocs }}" hint-placeholder-val="{{ true }}">
-                  <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
-                </sc-if>
+              <sc-for list="{{ navItems }}" as="i" hint-placeholder-count="8">
+                <button onClick="{{ i.go }}" style="text-align:left;padding:11px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:600;color:#2C2A6B;white-space:nowrap" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
               </sc-for>
             </span>
           </sc-if>
@@ -278,12 +258,22 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       <button data-r="nav-burger" onClick="{{ toggleMobileNav }}" aria-label="Menu" aria-expanded="{{ mobileNavOpen }}" style="display:none;width:40px;height:40px;border-radius:12px;align-items:center;justify-content:center;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;cursor:pointer">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M3 12h18"></path><path d="M3 18h18"></path></svg>
       </button>
-      <select data-r="nav-space" value="{{ spaceValue }}" onChange="{{ pickSpace }}" aria-label="Choose your ŪPIRI space" style="appearance:none;-webkit-appearance:none;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;color:#2C2A6B;cursor:pointer;outline:none">
-        <option value="people">People · ప్రజలు</option>
-        <option value="doctors">Doctors</option>
-        <option value="corporates">Corporates</option>
-        <option value="schools">Schools</option>
-      </select>
+      <span data-r="nav-space" style="position:relative;display:inline-block">
+        <button data-r="nav-profile" onClick="{{ toggleProfile }}" aria-haspopup="true" aria-expanded="{{ profileExp }}" aria-label="Profile — choose your space" style="{{ navProfileSt }}" style-hover="background:rgba(44,42,107,0.12)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>{{ profileLabel }}</span>
+        </button>
+        <sc-if value="{{ menuProfile }}" hint-placeholder-val="{{ false }}">
+          <span data-r="menu" style="position:absolute;top:calc(100% + 10px);right:0;z-index:60;min-width:236px;display:flex;flex-direction:column;padding:8px;border-radius:18px;background:#fff;border:1px solid rgba(44,42,107,0.12);box-shadow:0 24px 60px -20px rgba(29,27,75,0.4)">
+            <sc-for list="{{ profileItems }}" as="p" hint-placeholder-count="4">
+              <button onClick="{{ p.go }}" aria-current="{{ p.cur }}" style="{{ p.st }}" style-hover="background:rgba(44,42,107,0.07)">
+                <span style="font-size:14px;font-weight:700;color:#2C2A6B">{{ p.t }}</span>
+                <span style="font-size:11.5px;font-weight:600;color:#8A88B8">{{ p.d }}</span>
+              </button>
+            </sc-for>
+          </span>
+        </sc-if>
+      </span>
       <span data-r="nav-lang-wrap" style="position:relative;display:inline-block;margin-left:6px">
         <button data-r="nav-lang" onClick="{{ toggleLang }}" aria-haspopup="true" aria-expanded="{{ langExp }}" aria-label="Choose language" style="display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);color:#2C2A6B;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:rgba(44,42,107,0.12)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
@@ -321,10 +311,16 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
             <a href="{{ mtHref }}" target="_blank" rel="noreferrer" style="padding:6px;font-size:11.5px;font-weight:700;color:#5E82E8;text-decoration:none">Machine-translate the whole page ↗</a>
           </sc-if>
         </div>
+        <div data-r="sheet-profile" style="display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 10px;border-bottom:1px solid rgba(44,42,107,0.1);margin-bottom:8px">
+          <span style="width:100%;padding:4px 6px 6px;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#8A88B8">Profile</span>
+          <sc-for list="{{ profileItems }}" as="p" hint-placeholder-count="4">
+            <button onClick="{{ p.go }}" aria-current="{{ p.cur }}" style="{{ p.chip }}">{{ p.t }}</button>
+          </sc-for>
+        </div>
         <sc-for list="{{ navSections }}" as="sec" hint-placeholder-count="3">
           <div style="padding:8px 10px 4px;font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#8A88B8">{{ sec.g }}</div>
           <sc-for list="{{ sec.items }}" as="i" hint-placeholder-count="4">
-            <button onClick="{{ i.go }}" style="display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:15px;font-weight:600;color:#2C2A6B" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
+            <button onClick="{{ i.go }}" style="display:block;width:100%;text-align:left;padding:14px;border-radius:12px;border:none;background:transparent;cursor:pointer;font-size:15px;font-weight:600;color:#2C2A6B;min-height:48px" style-hover="background:rgba(44,42,107,0.07)">{{ i.t }}</button>
           </sc-for>
         </sc-for>
         <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ true }}">
@@ -362,13 +358,13 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
             <span style="display:inline-block;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;background:rgba(245,130,31,0.16);border:1px solid rgba(245,130,31,0.4);color:#FFB067">Yashoda Pulmonology</span>
             <span style="display:inline-block;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;background:rgba(107,213,155,0.12);border:1px solid rgba(107,213,155,0.35);color:#8FE0B4">Precision and Personalized Pulmonary Care</span>
           </div>
-          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(2.6rem,4.8vw,4.1rem);line-height:1.05;letter-spacing:-0.03em;color:#fff;margin:0;text-wrap:balance">Your lungs.<br>One place to understand them better.</h1>
-          <p style="margin:22px 0 0;font-size:18px;line-height:1.6;color:#C9D2E6;max-width:560px;text-wrap:pretty">Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.</p>
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(2.4rem,4.4vw,3.8rem);line-height:1.06;letter-spacing:-0.03em;color:#fff;margin:0;text-wrap:balance">Have a question about your breathing?<br>Start here.</h1>
+          <p style="margin:22px 0 0;font-size:18px;line-height:1.6;color:#C9D2E6;max-width:560px;text-wrap:pretty">From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.</p>
           <p style="font-family:'Noto Sans Telugu',sans-serif;margin:12px 0 0;font-size:15px;color:#F5A159">మీ ఊపిరికి భరోసా — యశోద పల్మనాలజీ</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:34px">
-            <button onClick="{{ goKnowledge }}" style="display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:999px;border:none;cursor:pointer;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px) scale(1.02)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-              Explore a condition
+            <button onClick="{{ goQuestions }}" style="display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:999px;border:none;cursor:pointer;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px) scale(1.02)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="10"></circle></svg>
+              What brings you here today?
             </button>
             <a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:999px;font-size:16px;font-weight:600;color:#fff;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.25);transition:background .18s ease" style-hover="background:rgba(255,255,255,0.16);color:#fff">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -423,22 +419,21 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </div>
     </section>
 
-    <!-- WHAT BRINGS YOU HERE? -->
-    <section aria-labelledby="entry-heading" style="max-width:1150px;margin:0 auto;padding:64px 24px 20px">
-      <h2 id="entry-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0;text-wrap:balance">What brings you here?</h2>
-      <p style="font-size:16px;color:#6C6A9E;margin:10px 0 30px;max-width:640px">Start wherever you are. Each route leads to the part of ŪPIRI built for it.</p>
+    <!-- WHAT BRINGS YOU HERE TODAY? — the patient's own question is the entry point -->
+    <section id="questions" aria-labelledby="entry-heading" style="max-width:1150px;margin:0 auto;padding:64px 24px 20px;scroll-margin-top:104px">
+      <h2 id="entry-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0;text-wrap:balance">What brings you here today?</h2>
+      <p style="font-size:16px;color:#6C6A9E;margin:10px 0 30px;max-width:640px">Choose what sounds most like you.</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
-        <sc-for list="{{ entryPoints }}" as="e" hint-placeholder-count="6">
-          <button onClick="{{ e.go }}" style="text-align:left;display:flex;flex-direction:column;gap:12px;padding:28px 26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -30px rgba(29,27,75,0.3);cursor:pointer;transition:transform .18s ease, box-shadow .18s ease" style-hover="transform:translateY(-3px);box-shadow:0 30px 66px -30px rgba(29,27,75,0.42)">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="6">
+          <button onClick="{{ q.go }}" style="text-align:left;display:flex;flex-direction:column;gap:14px;padding:28px 26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -30px rgba(29,27,75,0.3);cursor:pointer;min-height:200px;transition:transform .18s ease, box-shadow .18s ease" style-hover="transform:translateY(-3px);box-shadow:0 30px 66px -30px rgba(29,27,75,0.42)">
             <span aria-hidden="true" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B">
-              <svg width="22" height="22" viewBox="{{ e.vb }}" fill="none" stroke="currentColor" stroke-width="{{ e.sw }}" stroke-linecap="round" stroke-linejoin="round">
-                <sc-for list="{{ e.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
+              <svg width="22" height="22" viewBox="{{ q.vb }}" fill="none" stroke="currentColor" stroke-width="{{ q.sw }}" stroke-linecap="round" stroke-linejoin="round">
+                <sc-for list="{{ q.paths }}" as="p" hint-placeholder-count="2"><path d="{{ p.d }}"></path></sc-for>
               </svg>
             </span>
-            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18.5px;color:#2C2A6B">{{ e.t }}</span>
-            <span style="font-size:14px;line-height:1.55;color:#4A4880;flex:1">{{ e.d }}</span>
-            <span style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#B35A08">
-              {{ e.cta }}
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;line-height:1.35;color:#2C2A6B;flex:1;text-wrap:pretty">{{ q.q }}</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:#B35A08">
+              {{ q.cta }}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
             </span>
           </button>
@@ -448,7 +443,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
 
     <!-- EXPLORE PULMONARY CARE (§3) -->
     <section aria-labelledby="explore-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
-      <h2 id="explore-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Explore pulmonary care</h2>
+      <h2 id="explore-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Conditions we treat</h2>
       <p style="font-size:16px;color:#6C6A9E;margin:10px 0 30px;max-width:640px">Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
         <sc-for list="{{ topicGroups }}" as="gr" hint-placeholder-count="7">
@@ -1457,6 +1452,25 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
             <p style="margin:0;font-size:13.5px;line-height:1.6;color:#4A4880;flex:1">Papers, case reports and journal publications from the department — indexed in one library, with abstracts and full-text links where available.</p>
             <div><a href="{{ wa.library }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:999px;font-size:13.5px;font-weight:700;color:#fff;background:#2C2A6B;transition:transform .18s ease" style-hover="transform:translateY(-2px);color:#fff">Browse the library</a></div>
           </div>
+        </div>
+      </div>
+
+      <!-- The rest of the doctor-facing platform, gathered here now that Profile →
+           Doctors is its single home rather than a separate navbar menu. -->
+      <div style="margin-top:44px">
+        <div style="font-size:12px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#8A88B8;margin-bottom:6px">Also for doctors</div>
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px,2.6vw,28px);letter-spacing:-0.02em;color:#2C2A6B;margin:0 0 20px">The clinical side of ŪPIRI</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <button onClick="{{ goAlumni }}" style="text-align:left;display:flex;flex-direction:column;gap:10px;padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3);cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-3px)">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;color:#2C2A6B">ŪPIRI Clinical Network</span>
+            <span style="font-size:14px;line-height:1.6;color:#4A4880;flex:1">Case discussion, CME, mentorship and research collaboration with the Yashoda pulmonology department.</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#B35A08">Visit the Clinical Network<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span>
+          </button>
+          <button onClick="{{ goCase }}" style="text-align:left;display:flex;flex-direction:column;gap:10px;padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(16px);box-shadow:0 24px 56px -26px rgba(29,27,75,0.3);cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-3px)">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;color:#2C2A6B">Case of the Month</span>
+            <span style="font-size:14px;line-height:1.6;color:#4A4880;flex:1">A real pathway from the Nodule Board each month — anonymised, and explained step by step.</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#B35A08">Read this month's case<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span>
+          </button>
         </div>
       </div>
     </div>
@@ -3380,12 +3394,12 @@ class Component extends DCLogic {
   I18N = {
     te: {
       /* navigation */
-      'Explore Care ▾': 'సంరక్షణ ▾', 'Doctors': 'వైద్యులు', 'Knowledge Hub': 'నాలెడ్జ్ హబ్',
-      'Tools ▾': 'టూల్స్ ▾', 'For Doctors ▾': 'వైద్యుల కోసం ▾', 'Book': 'బుక్ చేయండి',
+      'Doctors': 'వైద్యులు', 'Knowledge Hub': 'నాలెడ్జ్ హబ్',
+      'Book': 'బుక్ చేయండి',
       'Menu': 'మెనూ', 'Main': 'ప్రధాన', 'ŪPIRI home': 'ఊపిరి హోమ్',
-      'Choose your ŪPIRI space': 'మీ ఊపిరి విభాగాన్ని ఎంచుకోండి', 'Choose language': 'భాషను ఎంచుకోండి',
+      'Choose language': 'భాషను ఎంచుకోండి',
       'Language': 'భాష', 'ŪPIRI sections': 'ఊపిరి విభాగాలు',
-      'People · ప్రజలు': 'ప్రజలు', 'Corporates': 'కార్పొరేట్‌లు', 'Schools': 'పాఠశాలలు',
+      'Schools': 'పాఠశాలలు',
       'Conditions': 'వ్యాధులు', 'Tests & Procedures': 'పరీక్షలు & ప్రక్రియలు',
       'Nodule Journey': 'నాడ్యూల్ ప్రయాణం', 'Breath Clubs': 'ఊపిరి క్లబ్‌లు',
       'Allergy Calendar': 'అలర్జీ క్యాలెండర్', 'Risk Check': 'రిస్క్ చెక్',
@@ -3398,29 +3412,10 @@ class Component extends DCLogic {
       /* hero */
       'Yashoda Pulmonology': 'యశోద పల్మనాలజీ',
       'Precision and Personalized Pulmonary Care': 'కచ్చితమైన, వ్యక్తిగత ఊపిరితిత్తుల సంరక్షణ',
-      'Your lungs.': 'మీ ఊపిరితిత్తులు.',
-      'One place to understand them better.': 'వాటిని బాగా అర్థం చేసుకోవడానికి ఒకే చోటు.',
-      'Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.': 'ఊపిరితిత్తుల వ్యాధులను తెలుసుకోండి, మీ పరీక్షలు, ప్రక్రియలు అర్థం చేసుకోండి, ఉపయోగకరమైన టూల్స్ వాడండి, యశోద హాస్పిటల్స్ నుండి ఊపిరితిత్తుల సంరక్షణ పొందండి.',
-      'Explore a condition': 'వ్యాధిని చూడండి', 'Book an appointment': 'అపాయింట్‌మెంట్ బుక్ చేయండి',
+      'Book an appointment': 'అపాయింట్‌మెంట్ బుక్ చేయండి',
       'Quick tools:': 'త్వరిత టూల్స్:', 'Quit Smoking': 'పొగ మానేయండి', 'scroll': 'స్క్రోల్',
       /* what brings you here */
-      'What brings you here?': 'మీరు ఇక్కడికి ఎందుకు వచ్చారు?',
-      'Start wherever you are. Each route leads to the part of ŪPIRI built for it.': 'మీరు ఎక్కడ ఉన్నా అక్కడి నుండే మొదలుపెట్టండి. ప్రతి దారి ఊపిరిలోని సరైన భాగానికి తీసుకెళ్తుంది.',
-      'I have symptoms': 'నాకు లక్షణాలు ఉన్నాయి',
-      'Cough, breathlessness, wheeze or chest discomfort.': 'దగ్గు, ఊపిరి ఆడకపోవడం, పిల్లికూతలు లేదా ఛాతీలో ఇబ్బంది.',
-      'Check my symptoms': 'నా లక్షణాలను చూడండి', 'I have been diagnosed': 'నాకు వ్యాధి నిర్ధారణ అయ్యింది',
-      'Asthma, COPD, ILD, pulmonary hypertension and more.': 'ఉబ్బసం, COPD, ILD, పల్మనరీ హైపర్‌టెన్షన్ మరియు ఇతరాలు.',
-      'Find my condition': 'నా వ్యాధిని కనుగొనండి', 'My scan showed something': 'నా స్కాన్‌లో ఏదో కనిపించింది',
-      'A nodule, an abnormal X-ray or CT, or a lung lesion.': 'నాడ్యూల్, అసాధారణ ఎక్స్-రే లేదా సీటీ, లేదా ఊపిరితిత్తుల గాయం.',
-      'Understand the pathway': 'మార్గాన్ని అర్థం చేసుకోండి', 'I want to learn': 'నేను తెలుసుకోవాలి',
-      'Articles, videos, guides and answers to common questions.': 'వ్యాసాలు, వీడియోలు, గైడ్‌లు మరియు సాధారణ ప్రశ్నలకు సమాధానాలు.',
-      'Open the Knowledge Hub': 'నాలెడ్జ్ హబ్ తెరవండి', 'I want to check my lungs': 'నా ఊపిరితిత్తులను పరీక్షించుకోవాలి',
-      'Risk check, lung age and a symptom checker you can use now.': 'రిస్క్ చెక్, ఊపిరితిత్తుల వయసు, లక్షణాల పరిశీలన — ఇప్పుడే వాడండి.',
-      'Use the tools': 'టూల్స్ వాడండి', 'I want to stop smoking': 'నేను పొగ మానేయాలి',
-      'A structured quit programme with support and follow-up.': 'మద్దతు, ఫాలో-అప్‌తో కూడిన ప్రణాళికాబద్ధమైన మానేసే కార్యక్రమం.',
-      'Start Rendo Ūpiri': 'రెండో ఊపిరి మొదలుపెట్టండి',
       /* explore pulmonary care */
-      'Explore pulmonary care': 'ఊపిరితిత్తుల సంరక్షణను చూడండి',
       'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'పద్దెనిమిది వ్యాధులు, పరీక్షలు, ప్రక్రియలు — ఊపిరితిత్తులు పనిచేసే విధంగా వర్గీకరించబడ్డాయి, మీది వెంటనే కనుగొనడానికి.',
       'Airways': 'శ్వాసనాళాలు', 'Lung tissue': 'ఊపిరితిత్తుల కణజాలం',
       'Lung cancer & nodules': 'ఊపిరితిత్తుల క్యాన్సర్ & నాడ్యూల్స్', 'Lung circulation': 'ఊపిరితిత్తుల రక్తప్రసరణ',
@@ -3491,15 +3486,47 @@ class Component extends DCLogic {
       'When would a doctor recommend it?': 'వైద్యుడు దీన్ని ఎప్పుడు సూచిస్తారు?',
       'Related conditions': 'సంబంధిత వ్యాధులు', 'Which Yashoda specialists perform it': 'దీన్ని చేసే యశోద నిపుణులు',
       'Ask about this test': 'ఈ పరీక్ష గురించి అడగండి', 'All tests': 'అన్ని పరీక్షలు',
+      /* homepage questions, navigation and profile */
+      'Have a question about your breathing?': 'మీ శ్వాస గురించి సందేహమా?',
+      'Start here.': 'ఇక్కడ మొదలుపెట్టండి.',
+      'From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.': 'లక్షణాల నుండి నిర్ధారణ, చికిత్స, దీర్ఘకాలిక ఊపిరితిత్తుల ఆరోగ్యం వరకు — యశోద పల్మనాలజీతో మీ తదుపరి అడుగును కనుగొనండి.',
+      'What brings you here today?': 'ఈరోజు మీరు ఎందుకు వచ్చారు?',
+      'Choose what sounds most like you.': 'మీ పరిస్థితికి దగ్గరగా ఉన్నదాన్ని ఎంచుకోండి.',
+      'I\'ve been coughing for a while. Should I get it checked?': 'చాలా రోజులుగా దగ్గు ఉంది. పరీక్ష చేయించుకోవాలా?',
+      'Understand what could be causing it': 'కారణం ఏమిటో తెలుసుకోండి',
+      'I feel breathless. Is it something to worry about?': 'ఊపిరి ఆడటం లేదు. ఇది ఆందోళన కలిగించేదా?',
+      'Explore breathlessness': 'ఆయాసం గురించి తెలుసుకోండి',
+      'I have asthma. Am I really in control?': 'నాకు ఉబ్బసం ఉంది. అది నిజంగా అదుపులో ఉందా?',
+      'Check your asthma control': 'మీ ఉబ్బసం అదుపును పరిశీలించండి',
+      'I have COPD. How can I keep my lungs stable?': 'నాకు COPD ఉంది. ఊపిరితిత్తులను స్థిరంగా ఎలా ఉంచుకోవాలి?',
+      'Learn about COPD care': 'COPD సంరక్షణ గురించి తెలుసుకోండి',
+      'My scan showed a lung nodule. What happens next?': 'నా స్కాన్‌లో ఊపిరితిత్తుల నాడ్యూల్ కనిపించింది. తర్వాత ఏమిటి?',
+      'Understand the lung nodule journey': 'నాడ్యూల్ ప్రయాణాన్ని అర్థం చేసుకోండి',
+      'I want to understand my lungs better. Where do I start?': 'నా ఊపిరితిత్తుల గురించి బాగా తెలుసుకోవాలి. ఎక్కడ మొదలుపెట్టాలి?',
+      'Start your lung health journey': 'మీ ఊపిరితిత్తుల ఆరోగ్య ప్రయాణం మొదలుపెట్టండి',
+      'Explore Care': 'సంరక్షణ',
+      'Tools ▾': 'టూల్స్ ▾',
+      'Conditions we treat': 'మేము చికిత్స చేసే వ్యాధులు',
+      'Profile': 'ప్రొఫైల్',
+      'Profile — choose your space': 'ప్రొఫైల్ — మీ విభాగాన్ని ఎంచుకోండి',
+      'People': 'ప్రజలు',
+      'Patients and families': 'రోగులు, కుటుంబాలు',
+      'Corporate': 'కార్పొరేట్',
+      'Refer, discuss and learn': 'రెఫర్ చేయండి, చర్చించండి, నేర్చుకోండి',
+      'ŪPIRI@Work programmes': 'ఊపిరి@వర్క్ కార్యక్రమాలు',
+      'Awareness and teacher training': 'అవగాహన, ఉపాధ్యాయ శిక్షణ',
+      'Also for doctors': 'వైద్యుల కోసం మరిన్ని',
+      'The clinical side of ŪPIRI': 'ఊపిరి క్లినికల్ విభాగం',
+      'Read this month\'s case': 'ఈ నెల కేసు చదవండి',
       'Machine-translate the whole page ↗': 'పూర్తి పేజీని యంత్ర అనువాదం చేయండి ↗'
     },
     kn: {
-      'Explore Care ▾': 'ಆರೈಕೆ ▾', 'Doctors': 'ವೈದ್ಯರು', 'Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್',
-      'Tools ▾': 'ಟೂಲ್ಸ್ ▾', 'For Doctors ▾': 'ವೈದ್ಯರಿಗಾಗಿ ▾', 'Book': 'ಬುಕ್ ಮಾಡಿ',
+      'Doctors': 'ವೈದ್ಯರು', 'Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್',
+      'Book': 'ಬುಕ್ ಮಾಡಿ',
       'Menu': 'ಮೆನು', 'Main': 'ಮುಖ್ಯ', 'ŪPIRI home': 'ಊಪಿರಿ ಮುಖಪುಟ',
-      'Choose your ŪPIRI space': 'ನಿಮ್ಮ ಊಪಿರಿ ವಿಭಾಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ', 'Choose language': 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+      'Choose language': 'ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
       'Language': 'ಭಾಷೆ', 'ŪPIRI sections': 'ಊಪಿರಿ ವಿಭಾಗಗಳು',
-      'People · ప్రజలు': 'ಜನರು', 'Corporates': 'ಕಾರ್ಪೊರೇಟ್‌ಗಳು', 'Schools': 'ಶಾಲೆಗಳು',
+      'Schools': 'ಶಾಲೆಗಳು',
       'Conditions': 'ಕಾಯಿಲೆಗಳು', 'Tests & Procedures': 'ಪರೀಕ್ಷೆಗಳು & ಪ್ರಕ್ರಿಯೆಗಳು',
       'Nodule Journey': 'ನಾಡ್ಯೂಲ್ ಪ್ರಯಾಣ', 'Breath Clubs': 'ಉಸಿರಾಟ ಕ್ಲಬ್‌ಗಳು',
       'Allergy Calendar': 'ಅಲರ್ಜಿ ಕ್ಯಾಲೆಂಡರ್', 'Risk Check': 'ರಿಸ್ಕ್ ಚೆಕ್',
@@ -3511,27 +3538,8 @@ class Component extends DCLogic {
       'For doctors': 'ವೈದ್ಯರಿಗಾಗಿ', 'Find a specialist': 'ತಜ್ಞರನ್ನು ಹುಡುಕಿ',
       'Yashoda Pulmonology': 'ಯಶೋದಾ ಪಲ್ಮನಾಲಜಿ',
       'Precision and Personalized Pulmonary Care': 'ನಿಖರವಾದ ಮತ್ತು ವೈಯಕ್ತಿಕ ಶ್ವಾಸಕೋಶ ಆರೈಕೆ',
-      'Your lungs.': 'ನಿಮ್ಮ ಶ್ವಾಸಕೋಶಗಳು.',
-      'One place to understand them better.': 'ಅವುಗಳನ್ನು ಚೆನ್ನಾಗಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಒಂದೇ ಸ್ಥಳ.',
-      'Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.': 'ಶ್ವಾಸಕೋಶದ ಕಾಯಿಲೆಗಳನ್ನು ತಿಳಿಯಿರಿ, ನಿಮ್ಮ ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ, ಪ್ರಾಯೋಗಿಕ ಟೂಲ್ಸ್ ಬಳಸಿ, ಮತ್ತು ಯಶೋದಾ ಆಸ್ಪತ್ರೆಯಿಂದ ಶ್ವಾಸಕೋಶ ಆರೈಕೆ ಪಡೆಯಿರಿ.',
-      'Explore a condition': 'ಕಾಯಿಲೆಯನ್ನು ನೋಡಿ', 'Book an appointment': 'ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ',
+      'Book an appointment': 'ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ',
       'Quick tools:': 'ತ್ವರಿತ ಟೂಲ್ಸ್:', 'Quit Smoking': 'ಧೂಮಪಾನ ಬಿಡಿ', 'scroll': 'ಸ್ಕ್ರಾಲ್',
-      'What brings you here?': 'ನೀವು ಇಲ್ಲಿಗೆ ಏಕೆ ಬಂದಿದ್ದೀರಿ?',
-      'Start wherever you are. Each route leads to the part of ŪPIRI built for it.': 'ನೀವು ಎಲ್ಲಿದ್ದೀರೋ ಅಲ್ಲಿಂದಲೇ ಶುರು ಮಾಡಿ. ಪ್ರತಿ ದಾರಿಯೂ ಊಪಿರಿಯ ಸರಿಯಾದ ಭಾಗಕ್ಕೆ ಕರೆದೊಯ್ಯುತ್ತದೆ.',
-      'I have symptoms': 'ನನಗೆ ಲಕ್ಷಣಗಳಿವೆ',
-      'Cough, breathlessness, wheeze or chest discomfort.': 'ಕೆಮ್ಮು, ಉಸಿರಾಟದ ತೊಂದರೆ, ಸೀಟಿ ಶಬ್ದ ಅಥವಾ ಎದೆಯಲ್ಲಿ ಅಸ್ವಸ್ಥತೆ.',
-      'Check my symptoms': 'ನನ್ನ ಲಕ್ಷಣಗಳನ್ನು ಪರಿಶೀಲಿಸಿ', 'I have been diagnosed': 'ನನಗೆ ರೋಗನಿರ್ಣಯವಾಗಿದೆ',
-      'Asthma, COPD, ILD, pulmonary hypertension and more.': 'ಅಸ್ತಮಾ, COPD, ILD, ಪಲ್ಮನರಿ ಹೈಪರ್‌ಟೆನ್ಷನ್ ಮತ್ತು ಇನ್ನಷ್ಟು.',
-      'Find my condition': 'ನನ್ನ ಕಾಯಿಲೆಯನ್ನು ಹುಡುಕಿ', 'My scan showed something': 'ನನ್ನ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಏನೋ ಕಂಡಿದೆ',
-      'A nodule, an abnormal X-ray or CT, or a lung lesion.': 'ನಾಡ್ಯೂಲ್, ಅಸಹಜ ಎಕ್ಸ್-ರೇ ಅಥವಾ ಸಿಟಿ, ಅಥವಾ ಶ್ವಾಸಕೋಶದ ಗಾಯ.',
-      'Understand the pathway': 'ಮಾರ್ಗವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ', 'I want to learn': 'ನಾನು ತಿಳಿಯಬೇಕು',
-      'Articles, videos, guides and answers to common questions.': 'ಲೇಖನಗಳು, ವೀಡಿಯೊಗಳು, ಮಾರ್ಗದರ್ಶಿಗಳು ಮತ್ತು ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರಗಳು.',
-      'Open the Knowledge Hub': 'ನಾಲೆಡ್ಜ್ ಹಬ್ ತೆರೆಯಿರಿ', 'I want to check my lungs': 'ನನ್ನ ಶ್ವಾಸಕೋಶವನ್ನು ಪರೀಕ್ಷಿಸಬೇಕು',
-      'Risk check, lung age and a symptom checker you can use now.': 'ರಿಸ್ಕ್ ಚೆಕ್, ಶ್ವಾಸಕೋಶದ ವಯಸ್ಸು ಮತ್ತು ಲಕ್ಷಣ ಪರಿಶೀಲನೆ — ಈಗಲೇ ಬಳಸಿ.',
-      'Use the tools': 'ಟೂಲ್ಸ್ ಬಳಸಿ', 'I want to stop smoking': 'ನಾನು ಧೂಮಪಾನ ಬಿಡಬೇಕು',
-      'A structured quit programme with support and follow-up.': 'ಬೆಂಬಲ ಮತ್ತು ಫಾಲೋ-ಅಪ್ ಇರುವ ಯೋಜಿತ ಧೂಮಪಾನ ತ್ಯಜಿಸುವ ಕಾರ್ಯಕ್ರಮ.',
-      'Start Rendo Ūpiri': 'ರೆಂಡೋ ಊಪಿರಿ ಪ್ರಾರಂಭಿಸಿ',
-      'Explore pulmonary care': 'ಶ್ವಾಸಕೋಶ ಆರೈಕೆಯನ್ನು ನೋಡಿ',
       'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'ಹದಿನೆಂಟು ಕಾಯಿಲೆಗಳು, ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗಳು — ಶ್ವಾಸಕೋಶ ಕೆಲಸ ಮಾಡುವ ರೀತಿಯಲ್ಲಿ ಜೋಡಿಸಲಾಗಿದೆ, ನಿಮ್ಮದನ್ನು ಬೇಗ ಹುಡುಕಲು.',
       'Airways': 'ಶ್ವಾಸನಾಳಗಳು', 'Lung tissue': 'ಶ್ವಾಸಕೋಶದ ಅಂಗಾಂಶ',
       'Lung cancer & nodules': 'ಶ್ವಾಸಕೋಶದ ಕ್ಯಾನ್ಸರ್ & ನಾಡ್ಯೂಲ್‌ಗಳು', 'Lung circulation': 'ಶ್ವಾಸಕೋಶದ ರಕ್ತಪರಿಚಲನೆ',
@@ -3595,15 +3603,47 @@ class Component extends DCLogic {
       'When would a doctor recommend it?': 'ವೈದ್ಯರು ಇದನ್ನು ಯಾವಾಗ ಸೂಚಿಸುತ್ತಾರೆ?',
       'Related conditions': 'ಸಂಬಂಧಿತ ಕಾಯಿಲೆಗಳು', 'Which Yashoda specialists perform it': 'ಇದನ್ನು ಮಾಡುವ ಯಶೋದಾ ತಜ್ಞರು',
       'Ask about this test': 'ಈ ಪರೀಕ್ಷೆಯ ಬಗ್ಗೆ ಕೇಳಿ', 'All tests': 'ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳು',
+      /* homepage questions, navigation and profile */
+      'Have a question about your breathing?': 'ನಿಮ್ಮ ಉಸಿರಾಟದ ಬಗ್ಗೆ ಪ್ರಶ್ನೆ ಇದೆಯೇ?',
+      'Start here.': 'ಇಲ್ಲಿಂದ ಶುರು ಮಾಡಿ.',
+      'From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.': 'ಲಕ್ಷಣಗಳಿಂದ ರೋಗನಿರ್ಣಯ, ಚಿಕಿತ್ಸೆ ಮತ್ತು ದೀರ್ಘಕಾಲದ ಶ್ವಾಸಕೋಶ ಆರೋಗ್ಯದವರೆಗೆ — ಯಶೋದಾ ಪಲ್ಮನಾಲಜಿಯೊಂದಿಗೆ ನಿಮ್ಮ ಮುಂದಿನ ಹೆಜ್ಜೆಯನ್ನು ಕಂಡುಕೊಳ್ಳಿ.',
+      'What brings you here today?': 'ಇಂದು ನೀವು ಇಲ್ಲಿಗೆ ಏಕೆ ಬಂದಿದ್ದೀರಿ?',
+      'Choose what sounds most like you.': 'ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಗೆ ಹತ್ತಿರವಾದದ್ದನ್ನು ಆಯ್ಕೆಮಾಡಿ.',
+      'I\'ve been coughing for a while. Should I get it checked?': 'ಬಹಳ ದಿನಗಳಿಂದ ಕೆಮ್ಮು ಇದೆ. ಪರೀಕ್ಷಿಸಿಕೊಳ್ಳಬೇಕೇ?',
+      'Understand what could be causing it': 'ಕಾರಣ ಏನಿರಬಹುದು ಎಂದು ತಿಳಿಯಿರಿ',
+      'I feel breathless. Is it something to worry about?': 'ಉಸಿರಾಟದ ತೊಂದರೆ ಇದೆ. ಇದು ಚಿಂತೆಯ ವಿಷಯವೇ?',
+      'Explore breathlessness': 'ಉಸಿರಾಟದ ತೊಂದರೆ ಬಗ್ಗೆ ನೋಡಿ',
+      'I have asthma. Am I really in control?': 'ನನಗೆ ಅಸ್ತಮಾ ಇದೆ. ಅದು ನಿಜವಾಗಿಯೂ ನಿಯಂತ್ರಣದಲ್ಲಿದೆಯೇ?',
+      'Check your asthma control': 'ನಿಮ್ಮ ಅಸ್ತಮಾ ನಿಯಂತ್ರಣ ಪರಿಶೀಲಿಸಿ',
+      'I have COPD. How can I keep my lungs stable?': 'ನನಗೆ COPD ಇದೆ. ಶ್ವಾಸಕೋಶವನ್ನು ಸ್ಥಿರವಾಗಿ ಹೇಗೆ ಇಡುವುದು?',
+      'Learn about COPD care': 'COPD ಆರೈಕೆ ಬಗ್ಗೆ ತಿಳಿಯಿರಿ',
+      'My scan showed a lung nodule. What happens next?': 'ನನ್ನ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಶ್ವಾಸಕೋಶದ ನಾಡ್ಯೂಲ್ ಕಂಡಿದೆ. ಮುಂದೇನು?',
+      'Understand the lung nodule journey': 'ನಾಡ್ಯೂಲ್ ಪ್ರಯಾಣವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ',
+      'I want to understand my lungs better. Where do I start?': 'ನನ್ನ ಶ್ವಾಸಕೋಶದ ಬಗ್ಗೆ ಚೆನ್ನಾಗಿ ತಿಳಿಯಬೇಕು. ಎಲ್ಲಿಂದ ಶುರು ಮಾಡಲಿ?',
+      'Start your lung health journey': 'ನಿಮ್ಮ ಶ್ವಾಸಕೋಶ ಆರೋಗ್ಯ ಪ್ರಯಾಣ ಶುರು ಮಾಡಿ',
+      'Explore Care': 'ಆರೈಕೆ',
+      'Tools ▾': 'ಟೂಲ್ಸ್ ▾',
+      'Conditions we treat': 'ನಾವು ಚಿಕಿತ್ಸೆ ನೀಡುವ ಕಾಯಿಲೆಗಳು',
+      'Profile': 'ಪ್ರೊಫೈಲ್',
+      'Profile — choose your space': 'ಪ್ರೊಫೈಲ್ — ನಿಮ್ಮ ವಿಭಾಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+      'People': 'ಜನರು',
+      'Patients and families': 'ರೋಗಿಗಳು ಮತ್ತು ಕುಟುಂಬಗಳು',
+      'Corporate': 'ಕಾರ್ಪೊರೇಟ್',
+      'Refer, discuss and learn': 'ರೆಫರ್ ಮಾಡಿ, ಚರ್ಚಿಸಿ, ಕಲಿಯಿರಿ',
+      'ŪPIRI@Work programmes': 'ಊಪಿರಿ@ವರ್ಕ್ ಕಾರ್ಯಕ್ರಮಗಳು',
+      'Awareness and teacher training': 'ಅರಿವು ಮತ್ತು ಶಿಕ್ಷಕರ ತರಬೇತಿ',
+      'Also for doctors': 'ವೈದ್ಯರಿಗಾಗಿ ಇನ್ನಷ್ಟು',
+      'The clinical side of ŪPIRI': 'ಊಪಿರಿಯ ಕ್ಲಿನಿಕಲ್ ಭಾಗ',
+      'Read this month\'s case': 'ಈ ತಿಂಗಳ ಪ್ರಕರಣ ಓದಿ',
       'Machine-translate the whole page ↗': 'ಪೂರ್ಣ ಪುಟವನ್ನು ಯಂತ್ರ ಅನುವಾದ ಮಾಡಿ ↗'
     },
     bn: {
-      'Explore Care ▾': 'চিকিৎসা ▾', 'Doctors': 'ডাক্তার', 'Knowledge Hub': 'নলেজ হাব',
-      'Tools ▾': 'টুলস ▾', 'For Doctors ▾': 'ডাক্তারদের জন্য ▾', 'Book': 'বুক করুন',
+      'Doctors': 'ডাক্তার', 'Knowledge Hub': 'নলেজ হাব',
+      'Book': 'বুক করুন',
       'Menu': 'মেনু', 'Main': 'প্রধান', 'ŪPIRI home': 'ঊপিরি হোম',
-      'Choose your ŪPIRI space': 'আপনার ঊপিরি বিভাগ বেছে নিন', 'Choose language': 'ভাষা নির্বাচন করুন',
+      'Choose language': 'ভাষা নির্বাচন করুন',
       'Language': 'ভাষা', 'ŪPIRI sections': 'ঊপিরি বিভাগসমূহ',
-      'People · ప్రజలు': 'সাধারণ মানুষ', 'Corporates': 'কর্পোরেট', 'Schools': 'স্কুল',
+      'Schools': 'স্কুল',
       'Conditions': 'রোগসমূহ', 'Tests & Procedures': 'পরীক্ষা ও প্রক্রিয়া',
       'Nodule Journey': 'নডিউল যাত্রা', 'Breath Clubs': 'শ্বাস ক্লাব',
       'Allergy Calendar': 'অ্যালার্জি ক্যালেন্ডার', 'Risk Check': 'ঝুঁকি যাচাই',
@@ -3615,27 +3655,8 @@ class Component extends DCLogic {
       'For doctors': 'ডাক্তারদের জন্য', 'Find a specialist': 'বিশেষজ্ঞ খুঁজুন',
       'Yashoda Pulmonology': 'যশোদা পালমোনোলজি',
       'Precision and Personalized Pulmonary Care': 'নির্ভুল ও ব্যক্তিগত ফুসফুস চিকিৎসা',
-      'Your lungs.': 'আপনার ফুসফুস।',
-      'One place to understand them better.': 'এগুলি আরও ভালোভাবে বোঝার একটিই জায়গা।',
-      'Explore lung conditions, understand your tests and procedures, use practical self-management tools, and reach pulmonary care from Yashoda Hospitals.': 'ফুসফুসের রোগ জানুন, আপনার পরীক্ষা ও প্রক্রিয়া বুঝুন, কাজে লাগে এমন টুলস ব্যবহার করুন, এবং যশোদা হাসপাতাল থেকে ফুসফুসের চিকিৎসা নিন।',
-      'Explore a condition': 'একটি রোগ দেখুন', 'Book an appointment': 'অ্যাপয়েন্টমেন্ট বুক করুন',
+      'Book an appointment': 'অ্যাপয়েন্টমেন্ট বুক করুন',
       'Quick tools:': 'দ্রুত টুলস:', 'Quit Smoking': 'ধূমপান ছাড়ুন', 'scroll': 'স্ক্রল',
-      'What brings you here?': 'আপনি কী কারণে এসেছেন?',
-      'Start wherever you are. Each route leads to the part of ŪPIRI built for it.': 'আপনি যেখানেই আছেন সেখান থেকেই শুরু করুন। প্রতিটি পথ ঊপিরির সঠিক অংশে নিয়ে যায়।',
-      'I have symptoms': 'আমার উপসর্গ আছে',
-      'Cough, breathlessness, wheeze or chest discomfort.': 'কাশি, শ্বাসকষ্ট, শ্বাসে সাঁই সাঁই শব্দ বা বুকে অস্বস্তি।',
-      'Check my symptoms': 'আমার উপসর্গ যাচাই করুন', 'I have been diagnosed': 'আমার রোগ নির্ণয় হয়েছে',
-      'Asthma, COPD, ILD, pulmonary hypertension and more.': 'অ্যাজমা, COPD, ILD, পালমোনারি হাইপারটেনশন এবং আরও।',
-      'Find my condition': 'আমার রোগ খুঁজুন', 'My scan showed something': 'আমার স্ক্যানে কিছু ধরা পড়েছে',
-      'A nodule, an abnormal X-ray or CT, or a lung lesion.': 'একটি নডিউল, অস্বাভাবিক এক্স-রে বা সিটি, অথবা ফুসফুসের ক্ষত।',
-      'Understand the pathway': 'পথটি বুঝে নিন', 'I want to learn': 'আমি জানতে চাই',
-      'Articles, videos, guides and answers to common questions.': 'নিবন্ধ, ভিডিও, গাইড এবং সাধারণ প্রশ্নের উত্তর।',
-      'Open the Knowledge Hub': 'নলেজ হাব খুলুন', 'I want to check my lungs': 'আমি আমার ফুসফুস পরীক্ষা করতে চাই',
-      'Risk check, lung age and a symptom checker you can use now.': 'ঝুঁকি যাচাই, ফুসফুসের বয়স ও উপসর্গ যাচাই — এখনই ব্যবহার করুন।',
-      'Use the tools': 'টুলস ব্যবহার করুন', 'I want to stop smoking': 'আমি ধূমপান ছাড়তে চাই',
-      'A structured quit programme with support and follow-up.': 'সহায়তা ও ফলো-আপ সহ একটি সুসংগঠিত ধূমপান ত্যাগ কর্মসূচি।',
-      'Start Rendo Ūpiri': 'রেন্ডো ঊপিরি শুরু করুন',
-      'Explore pulmonary care': 'ফুসফুসের চিকিৎসা দেখুন',
       'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'আঠারোটি রোগ, পরীক্ষা ও প্রক্রিয়া — ফুসফুস যেভাবে কাজ করে সেভাবেই সাজানো, যাতে আপনারটি দ্রুত খুঁজে পান।',
       'Airways': 'শ্বাসনালী', 'Lung tissue': 'ফুসফুসের কলা',
       'Lung cancer & nodules': 'ফুসফুসের ক্যান্সার ও নডিউল', 'Lung circulation': 'ফুসফুসের রক্তসঞ্চালন',
@@ -3699,6 +3720,38 @@ class Component extends DCLogic {
       'When would a doctor recommend it?': 'ডাক্তার কখন এটি পরামর্শ দেন?',
       'Related conditions': 'সম্পর্কিত রোগ', 'Which Yashoda specialists perform it': 'যশোদার যেসব বিশেষজ্ঞ এটি করেন',
       'Ask about this test': 'এই পরীক্ষা সম্পর্কে জিজ্ঞাসা করুন', 'All tests': 'সব পরীক্ষা',
+      /* homepage questions, navigation and profile */
+      'Have a question about your breathing?': 'আপনার শ্বাস নিয়ে প্রশ্ন আছে?',
+      'Start here.': 'এখান থেকে শুরু করুন।',
+      'From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.': 'উপসর্গ থেকে রোগনির্ণয়, চিকিৎসা ও দীর্ঘমেয়াদি ফুসফুসের স্বাস্থ্য পর্যন্ত — যশোদা পালমোনোলজির সঙ্গে আপনার পরবর্তী পদক্ষেপ খুঁজে নিন।',
+      'What brings you here today?': 'আজ আপনি কী কারণে এসেছেন?',
+      'Choose what sounds most like you.': 'আপনার সঙ্গে সবচেয়ে মেলে এমনটি বেছে নিন।',
+      'I\'ve been coughing for a while. Should I get it checked?': 'অনেক দিন ধরে কাশি হচ্ছে। পরীক্ষা করানো উচিত?',
+      'Understand what could be causing it': 'কারণ কী হতে পারে জানুন',
+      'I feel breathless. Is it something to worry about?': 'শ্বাসকষ্ট হচ্ছে। এটা কি চিন্তার বিষয়?',
+      'Explore breathlessness': 'শ্বাসকষ্ট সম্পর্কে দেখুন',
+      'I have asthma. Am I really in control?': 'আমার অ্যাজমা আছে। সত্যিই কি নিয়ন্ত্রণে আছে?',
+      'Check your asthma control': 'আপনার অ্যাজমা নিয়ন্ত্রণ যাচাই করুন',
+      'I have COPD. How can I keep my lungs stable?': 'আমার COPD আছে। ফুসফুস স্থিতিশীল রাখব কীভাবে?',
+      'Learn about COPD care': 'COPD চিকিৎসা সম্পর্কে জানুন',
+      'My scan showed a lung nodule. What happens next?': 'আমার স্ক্যানে ফুসফুসের নডিউল ধরা পড়েছে। এরপর কী?',
+      'Understand the lung nodule journey': 'নডিউল যাত্রা বুঝে নিন',
+      'I want to understand my lungs better. Where do I start?': 'ফুসফুস সম্পর্কে ভালোভাবে জানতে চাই। কোথা থেকে শুরু করব?',
+      'Start your lung health journey': 'আপনার ফুসফুস স্বাস্থ্য যাত্রা শুরু করুন',
+      'Explore Care': 'চিকিৎসা',
+      'Tools ▾': 'টুলস ▾',
+      'Conditions we treat': 'যেসব রোগের চিকিৎসা করি',
+      'Profile': 'প্রোফাইল',
+      'Profile — choose your space': 'প্রোফাইল — আপনার বিভাগ বেছে নিন',
+      'People': 'সাধারণ মানুষ',
+      'Patients and families': 'রোগী ও পরিবার',
+      'Corporate': 'কর্পোরেট',
+      'Refer, discuss and learn': 'রেফার করুন, আলোচনা করুন, শিখুন',
+      'ŪPIRI@Work programmes': 'ঊপিরি@ওয়ার্ক কর্মসূচি',
+      'Awareness and teacher training': 'সচেতনতা ও শিক্ষক প্রশিক্ষণ',
+      'Also for doctors': 'ডাক্তারদের জন্য আরও',
+      'The clinical side of ŪPIRI': 'ঊপিরির ক্লিনিক্যাল দিক',
+      'Read this month\'s case': 'এই মাসের কেস পড়ুন',
       'Machine-translate the whole page ↗': 'সম্পূর্ণ পৃষ্ঠা মেশিন-অনুবাদ করুন ↗'
     }
   };
@@ -3867,14 +3920,17 @@ class Component extends DCLogic {
     { g: 'Diagnostics & procedures', ids: ['pulmonary-function-testing', 'cpet', 'bronchoscopy', 'interventional-pulmonology', 'lung-transplantation'] }
   ];
 
-  /* ============ HOMEPAGE: WHAT BRINGS YOU HERE? ============ */
-  ENTRY_POINTS = [
-    { k: 'symptoms', t: 'I have symptoms', d: 'Cough, breathlessness, wheeze or chest discomfort.', cta: 'Check my symptoms', ic: 'wind' },
-    { k: 'diagnosed', t: 'I have been diagnosed', d: 'Asthma, COPD, ILD, pulmonary hypertension and more.', cta: 'Find my condition', ic: 'lung' },
-    { k: 'scan', t: 'My scan showed something', d: 'A nodule, an abnormal X-ray or CT, or a lung lesion.', cta: 'Understand the pathway', ic: 'scan' },
-    { k: 'learn', t: 'I want to learn', d: 'Articles, videos, guides and answers to common questions.', cta: 'Open the Knowledge Hub', ic: 'micro' },
-    { k: 'tools', t: 'I want to check my lungs', d: 'Risk check, lung age and a symptom checker you can use now.', cta: 'Use the tools', ic: 'pulse' },
-    { k: 'quit', t: 'I want to stop smoking', d: 'A structured quit programme with support and follow-up.', cta: 'Start Rendo Ūpiri', ic: 'flame' }
+  /* ============ HOMEPAGE: WHAT BRINGS YOU HERE TODAY? ============
+     The homepage opens with the question the patient already has, in their own
+     words, and each one leads straight into the ŪPIRI experience built for it —
+     not into a category of articles. `k` is matched in renderVals to an action. */
+  QUESTIONS = [
+    { k: 'cough', q: "I've been coughing for a while. Should I get it checked?", cta: 'Understand what could be causing it', ic: 'wind' },
+    { k: 'breath', q: 'I feel breathless. Is it something to worry about?', cta: 'Explore breathlessness', ic: 'pulse' },
+    { k: 'asthma', q: 'I have asthma. Am I really in control?', cta: 'Check your asthma control', ic: 'lung' },
+    { k: 'copd', q: 'I have COPD. How can I keep my lungs stable?', cta: 'Learn about COPD care', ic: 'shield' },
+    { k: 'nodule', q: 'My scan showed a lung nodule. What happens next?', cta: 'Understand the lung nodule journey', ic: 'scan' },
+    { k: 'start', q: 'I want to understand my lungs better. Where do I start?', cta: 'Start your lung health journey', ic: 'micro' }
   ];
 
   /* ============ ŪPIRI CLINICAL NETWORK (/alumni) ============ */
@@ -4458,6 +4514,27 @@ class Component extends DCLogic {
       background: sel ? 'rgba(44,42,107,0.09)' : 'transparent'
     };
   }
+  /* Opens the symptom checker with one symptom already ticked, so a patient who
+     answered "I've been coughing" on the homepage carries that answer with them. */
+  goTriageWith = (id) => {
+    this.setState({ route: 'triage', tStep: 0, tSel: [id], tFollow: {}, khTopic: null, docId: null, procId: null });
+    this.state.docId = null; this.state.procId = null;
+    this.syncUrl('triage', null);
+    window.scrollTo({ top: 0 });
+  };
+  profileBtnSt(active) {
+    const base = 'display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;transition:background .15s ease;';
+    return base + (active
+      ? 'color:#fff;background:#2C2A6B;border:1px solid #2C2A6B'
+      : 'color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12)');
+  }
+  profileRowSt(sel) {
+    return {
+      display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px', textAlign: 'left',
+      padding: '10px 13px', borderRadius: '12px', border: 'none', cursor: 'pointer',
+      background: sel ? 'rgba(44,42,107,0.09)' : 'transparent'
+    };
+  }
   langChipSt(sel) {
     return {
       padding: '9px 15px', borderRadius: '999px', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
@@ -5019,8 +5096,6 @@ class Component extends DCLogic {
       isDoctors: s.route === 'doctors', isCorporates: s.route === 'corporates', isSchools: s.route === 'schools',
       goHome: () => this.go('home'), goRisk: () => this.go('risk'), goBreath: () => this.go('breath'), goJourney: () => this.go('journey'), goRendo: () => this.go('rendo'),
       goDoctors: () => this.go('doctors'), goCorporates: () => this.go('corporates'), goSchools: () => this.go('schools'),
-      spaceValue: ['doctors', 'corporates', 'schools'].includes(s.route) ? s.route : 'people',
-      pickSpace: (e) => { const v = e.target.value; this.go(v === 'people' ? 'home' : v); },
       wa,
       /* risk */
       rq: { t: q.t, te: q.te || '', note: q.note || '' },
@@ -5074,7 +5149,7 @@ class Component extends DCLogic {
       navRisk: this.navSt(s.route === 'risk'), navBreath: this.navSt(s.route === 'breath'),
       navClubs: this.navSt(s.route === 'clubs' || s.route === 'club'),
       navJourney: this.navSt(s.route === 'journey'), navRendo: this.navSt(s.route === 'rendo'),
-      navKnowledge: this.navSt(s.route === 'knowledge'), navAlumni: this.navSt(s.route === 'alumni'),
+      navAlumni: this.navSt(s.route === 'alumni'),
       navFind: this.navSt(s.route === 'find'), curFind: s.route === 'find' ? 'page' : 'false',
       curRisk: s.route === 'risk' ? 'page' : 'false', curBreath: s.route === 'breath' ? 'page' : 'false',
       curClubs: (s.route === 'clubs' || s.route === 'club') ? 'page' : 'false',
@@ -5125,15 +5200,33 @@ class Component extends DCLogic {
         })
       })),
 
-      /* ---- navigation (§14) ---- */
-      menuCare: s.menu === 'care', menuTools: s.menu === 'tools', menuDocs: s.menu === 'docs',
-      careExp: s.menu === 'care' ? 'true' : 'false', toolsExp: s.menu === 'tools' ? 'true' : 'false', docsExp: s.menu === 'docs' ? 'true' : 'false',
-      toggleCare: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'care' ? null : 'care' }); },
+      /* ---- navigation (§14) ----
+         Every top-level item navigates on click. Only Tools and Profile open a
+         menu, and each of their entries is a real destination — nothing in the
+         bar is a label that merely looks tappable. */
+      menuTools: s.menu === 'tools', menuProfile: s.menu === 'profile',
+      toolsExp: s.menu === 'tools' ? 'true' : 'false', profileExp: s.menu === 'profile' ? 'true' : 'false',
       toggleTools: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'tools' ? null : 'tools' }); },
-      toggleDocs: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'docs' ? null : 'docs' }); },
-      navCareSt: this.navSt(['knowledge', 'journey', 'clubs', 'club', 'allergy', 'procs'].includes(s.route)),
-      navToolsSt: this.navSt(['risk', 'triage', 'breath', 'rendo', 'shikhar'].includes(s.route)),
-      navDocsSt: this.navSt(['alumni', 'doctors', 'case'].includes(s.route)),
+      toggleProfile: (e) => { if (e) e.stopPropagation(); this.setState({ menu: s.menu === 'profile' ? null : 'profile' }); },
+      navCareSt: this.navSt(s.route === 'knowledge'),
+      navProcs: this.navSt(s.route === 'procs'),
+      curProcs: s.route === 'procs' ? 'page' : 'false',
+      navToolsSt: this.navSt(['risk', 'triage', 'breath', 'rendo', 'shikhar', 'journey', 'clubs', 'club', 'allergy'].includes(s.route)),
+      navProfileSt: this.profileBtnSt(['doctors', 'corporates', 'schools'].includes(s.route)),
+      profileLabel: { doctors: 'Doctors', corporates: 'Corporate', schools: 'Schools' }[s.route] || 'People',
+      profileItems: [
+        { k: 'people', t: 'People', d: 'Patients and families', r: 'home' },
+        { k: 'doctors', t: 'Doctors', d: 'Refer, discuss and learn', r: 'doctors' },
+        { k: 'corporates', t: 'Corporate', d: 'ŪPIRI@Work programmes', r: 'corporates' },
+        { k: 'schools', t: 'Schools', d: 'Awareness and teacher training', r: 'schools' }
+      ].map(p => {
+        const on = p.r === 'home' ? !['doctors', 'corporates', 'schools'].includes(s.route) : s.route === p.r;
+        return {
+          t: p.t, d: p.d, cur: on ? 'true' : 'false',
+          st: this.profileRowSt(on), chip: this.langChipSt(on),
+          go: (e) => { if (e) e.stopPropagation(); this.setState({ menu: null, mobileNav: false }); this.go(p.r); }
+        };
+      }),
       mobileNavOpen: s.mobileNav, mobileNavClosed: !s.mobileNav,
       toggleMobileNav: (e) => { if (e) e.stopPropagation(); this.setState({ mobileNav: !s.mobileNav, menu: null }); },
 
@@ -5149,52 +5242,55 @@ class Component extends DCLogic {
       })),
       mtShow: s.lang !== 'en',
       mtHref: this.mtUrl(s.lang === 'en' ? 'te' : s.lang),
+      /* The Tools menu carries every patient-facing experience; the bar's other
+         items go straight to their page. Nothing here is grouped for its own
+         sake — a menu exists only where there are several real destinations. */
       navItems: [
-        { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
-        { t: 'Tests & Procedures', go: () => this.go('procs'), grp: 'care' },
-        { t: 'Nodule Journey', go: () => this.go('journey'), grp: 'care' },
-        { t: 'Breath Clubs', go: () => this.go('clubs'), grp: 'care' },
-        { t: 'Allergy Calendar', go: () => this.go('allergy'), grp: 'care' },
-        { t: 'Risk Check', go: () => this.go('risk'), grp: 'tools' },
-        { t: 'Symptom Checker', go: () => this.go('triage'), grp: 'tools' },
-        { t: 'Lung Age', go: () => this.go('breath'), grp: 'tools' },
-        { t: 'Rendo Ūpiri — quit smoking', go: () => this.go('rendo'), grp: 'tools' },
-        { t: 'Shikhar — altitude check', go: () => this.go('shikhar'), grp: 'tools' },
-        { t: 'ŪPIRI Clinical Network', go: () => this.go('alumni'), grp: 'docs' },
-        { t: 'Refer a patient', go: () => this.go('doctors'), grp: 'docs' },
-        { t: 'Case of the Month', go: () => this.go('case'), grp: 'docs' }
+        { t: 'Risk Check', go: () => this.go('risk') },
+        { t: 'Symptom Checker', go: () => this.go('triage') },
+        { t: 'Lung Age', go: () => this.go('breath') },
+        { t: 'Nodule Journey', go: () => this.go('journey') },
+        { t: 'Breath Clubs', go: () => this.go('clubs') },
+        { t: 'Allergy Calendar', go: () => this.go('allergy') },
+        { t: 'Rendo Ūpiri — quit smoking', go: () => this.go('rendo') },
+        { t: 'Shikhar — altitude check', go: () => this.go('shikhar') }
       ].map(i => ({
-        t: i.t, grp: i.grp,
-        inCare: i.grp === 'care', inTools: i.grp === 'tools', inDocs: i.grp === 'docs',
+        t: i.t,
         go: () => { this.setState({ menu: null, mobileNav: false }); i.go(); }
       })),
 
+      /* The sheet is the whole navigation on a phone, so it lists destinations
+         only — a heading here is a label, never something that looks tappable
+         and then does nothing. */
       navSections: [
-        { g: 'Explore care', keys: ['care'] },
-        { g: 'Doctors', keys: ['find'] },
-        { g: 'Tools', keys: ['tools'] },
-        { g: 'For doctors', keys: ['docs'] }
+        {
+          g: 'Explore care',
+          items: [
+            { t: 'Conditions', r: 'knowledge' },
+            { t: 'Knowledge Hub', r: 'knowledge' },
+            { t: 'Tests & Procedures', r: 'procs' },
+            { t: 'Find a specialist', r: 'find' }
+          ]
+        },
+        {
+          g: 'Tools',
+          items: [
+            { t: 'Risk Check', r: 'risk' },
+            { t: 'Symptom Checker', r: 'triage' },
+            { t: 'Lung Age', r: 'breath' },
+            { t: 'Nodule Journey', r: 'journey' },
+            { t: 'Breath Clubs', r: 'clubs' },
+            { t: 'Allergy Calendar', r: 'allergy' },
+            { t: 'Rendo Ūpiri — quit smoking', r: 'rendo' },
+            { t: 'Shikhar — altitude check', r: 'shikhar' }
+          ]
+        }
       ].map(sec => ({
         g: sec.g,
-        items: sec.keys[0] === 'find'
-          ? [{ t: 'Find a specialist', go: () => { this.setState({ mobileNav: false }); this.go('find'); } },
-             { t: 'Knowledge Hub', go: () => { this.setState({ mobileNav: false }); this.go('knowledge'); } }]
-          : [
-            { t: 'Conditions', go: () => this.go('knowledge'), grp: 'care' },
-            { t: 'Tests & Procedures', go: () => this.go('procs'), grp: 'care' },
-            { t: 'Nodule Journey', go: () => this.go('journey'), grp: 'care' },
-            { t: 'Breath Clubs', go: () => this.go('clubs'), grp: 'care' },
-            { t: 'Allergy Calendar', go: () => this.go('allergy'), grp: 'care' },
-            { t: 'Risk Check', go: () => this.go('risk'), grp: 'tools' },
-            { t: 'Symptom Checker', go: () => this.go('triage'), grp: 'tools' },
-            { t: 'Lung Age', go: () => this.go('breath'), grp: 'tools' },
-            { t: 'Rendo Ūpiri — quit smoking', go: () => this.go('rendo'), grp: 'tools' },
-            { t: 'Shikhar — altitude check', go: () => this.go('shikhar'), grp: 'tools' },
-            { t: 'ŪPIRI Clinical Network', go: () => this.go('alumni'), grp: 'docs' },
-            { t: 'Refer a patient', go: () => this.go('doctors'), grp: 'docs' },
-            { t: 'Case of the Month', go: () => this.go('case'), grp: 'docs' }
-          ].filter(i => sec.keys.includes(i.grp))
-            .map(i => ({ t: i.t, go: () => { this.setState({ mobileNav: false, menu: null }); i.go(); } }))
+        items: sec.items.map(i => ({
+          t: i.t,
+          go: () => { this.setState({ mobileNav: false, menu: null }); this.go(i.r); }
+        }))
       })),
 
       /* ---- specialist finder ---- */
@@ -5236,13 +5332,25 @@ class Component extends DCLogic {
       tpDocs: tp ? this.DOCTORS.filter(d => d.conds.includes(tp.id)).slice(0, 3).map(docCard) : [],
       tpHasDocs: tp ? this.DOCTORS.some(d => d.conds.includes(tp.id)) : false,
 
-      /* ---- what brings you here? ---- */
-      entryPoints: this.ENTRY_POINTS.map(e => ({
-        t: e.t, d: e.d, cta: e.cta, ...this.iconOf(e.ic),
-        go: () => ({ symptoms: () => this.go('triage'), diagnosed: () => this.go('knowledge'),
-          scan: () => this.go('journey'), learn: () => this.go('knowledge'),
-          tools: () => this.go('risk'), quit: () => this.go('rendo') })[e.k]()
+      /* ---- what brings you here today? ----
+         Each question opens the tool or pathway that answers it. The two symptom
+         questions start the checker with that symptom already ticked, so the
+         patient continues from where they left off rather than starting over. */
+      questions: this.QUESTIONS.map(q => ({
+        q: q.q, cta: q.cta, ...this.iconOf(q.ic),
+        go: () => ({
+          cough: () => this.goTriageWith('cough'),
+          breath: () => this.goTriageWith('breath'),
+          asthma: () => this.goClub('asthma'),
+          copd: () => this.goTopic('copd'),
+          nodule: () => this.go('journey'),
+          start: () => this.go('risk')
+        })[q.k]()
       })),
+      goQuestions: () => {
+        const el = document.getElementById('questions');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      },
 
       /* ---- clinical review status ---- */
       revText: this.REVIEW.reviewed
