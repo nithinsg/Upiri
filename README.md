@@ -83,7 +83,8 @@ canvas with inline styles only. **Re-exports need the same two edits.**
 
 The page opens with the question the patient already has, in their own words, rather than
 with categories of information. Hero: **ŪPIRI** → *Yashoda Pulmonology · Precision and
-Personalized Pulmonary Care* → "Have a question about your breathing? Start here." Then
+Personalized Pulmonary Care* (one bordered institutional lockup) → "Not breathing right?
+Let's find out why." Then
 **"What brings you here today?"** and six questions, each leading straight into the ŪPIRI
 experience that answers it:
 
@@ -99,11 +100,19 @@ experience that answers it:
 `QUESTIONS` holds the text; `renderVals` maps each `k` to its action, so changing a question
 or where it leads is one line.
 
-Section order follows *need → next step → depth*: questions, then the specialist finder and
-the patient tools, then the signature nodule pathway, and only then the directories
-(conditions, tests). On a phone the hero's decorative lung stage and drifting dust are
-hidden and the capability chips become one scrolling row, so "What brings you here today?"
-reaches the first screen instead of sitting a screen and a half down.
+Section order follows *need → next step → depth*: questions, then the pulmonologists and the
+patient tools, then the procedure list, and only then the directories (conditions, tests).
+On a phone the hero's decorative lung stage and drifting dust are hidden and the chip row
+scrolls horizontally, so "What brings you here today?" reaches the first screen instead of
+sitting a screen and a half down.
+
+**Procedures we perform** is an SEO block: the nine `PROCEDURES` as indexable text — real
+name, a plain-language line and each entry's `kw` search terms — linking to the procedure
+pages, and declared in the homepage JSON-LD as an `ItemList` of `MedicalProcedure`.
+
+**Find a pulmonologist near you** lists all fifteen consultants grouped by unit (Hitec City,
+Secunderabad, Somajiguda, Malakpet) in collapsible panels. Phones start every unit collapsed
+so the section is four rows rather than a long scroll; wider screens open the first unit.
 
 ## Content data
 
