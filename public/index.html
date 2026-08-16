@@ -186,13 +186,17 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
      changes width (language, icon-only CTA, open or closed menu). */
   x-dc [data-r="nav-home"]{order:2;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
     padding:0 !important;gap:8px !important}
-  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:32px !important;height:32px !important}
-  x-dc [data-r="nav-pill"] [data-r="nav-word"]{font-size:20px !important}
-  /* the parent brand rides in the toolbar as its mark; the full lockup is in the sheet */
-  x-dc [data-r="nav-brand"]{display:flex !important;order:3;margin-left:auto !important;
-    padding-left:0 !important;border-left:none !important}
+  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:42px !important;height:42px !important}
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]{font-size:25px !important}
+  /* The Yashoda mark rides beside the menu button rather than opposite it. The
+     lockup was already dead-centre in the viewport, but with a heavy cluster on
+     the right and only the menu button on the left the whitespace either side
+     was 104px vs 70px, which reads as "pushed right". Balancing the two sides
+     makes true centring look centred. */
+  x-dc [data-r="nav-brand"]{display:flex !important;order:2;margin-left:6px !important;
+    margin-right:auto !important;padding-left:0 !important;border-left:none !important}
   x-dc [data-r="nav-brand"]>span{display:none !important}
-  x-dc [data-r="nav-pill"] [data-r="brand-mark"]{height:26px !important}
+  x-dc [data-r="nav-pill"] [data-r="brand-mark"]{height:28px !important}
   x-dc [data-r="nav-book"]{order:4}
 }
 @media (min-width:901px) and (max-width:1150px){
@@ -238,17 +242,17 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   /* the centred brand has the narrowest toolbars to live in: stack the lockup so
      it can never run into the menu button or the Book CTA */
   x-dc [data-r="nav-pill"] [data-r="nav-word"]{display:flex;flex-direction:column;align-items:center;
-    line-height:1.05;font-size:18.5px !important}
-  x-dc [data-r="nav-pill"] [data-r="nav-word"]>span{font-size:12px !important}
-  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:30px !important;height:30px !important}
-  x-dc [data-r="nav-book"]{padding:7px 11px !important}
+    line-height:1.02;font-size:23px !important}
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]>span{font-size:14px !important}
+  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:38px !important;height:38px !important}
+  x-dc [data-r="nav-book"]{padding:8px 12px !important}
 }
 @media (max-width:380px){
-  /* The centred lockup keeps its width on the narrowest phones; the CTA gives way
-     instead, becoming its icon. font-size:0 hides the label visually while the
-     text stays in the accessibility tree as the button's name. */
-  x-dc [data-r="nav-book"]{font-size:0 !important;gap:0 !important;padding:10px !important;border-radius:50% !important}
-  x-dc [data-r="nav-book"] svg{width:16px;height:16px}
+  /* Narrowest phones: trim the CTA rather than the brand, but keep its label —
+     an icon-only button on the right would unbalance the two sides again. */
+  x-dc [data-r="nav-book"]{padding:8px 10px !important;font-size:11.5px !important;gap:5px !important}
+  x-dc [data-r="nav-pill"] [data-r="nav-word"]{font-size:21px !important}
+  x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:34px !important;height:34px !important}
 }
 </style>
 </helmet>
@@ -386,17 +390,16 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </div>
       <div style="position:relative;max-width:1150px;margin:0 auto;padding:128px 24px 40px;display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;align-items:center;width:100%">
         <div style="animation:fadeUp .8s ease both">
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px">
-            <span style="display:inline-block;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;background:rgba(245,130,31,0.16);border:1px solid rgba(245,130,31,0.4);color:#FFB067">Yashoda Pulmonology</span>
-            <span style="display:inline-block;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;background:rgba(107,213,155,0.12);border:1px solid rgba(107,213,155,0.35);color:#8FE0B4">Precision and Personalized Pulmonary Care</span>
+          <div data-r="inst-lockup" style="display:inline-flex;flex-direction:column;gap:3px;margin-bottom:22px;padding:13px 20px;border-radius:16px;background:rgba(255,255,255,0.07);border:1px solid rgba(245,130,31,0.45);box-shadow:0 12px 34px -20px rgba(0,0,0,0.6)">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;letter-spacing:0.01em;color:#FFB067">Yashoda Pulmonology</span>
+            <span style="font-size:11.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#8FE0B4">Precision and Personalized Pulmonary Care</span>
           </div>
-          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(2.4rem,4.4vw,3.8rem);line-height:1.06;letter-spacing:-0.03em;color:#fff;margin:0;text-wrap:balance">Have a question about your breathing?<br>Start here.</h1>
-          <p style="margin:22px 0 0;font-size:18px;line-height:1.6;color:#C9D2E6;max-width:560px;text-wrap:pretty">From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.</p>
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(2.4rem,4.4vw,3.8rem);line-height:1.06;letter-spacing:-0.03em;color:#fff;margin:0;text-wrap:balance">Not breathing right?<br>Let's find out why.</h1>
           <p style="font-family:'Noto Sans Telugu',sans-serif;margin:12px 0 0;font-size:15px;color:#F5A159">మీ ఊపిరికి భరోసా — యశోద పల్మనాలజీ</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px">
             <button onClick="{{ goQuestions }}" style="display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:999px;border:none;cursor:pointer;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px) scale(1.02)">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="10"></circle></svg>
-              Find your next step
+              Show me where to start
             </button>
             <a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:999px;font-size:16px;font-weight:600;color:#fff;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.25);transition:background .18s ease" style-hover="background:rgba(255,255,255,0.16);color:#fff">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -443,10 +446,9 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         </div>
       </div>
       <div data-r="hero-chips" style="position:relative;max-width:1150px;margin:0 auto;width:100%;padding:0 24px 24px;display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp 1s ease .3s both">
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#C9D2E6;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:8px 16px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8FE0B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>AI second read on every X-ray</span>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#C9D2E6;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:8px 16px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8FE0B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Priority nodule appointment</span>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#C9D2E6;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:8px 16px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8FE0B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>EBUS · Archimedes BTPNA · Cone-beam CT · Cryobiopsy</span>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#C9D2E6;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:8px 16px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8FE0B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>MDT Nodule Board review</span>
+        <sc-for list="{{ achievements }}" as="a" hint-placeholder-count="3">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#C9D2E6;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:8px 16px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8FE0B4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>{{ a.t }}</span>
+        </sc-for>
         <span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#A4AECC;animation:bounceY 2s ease-in-out infinite">scroll<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></span>
       </div>
     </section>
@@ -473,46 +475,55 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </div>
     </section>
 
-    <!-- FIND THE RIGHT SPECIALIST -->
+    <!-- PULMONOLOGISTS, BY UNIT (§7) -->
     <section aria-labelledby="spec-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
-      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px">
         <div>
-          <h2 id="spec-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Find the right lung specialist</h2>
-          <p style="font-size:16px;color:#69679C;margin:10px 0 0;max-width:620px">Yashoda pulmonology consultants across Hyderabad — filter by condition, procedure, location and language.</p>
+          <h2 id="spec-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Find a pulmonologist near you</h2>
+          <p style="font-size:16px;color:#69679C;margin:10px 0 0;max-width:620px">{{ docTotal }} across four Yashoda units. Choose a unit to see its team.</p>
         </div>
         <button onClick="{{ goFind }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
-          See all specialists
+          Search all specialists
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
         </button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
-        <sc-for list="{{ homeDocs }}" as="d" hint-placeholder-count="3">
-            <article style="display:flex;flex-direction:column;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);box-shadow:0 22px 54px -30px rgba(29,27,75,0.34)">
-              <div style="display:flex;gap:16px;align-items:flex-start">
-                <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:72px;height:72px;border-radius:20px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#2C2A6B">
-                  {{ d.initials }}
-                  <img src="{{ d.img }}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center">
-                </span>
-                <div style="min-width:0">
-                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
-                  <p style="font-size:12.5px;line-height:1.45;color:#4A4880;margin:5px 0 0">{{ d.desig }}</p>
-                  <p style="font-size:11.5px;color:#6966A4;margin:6px 0 0">{{ d.unit }} · {{ d.exp }} experience</p>
-                </div>
-              </div>
-              <p style="font-size:11.5px;color:#69679C;margin:12px 0 0">{{ d.qual }}</p>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-                <sc-for list="{{ d.condChips }}" as="c" hint-placeholder-count="3">
-                  <span style="font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ c.t }}</span>
-                </sc-for>
-              </div>
-              <p style="font-size:11.5px;color:#6966A4;margin:10px 0 14px">Speaks {{ d.langLine }}</p>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
-                <button onClick="{{ d.open }}" style="padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">View profile</button>
-                <a href="{{ d.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452)" style-hover="color:#fff;transform:translateY(-1px)">Book appointment</a>
-              </div>
-            </article>
-        </sc-for>
-      </div>
+      <sc-for list="{{ docUnits }}" as="u" hint-placeholder-count="4">
+        <div style="margin-bottom:14px;border-radius:22px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.66);backdrop-filter:blur(14px);overflow:hidden">
+          <h3 style="margin:0">
+            <button onClick="{{ u.toggle }}" aria-expanded="{{ u.open }}" style="display:flex;width:100%;align-items:center;gap:12px;padding:18px 22px;background:transparent;border:none;cursor:pointer;text-align:left;min-height:56px" style-hover="background:rgba(44,42,107,0.05)">
+              <span aria-hidden="true" style="flex:0 0 auto;width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#E7E7F4;color:#2C2A6B"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#2C2A6B">{{ u.unit }}</span>
+              <span style="font-size:13px;font-weight:700;color:#69679C">{{ u.count }}</span>
+              <span aria-hidden="true" style="{{ u.caret }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></span>
+            </button>
+          </h3>
+          <sc-if value="{{ u.isOpen }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:0 18px 18px">
+              <sc-for list="{{ u.docs }}" as="d" hint-placeholder-count="5">
+                <article style="display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:18px;border:1px solid rgba(44,42,107,0.1);background:#fff">
+                  <div style="display:flex;gap:12px;align-items:flex-start">
+                    <span aria-hidden="true" style="position:relative;flex:0 0 auto;width:56px;height:56px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2C2A6B,#5E82E8);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px">
+                      {{ d.initials }}
+                      <sc-if value="{{ d.hasImg }}" hint-placeholder-val="{{ true }}">
+                        <img src="{{ d.img }}" alt="" loading="lazy" width="56" height="56" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+                      </sc-if>
+                    </span>
+                    <div style="min-width:0">
+                      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;line-height:1.25;color:#2C2A6B">{{ d.name }}</div>
+                      <div style="font-size:12.5px;line-height:1.45;color:#4A4880;margin-top:3px">{{ d.desig }}</div>
+                      <div style="font-size:11.5px;color:#6966A4;margin-top:4px">{{ d.exp }} · {{ d.langLine }}</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+                    <button onClick="{{ d.open }}" style="padding:9px 15px;border-radius:999px;font-size:12.5px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.07);border:none;cursor:pointer;min-height:40px">View profile</button>
+                    <a href="{{ d.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;padding:9px 15px;border-radius:999px;font-size:12.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);text-decoration:none;min-height:40px">Book appointment</a>
+                  </div>
+                </article>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
     </section>
 
     <!-- MODULES -->
@@ -594,76 +605,30 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <p style="margin:0;font-size:14px;line-height:1.55;color:#4A4880">Asthma · COPD · ILD — diaries, academies and member champions.</p>
           <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#F5821F;margin-top:auto">Open<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
         </button>
-        <button onClick="{{ goShikhar }}" style="text-align:left;display:flex;flex-direction:column;gap:12px;padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3);cursor:pointer;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-6px);box-shadow:0 36px 74px -28px rgba(29,27,75,0.42)">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3A6EA5,#7FB2E5);color:#fff"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"></path></svg></div>
-            <span style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:#FDEBD9;color:#A95508">New</span>
-          </div>
-          <div>
-            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;color:#2C2A6B">ŪPIRI Shikhar — altitude ready</div>
-            <div style="font-family:'Noto Sans Telugu',sans-serif;font-size:12px;color:#6966A4;margin-top:2px">శిఖరం — ఎత్తులకు సిద్ధం</div>
-          </div>
-          <p style="margin:0;font-size:14px;line-height:1.55;color:#4A4880">Chardham, Ladakh, EBC or a marathon — get your lungs summit-ready.</p>
-          <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#F5821F;margin-top:auto">Open<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
-        </button>
-        <button onClick="{{ goAllergy }}" style="text-align:left;display:flex;flex-direction:column;gap:12px;padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3);cursor:pointer;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-6px);box-shadow:0 36px 74px -28px rgba(29,27,75,0.42)">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#916300,#EDB94A);color:#fff"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M3 10h18"></path></svg></div>
-            <span style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:#FDEBD9;color:#A95508">Monthly</span>
-          </div>
-          <div>
-            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;color:#2C2A6B">Hyderabad Allergy Calendar</div>
-            <div style="font-family:'Noto Sans Telugu',sans-serif;font-size:12px;color:#6966A4;margin-top:2px">అలర్జీ క్యాలెండర్</div>
-          </div>
-          <p style="margin:0;font-size:14px;line-height:1.55;color:#4A4880">What's in the city's air this month — and how to stay ahead of it.</p>
-          <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#F5821F;margin-top:auto">Open<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
-        </button>
-        <button onClick="{{ goCase }}" style="text-align:left;display:flex;flex-direction:column;gap:12px;padding:28px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3);cursor:pointer;transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-6px);box-shadow:0 36px 74px -28px rgba(29,27,75,0.42)">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2C2A6B,#5E82E8);color:#fff"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M16 13H8"></path><path d="M16 17H8"></path><path d="M10 9H8"></path></svg></div>
-            <span style="font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:#FDEBD9;color:#A95508">Physicians &amp; patients</span>
-          </div>
-          <div>
-            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;color:#2C2A6B">Case of the Month</div>
-            <div style="font-family:'Noto Sans Telugu',sans-serif;font-size:12px;color:#6966A4;margin-top:2px">ఈ నెల కేసు</div>
-          </div>
-          <p style="margin:0;font-size:14px;line-height:1.55;color:#4A4880">From the Nodule Board: real pathways, anonymised, explained.</p>
-          <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#F5821F;margin-top:auto">Open<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></div>
-        </button>
       </div>
     </section>
 
-    <!-- SEEING BEYOND THE SCAN (§6) -->
-    <section aria-labelledby="scan-heading" style="max-width:1150px;margin:56px auto 0;padding:0 24px">
-      <div style="border-radius:34px;overflow:hidden;background:radial-gradient(900px 520px at 88% -10%, rgba(245,130,31,0.18), transparent 60%), linear-gradient(155deg,#1D1B4B,#2C2A6B);padding:52px 48px">
-        <span style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:rgba(245,130,31,0.2);color:#FFB067">Signature capability</span>
-        <h2 id="scan-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px,3.6vw,40px);letter-spacing:-0.025em;color:#fff;margin:18px 0 0;text-wrap:balance">Seeing beyond the scan</h2>
-        <p style="font-size:16.5px;line-height:1.65;color:#C9D2E6;margin:14px 0 0;max-width:660px;text-wrap:pretty">Advanced AI-assisted imaging with expert clinical review. A shadow on a film is a question, not an answer — this is the path from one to the other.</p>
-        <ol style="list-style:none;padding:0;margin:36px 0 0;display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
-          <sc-for list="{{ scanPath }}" as="p" hint-placeholder-count="6">
-            <li style="position:relative;padding:20px 16px;border-radius:20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14)">
-              <span aria-hidden="true" style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F5821F,#FFA452);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:13px">
-                {{ p.n }}
-                <sc-if value="{{ p.live }}" hint-placeholder-val="{{ false }}">
-                  <span data-r="pulse" style="position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(245,130,31,0.7)"></span>
-                </sc-if>
-              </span>
-              <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#fff;margin-top:12px">{{ p.t }}</span>
-              <span style="display:block;font-size:12px;line-height:1.5;color:#9FB0D0;margin-top:6px">{{ p.d }}</span>
-            </li>
-          </sc-for>
-        </ol>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:30px">
-          <button onClick="{{ goJourney }}" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);border:none;cursor:pointer;box-shadow:0 16px 38px -12px rgba(245,130,31,0.7);transition:transform .18s ease" style-hover="transform:translateY(-2px)">Follow the nodule journey</button>
-          <button onClick="{{ goProcs }}" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600;color:#fff;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.25);cursor:pointer" style-hover="background:rgba(255,255,255,0.16)">How the tests work</button>
-        </div>
-      </div>
+    <!-- PROCEDURES WE PERFORM (§9) — indexable copy, one entry per procedure,
+         named the way patients and referrers actually search for them. -->
+    <section aria-labelledby="svc-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
+      <h2 id="svc-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Procedures we perform</h2>
+      <p style="font-size:16px;color:#69679C;margin:10px 0 24px;max-width:640px">Diagnostic and interventional pulmonology at Yashoda Hospitals, in plain words.</p>
+      <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+        <sc-for list="{{ svcList }}" as="x" hint-placeholder-count="9">
+          <li>
+            <a href="{{ x.href }}" onClick="{{ x.open }}" style="display:block;padding:18px 20px;border-radius:18px;border:1px solid rgba(44,42,107,0.1);background:rgba(255,255,255,0.72);text-decoration:none;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+              <h3 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;color:#2C2A6B">{{ x.n }}</h3>
+              <p style="margin:6px 0 0;font-size:13.5px;line-height:1.55;color:#4A4880">{{ x.plain }}</p>
+              <p style="margin:6px 0 0;font-size:12px;line-height:1.5;color:#6966A4">{{ x.kw }}</p>
+            </a>
+          </li>
+        </sc-for>
+      </ul>
     </section>
 
     <!-- EXPLORE PULMONARY CARE (§3) -->
     <section aria-labelledby="explore-heading" style="max-width:1150px;margin:0 auto;padding:56px 24px 20px">
       <h2 id="explore-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Conditions we treat</h2>
-      <p style="font-size:16px;color:#69679C;margin:10px 0 30px;max-width:640px">Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
         <sc-for list="{{ topicGroups }}" as="gr" hint-placeholder-count="7">
           <section style="padding:24px 26px;border-radius:24px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.75);backdrop-filter:blur(14px);box-shadow:0 20px 50px -30px rgba(29,27,75,0.3)">
@@ -686,7 +651,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:26px">
         <div>
           <h2 id="proc-heading" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px,3.2vw,34px);letter-spacing:-0.02em;color:#1D1B4B;margin:0">Tests &amp; procedures</h2>
-          <p style="font-size:16px;color:#69679C;margin:10px 0 0;max-width:620px">If a test has been suggested, read what it actually involves before the day.</p>
+          <p style="font-size:16px;color:#69679C;margin:10px 0 0;max-width:620px">Been told you need a test? Read what actually happens, how long it takes, whether it hurts, and how to prepare.</p>
         </div>
         <button onClick="{{ goProcs }}" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
           See all tests
@@ -710,23 +675,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
       </div>
     </section>
 
-    <!-- WHY -->
-    <section style="max-width:1150px;margin:0 auto;padding:56px 24px 30px">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
-        <div style="text-align:center;padding:40px 28px;border-radius:28px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3)">
-          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;letter-spacing:-0.02em;background:linear-gradient(120deg,#F5821F,#FFB25C);-webkit-background-clip:text;background-clip:text;color:transparent">Chest X-ray</div>
-          <div style="font-size:14.5px;margin-top:8px;color:#4A4880">the usual first imaging step, read by a radiologist and AI</div>
-        </div>
-        <div style="text-align:center;padding:40px 28px;border-radius:28px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3)">
-          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:46px;letter-spacing:-0.02em;background:linear-gradient(120deg,#F5821F,#FFB25C);-webkit-background-clip:text;background-clip:text;color:transparent">2 min</div>
-          <div style="font-size:14.5px;margin-top:8px;color:#4A4880">walk-in. No appointment, no prep, no fear</div>
-        </div>
-        <div style="text-align:center;padding:40px 28px;border-radius:28px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.72);backdrop-filter:blur(18px);box-shadow:0 24px 60px -28px rgba(29,27,75,0.3)">
-          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:46px;letter-spacing:-0.02em;background:linear-gradient(120deg,#F5821F,#FFB25C);-webkit-background-clip:text;background-clip:text;color:transparent">1 roof</div>
-          <div style="font-size:14.5px;margin-top:8px;color:#4A4880">detection → biopsy → treatment → surveillance</div>
-        </div>
-      </div>
-    </section>
+
 
     <!-- SPACES -->
     <section style="max-width:1150px;margin:0 auto;padding:40px 24px 90px">
@@ -3120,42 +3069,51 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
 
   </main>
 
-  <!-- FOOTER -->
+  <!-- FOOTER (§14) — links, units, contact, legal. No narrative copy. -->
   <footer style="background:linear-gradient(160deg,#232159,#1D1B4B)">
-    <div style="max-width:1150px;margin:0 auto;padding:56px 24px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:36px;font-size:14px;color:#C9D2E6">
+    <div style="max-width:1150px;margin:0 auto;padding:44px 24px 28px;display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:32px;font-size:14px;color:#C9D2E6">
       <div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" style="color:#fff"><g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M46 5v18c0 6-3 9-7 12"></path><path d="M54 5v18c0 6 3 9 7 12"></path><path d="M44 40c-2-9-9-13-17-8C16 39 8 57 9 73c1 12 8 19 18 17 10-2 16-11 17-24v-26z"></path><path d="M56 40c2-9 9-13 17-8 11 7 19 25 18 41-1 12-8 19-18 17-10-2-16-11-17-24v-26z"></path><path d="M39 35c-1 6-3 11-7 15" stroke-width="3.2"></path><path d="M36 43l-8 4" stroke-width="3.2"></path><path d="M32 50c-1 5-3 9-6 12" stroke-width="3.2"></path><path d="M61 35c1 6 3 11 7 15" stroke-width="3.2"></path><path d="M64 43l8 4" stroke-width="3.2"></path><path d="M68 50c1 5 3 9 6 12" stroke-width="3.2"></path></g><g fill="#F5821F"><path d="M35 32c-2-5-1-9 3-12 2 5 1 9-3 12z"></path><path d="M27 49c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M25 64c-5 2-9 1-12-3 5-2 9-1 12 3z"></path><path d="M65 32c2-5 1-9-3-12-2 5-1 9 3 12z"></path><path d="M73 49c5 2 9 1 12-3-5-2-9-1-12 3z"></path><path d="M75 64c5 2 9 1 12-3-5-2-9-1-12 3z"></path></g></svg>
-          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:#fff">ŪPIRI Lung Check</span>
-        </div>
-        <p style="font-family:'Noto Sans Telugu',sans-serif;color:#F5A159;margin:0">మీ ఊపిరికి భరోసా</p>
-        <a href="{{ brandSite }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:9px;margin-top:14px;padding:10px 16px;border-radius:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);color:#fff;text-decoration:none" style-hover="background:rgba(255,255,255,0.14);color:#fff">
+        <a href="{{ brandSite }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:9px;padding:10px 16px;border-radius:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);color:#fff;text-decoration:none" style-hover="background:rgba(255,255,255,0.14);color:#fff">
           <sc-if value="{{ brandHasLogo }}" hint-placeholder-val="{{ true }}">
-            <span style="display:flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:14px;background:#fff">
-              <img src="{{ brandLockup }}" alt="{{ brandAlt }}" width="99" height="70" style="height:52px;width:auto;display:block">
+            <span style="display:flex;align-items:center;justify-content:center;padding:9px 13px;border-radius:12px;background:#fff">
+              <img src="{{ brandLockup }}" alt="{{ brandAlt }}" width="99" height="70" style="height:44px;width:auto;display:block">
             </span>
           </sc-if>
           <span style="display:flex;flex-direction:column;line-height:1.15">
-            <span style="font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#A0AFD0">ŪPIRI is the pulmonary platform of</span>
-            <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:800;color:#fff">{{ brandName }}</span>
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:#fff">ŪPIRI</span>
+            <span style="font-size:11.5px;color:#A0AFD0">{{ brandName }} · {{ brandUnit }}</span>
           </span>
         </a>
-        <p style="margin:6px 0 0;font-size:12px">Two minutes. One X-ray. A lifetime of breath.</p>
-        <p style="margin:10px 0 0;font-size:12px">Emergency: <a href="tel:105910" style="font-weight:700;text-decoration:underline;color:#fff">105910</a></p>
+        <div style="margin-top:16px;font-size:13px">
+          <div style="font-weight:700;color:#fff;margin-bottom:6px">Contact</div>
+          <p style="margin:0">Emergency: <a href="tel:105910" style="font-weight:700;text-decoration:underline;color:#fff">105910</a></p>
+          <p style="margin:6px 0 0"><a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="text-decoration:underline;color:#C9D2E6">Book on WhatsApp</a></p>
+        </div>
       </div>
       <div>
-        <div style="font-weight:700;color:#fff;margin-bottom:10px">AI Lung Nodule Clinic</div>
-        <p style="margin:0;font-size:12px;line-height:1.7">AI detection (Qure.ai qXR) → risk assessment → EBUS · radial EBUS · Archimedes BTPNA · cone-beam CT biopsy · cryobiopsy → MDT treatment planning → surveillance. From shadow to answer, with each step reviewed by a specialist.</p>
+        <div style="font-weight:700;color:#fff;margin-bottom:10px">Units</div>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:13px">
+          <sc-for list="{{ footerUnits }}" as="u" hint-placeholder-count="4">
+            <li>
+              <span style="font-weight:700;color:#fff">{{ u.unit }}</span>
+              <span style="display:block;color:#A0AFD0;font-size:12px">{{ u.line }}</span>
+            </li>
+          </sc-for>
+        </ul>
       </div>
       <div>
         <div style="font-weight:700;color:#fff;margin-bottom:10px">Explore</div>
-        <nav aria-label="ŪPIRI sections" style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px;font-size:12px">
-          <a href="/knowledge-hub" onClick="{{ goKnowledge }}" style="color:#C9D2E6;text-decoration:underline">Yashoda Knowledge Hub — pulmonary conditions, articles and expert videos</a>
-          <a href="/alumni" onClick="{{ goAlumni }}" style="color:#C9D2E6;text-decoration:underline">ŪPIRI Clinical Network — for doctors: case discussion, CME and mentorship</a>
+        <nav aria-label="ŪPIRI sections" style="display:flex;flex-direction:column;gap:7px;font-size:13px">
+          <a href="/knowledge-hub" onClick="{{ goKnowledge }}" style="color:#C9D2E6;text-decoration:underline">Knowledge Hub</a>
+          <a href="/doctors" onClick="{{ goFind }}" style="color:#C9D2E6;text-decoration:underline">Find a pulmonologist</a>
+          <a href="/tests-and-procedures" onClick="{{ goProcs }}" style="color:#C9D2E6;text-decoration:underline">Tests &amp; procedures</a>
+          <a href="/for-doctors" onClick="{{ goDoctors }}" style="color:#C9D2E6;text-decoration:underline">For doctors</a>
+          <a href="/alumni" onClick="{{ goAlumni }}" style="color:#C9D2E6;text-decoration:underline">ŪPIRI Clinical Network</a>
         </nav>
-        <div style="font-weight:700;color:#fff;margin-bottom:10px">Important</div>
-        <p style="margin:0;font-size:12px;line-height:1.7">The tools here are awareness and self-management aids, not medical diagnosis; they are pending final clinical validation and medico-legal sign-off by the Yashoda Hospitals pulmonology department. In an emergency (severe breathlessness, chest pain, blue lips), call 105910 or go to the nearest emergency department immediately. AI reads assist — a qualified radiologist and pulmonologist make every clinical decision.</p>
       </div>
+    </div>
+    <div style="max-width:1150px;margin:0 auto;padding:0 24px 20px;font-size:11.5px;line-height:1.6;color:#A0AFD0">
+      The tools on this site are awareness aids, not a medical diagnosis, and are pending clinical validation by the Yashoda Hospitals pulmonology department. In an emergency call 105910 or go to the nearest emergency department.
     </div>
     <div style="text-align:center;font-size:12px;padding:14px;background:#171540;color:#8A94B8">© 2026 Yashoda Hospitals · Precision Pulmonary Care · Hyderabad ki Ūpiri 🧡</div>
   </footer>
@@ -3184,7 +3142,7 @@ class Component extends DCLogic {
     brandLogo: null,
     docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false,
     menu: null, mobileNav: false, procId: null,
-    lang: 'en'
+    lang: 'en', docUnitOpen: null
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -3391,6 +3349,24 @@ class Component extends DCLogic {
      happened. */
   REVIEW = { reviewed: false, reviewedOn: '' };
 
+  /* ---------------------------------------------------------------------------
+     Institutional achievements shown as chips under the hero.
+
+     TODO(yashoda): populate from the department's own published achievements.
+     Deliberately empty — the three chips that stood here ("AI second read on
+     every X-ray", "Priority nodule appointment", "MDT Nodule Board review")
+     were removed because none is sourced, and nothing is written in their
+     place: an unsourced "first in India" on a hospital site is a claim, not
+     copy. The row renders nothing while this array is empty.
+
+     TODO(yashoda): verify the cone-beam CT claim before it goes in — whether it
+     is "South India's first" or "India's first", and the exact modality wording
+     (cone-beam CT navigation bronchoscopy vs cone-beam CT-guided biopsy).
+
+     Shape: { t: 'Short factual statement' }
+     --------------------------------------------------------------------------- */
+  ACHIEVEMENTS = [];
+
   BRAND = {
     candidates: ['/yashoda-mark.png'],
     lockup: '/yashoda-logo.png',
@@ -3450,7 +3426,6 @@ class Component extends DCLogic {
       'Quick tools:': 'త్వరిత టూల్స్:', 'Quit Smoking': 'పొగ మానేయండి', 'scroll': 'స్క్రోల్',
       /* what brings you here */
       /* explore pulmonary care */
-      'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'పద్దెనిమిది వ్యాధులు, పరీక్షలు, ప్రక్రియలు — ఊపిరితిత్తులు పనిచేసే విధంగా వర్గీకరించబడ్డాయి, మీది వెంటనే కనుగొనడానికి.',
       'Airways': 'శ్వాసనాళాలు', 'Lung tissue': 'ఊపిరితిత్తుల కణజాలం',
       'Lung cancer & nodules': 'ఊపిరితిత్తుల క్యాన్సర్ & నాడ్యూల్స్', 'Lung circulation': 'ఊపిరితిత్తుల రక్తప్రసరణ',
       'Sleep & allergy': 'నిద్ర & అలర్జీ', 'Infections & prevention': 'ఇన్ఫెక్షన్లు & నివారణ',
@@ -3489,7 +3464,6 @@ class Component extends DCLogic {
       'Are you a doctor?': 'మీరు వైద్యులా?', 'Visit the Clinical Network': 'క్లినికల్ నెట్‌వర్క్‌ను సందర్శించండి',
       /* tests and procedures */
       'Tests & procedures': 'పరీక్షలు & ప్రక్రియలు', 'See all tests': 'అన్ని పరీక్షలను చూడండి',
-      'If a test has been suggested, read what it actually involves before the day.': 'పరీక్ష సూచించినట్లయితే, ఆ రోజుకు ముందే అందులో ఏమి జరుగుతుందో చదవండి.',
       /* tools */
       'Patient tools': 'రోగుల టూల్స్', 'Priority pathway': 'ప్రాధాన్య మార్గం', '90-day challenge': '90 రోజుల ఛాలెంజ్',
       'Guidance': 'మార్గదర్శకం', 'Member portal': 'సభ్యుల పోర్టల్', 'Monthly': 'నెలవారీ',
@@ -3521,11 +3495,7 @@ class Component extends DCLogic {
       'Related conditions': 'సంబంధిత వ్యాధులు', 'Which Yashoda specialists perform it': 'దీన్ని చేసే యశోద నిపుణులు',
       'Ask about this test': 'ఈ పరీక్ష గురించి అడగండి', 'All tests': 'అన్ని పరీక్షలు',
       /* homepage questions, navigation and profile */
-      'Have a question about your breathing?': 'మీ శ్వాస గురించి సందేహమా?',
-      'Start here.': 'ఇక్కడ మొదలుపెట్టండి.',
-      'From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.': 'లక్షణాల నుండి నిర్ధారణ, చికిత్స, దీర్ఘకాలిక ఊపిరితిత్తుల ఆరోగ్యం వరకు — యశోద పల్మనాలజీతో మీ తదుపరి అడుగును కనుగొనండి.',
       'What brings you here today?': 'ఈరోజు మీరు ఎందుకు వచ్చారు?',
-      'Find your next step': 'మీ తదుపరి అడుగును కనుగొనండి',
       'Choose what sounds most like you.': 'మీ పరిస్థితికి దగ్గరగా ఉన్నదాన్ని ఎంచుకోండి.',
       'I\'ve been coughing for a while. Should I get it checked?': 'చాలా రోజులుగా దగ్గు ఉంది. పరీక్ష చేయించుకోవాలా?',
       'Understand what could be causing it': 'కారణం ఏమిటో తెలుసుకోండి',
@@ -3553,6 +3523,13 @@ class Component extends DCLogic {
       'Also for doctors': 'వైద్యుల కోసం మరిన్ని',
       'The clinical side of ŪPIRI': 'ఊపిరి క్లినికల్ విభాగం',
       'Read this month\'s case': 'ఈ నెల కేసు చదవండి',
+      'Not breathing right?': 'సరిగా ఊపిరి ఆడటం లేదా?',
+      'Let\'s find out why.': 'కారణం తెలుసుకుందాం.',
+      'Show me where to start': 'ఎక్కడ మొదలుపెట్టాలో చూపించండి',
+      'Been told you need a test? Read what actually happens, how long it takes, whether it hurts, and how to prepare.': 'పరీక్ష చేయించుకోమన్నారా? అందులో ఏమి జరుగుతుంది, ఎంత సమయం పడుతుంది, నొప్పి ఉంటుందా, ఎలా సిద్ధం కావాలో చదవండి.',
+      'Procedures we perform': 'మేము చేసే ప్రక్రియలు',
+      'Find a pulmonologist near you': 'మీ దగ్గరి పల్మనాలజిస్ట్‌ను కనుగొనండి',
+      'Search all specialists': 'అందరు నిపుణులలో వెతకండి',
       'Machine-translate the whole page ↗': 'పూర్తి పేజీని యంత్ర అనువాదం చేయండి ↗'
     },
     kn: {
@@ -3575,7 +3552,6 @@ class Component extends DCLogic {
       'Precision and Personalized Pulmonary Care': 'ನಿಖರವಾದ ಮತ್ತು ವೈಯಕ್ತಿಕ ಶ್ವಾಸಕೋಶ ಆರೈಕೆ',
       'Book an appointment': 'ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ',
       'Quick tools:': 'ತ್ವರಿತ ಟೂಲ್ಸ್:', 'Quit Smoking': 'ಧೂಮಪಾನ ಬಿಡಿ', 'scroll': 'ಸ್ಕ್ರಾಲ್',
-      'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'ಹದಿನೆಂಟು ಕಾಯಿಲೆಗಳು, ಪರೀಕ್ಷೆಗಳು ಮತ್ತು ಪ್ರಕ್ರಿಯೆಗಳು — ಶ್ವಾಸಕೋಶ ಕೆಲಸ ಮಾಡುವ ರೀತಿಯಲ್ಲಿ ಜೋಡಿಸಲಾಗಿದೆ, ನಿಮ್ಮದನ್ನು ಬೇಗ ಹುಡುಕಲು.',
       'Airways': 'ಶ್ವಾಸನಾಳಗಳು', 'Lung tissue': 'ಶ್ವಾಸಕೋಶದ ಅಂಗಾಂಶ',
       'Lung cancer & nodules': 'ಶ್ವಾಸಕೋಶದ ಕ್ಯಾನ್ಸರ್ & ನಾಡ್ಯೂಲ್‌ಗಳು', 'Lung circulation': 'ಶ್ವಾಸಕೋಶದ ರಕ್ತಪರಿಚಲನೆ',
       'Sleep & allergy': 'ನಿದ್ರೆ & ಅಲರ್ಜಿ', 'Infections & prevention': 'ಸೋಂಕುಗಳು & ತಡೆಗಟ್ಟುವಿಕೆ',
@@ -3610,7 +3586,6 @@ class Component extends DCLogic {
       'Back': 'ಹಿಂದಕ್ಕೆ', 'Explore case': 'ಪ್ರಕರಣ ನೋಡಿ', 'What to expect': 'ಏನನ್ನು ನಿರೀಕ್ಷಿಸಬೇಕು',
       'Are you a doctor?': 'ನೀವು ವೈದ್ಯರೇ?', 'Visit the Clinical Network': 'ಕ್ಲಿನಿಕಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಭೇಟಿ ನೀಡಿ',
       'Tests & procedures': 'ಪರೀಕ್ಷೆಗಳು & ಪ್ರಕ್ರಿಯೆಗಳು', 'See all tests': 'ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳನ್ನು ನೋಡಿ',
-      'If a test has been suggested, read what it actually involves before the day.': 'ಪರೀಕ್ಷೆಯನ್ನು ಸೂಚಿಸಿದ್ದರೆ, ಆ ದಿನಕ್ಕೂ ಮೊದಲು ಅದರಲ್ಲಿ ಏನಾಗುತ್ತದೆ ಎಂಬುದನ್ನು ಓದಿ.',
       'Patient tools': 'ರೋಗಿಗಳ ಟೂಲ್ಸ್', 'Priority pathway': 'ಆದ್ಯತಾ ಮಾರ್ಗ', '90-day challenge': '90 ದಿನಗಳ ಸವಾಲು',
       'Guidance': 'ಮಾರ್ಗದರ್ಶನ', 'Member portal': 'ಸದಸ್ಯರ ಪೋರ್ಟಲ್', 'Monthly': 'ಮಾಸಿಕ',
       'Physicians & patients': 'ವೈದ್ಯರು & ರೋಗಿಗಳು', 'New': 'ಹೊಸದು', '2 min': '2 ನಿಮಿಷ',
@@ -3639,11 +3614,7 @@ class Component extends DCLogic {
       'Related conditions': 'ಸಂಬಂಧಿತ ಕಾಯಿಲೆಗಳು', 'Which Yashoda specialists perform it': 'ಇದನ್ನು ಮಾಡುವ ಯಶೋದಾ ತಜ್ಞರು',
       'Ask about this test': 'ಈ ಪರೀಕ್ಷೆಯ ಬಗ್ಗೆ ಕೇಳಿ', 'All tests': 'ಎಲ್ಲಾ ಪರೀಕ್ಷೆಗಳು',
       /* homepage questions, navigation and profile */
-      'Have a question about your breathing?': 'ನಿಮ್ಮ ಉಸಿರಾಟದ ಬಗ್ಗೆ ಪ್ರಶ್ನೆ ಇದೆಯೇ?',
-      'Start here.': 'ಇಲ್ಲಿಂದ ಶುರು ಮಾಡಿ.',
-      'From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.': 'ಲಕ್ಷಣಗಳಿಂದ ರೋಗನಿರ್ಣಯ, ಚಿಕಿತ್ಸೆ ಮತ್ತು ದೀರ್ಘಕಾಲದ ಶ್ವಾಸಕೋಶ ಆರೋಗ್ಯದವರೆಗೆ — ಯಶೋದಾ ಪಲ್ಮನಾಲಜಿಯೊಂದಿಗೆ ನಿಮ್ಮ ಮುಂದಿನ ಹೆಜ್ಜೆಯನ್ನು ಕಂಡುಕೊಳ್ಳಿ.',
       'What brings you here today?': 'ಇಂದು ನೀವು ಇಲ್ಲಿಗೆ ಏಕೆ ಬಂದಿದ್ದೀರಿ?',
-      'Find your next step': 'ನಿಮ್ಮ ಮುಂದಿನ ಹೆಜ್ಜೆಯನ್ನು ಕಂಡುಕೊಳ್ಳಿ',
       'Choose what sounds most like you.': 'ನಿಮ್ಮ ಪರಿಸ್ಥಿತಿಗೆ ಹತ್ತಿರವಾದದ್ದನ್ನು ಆಯ್ಕೆಮಾಡಿ.',
       'I\'ve been coughing for a while. Should I get it checked?': 'ಬಹಳ ದಿನಗಳಿಂದ ಕೆಮ್ಮು ಇದೆ. ಪರೀಕ್ಷಿಸಿಕೊಳ್ಳಬೇಕೇ?',
       'Understand what could be causing it': 'ಕಾರಣ ಏನಿರಬಹುದು ಎಂದು ತಿಳಿಯಿರಿ',
@@ -3671,6 +3642,13 @@ class Component extends DCLogic {
       'Also for doctors': 'ವೈದ್ಯರಿಗಾಗಿ ಇನ್ನಷ್ಟು',
       'The clinical side of ŪPIRI': 'ಊಪಿರಿಯ ಕ್ಲಿನಿಕಲ್ ಭಾಗ',
       'Read this month\'s case': 'ಈ ತಿಂಗಳ ಪ್ರಕರಣ ಓದಿ',
+      'Not breathing right?': 'ಸರಿಯಾಗಿ ಉಸಿರಾಡುತ್ತಿಲ್ಲವೇ?',
+      'Let\'s find out why.': 'ಕಾರಣ ತಿಳಿಯೋಣ.',
+      'Show me where to start': 'ಎಲ್ಲಿಂದ ಶುರು ಮಾಡಬೇಕೆಂದು ತೋರಿಸಿ',
+      'Been told you need a test? Read what actually happens, how long it takes, whether it hurts, and how to prepare.': 'ಪರೀಕ್ಷೆ ಮಾಡಿಸಿಕೊಳ್ಳಲು ಹೇಳಿದ್ದಾರೆಯೇ? ಅದರಲ್ಲಿ ಏನಾಗುತ್ತದೆ, ಎಷ್ಟು ಸಮಯ ಬೇಕು, ನೋವಾಗುತ್ತದೆಯೇ ಮತ್ತು ಹೇಗೆ ಸಿದ್ಧವಾಗಬೇಕು ಎಂದು ಓದಿ.',
+      'Procedures we perform': 'ನಾವು ಮಾಡುವ ಪ್ರಕ್ರಿಯೆಗಳು',
+      'Find a pulmonologist near you': 'ನಿಮ್ಮ ಹತ್ತಿರದ ಪಲ್ಮನಾಲಜಿಸ್ಟ್ ಹುಡುಕಿ',
+      'Search all specialists': 'ಎಲ್ಲಾ ತಜ್ಞರಲ್ಲಿ ಹುಡುಕಿ',
       'Machine-translate the whole page ↗': 'ಪೂರ್ಣ ಪುಟವನ್ನು ಯಂತ್ರ ಅನುವಾದ ಮಾಡಿ ↗'
     },
     bn: {
@@ -3693,7 +3671,6 @@ class Component extends DCLogic {
       'Precision and Personalized Pulmonary Care': 'নির্ভুল ও ব্যক্তিগত ফুসফুস চিকিৎসা',
       'Book an appointment': 'অ্যাপয়েন্টমেন্ট বুক করুন',
       'Quick tools:': 'দ্রুত টুলস:', 'Quit Smoking': 'ধূমপান ছাড়ুন', 'scroll': 'স্ক্রল',
-      'Eighteen conditions, tests and procedures — grouped the way lungs actually work, so you can find yours quickly.': 'আঠারোটি রোগ, পরীক্ষা ও প্রক্রিয়া — ফুসফুস যেভাবে কাজ করে সেভাবেই সাজানো, যাতে আপনারটি দ্রুত খুঁজে পান।',
       'Airways': 'শ্বাসনালী', 'Lung tissue': 'ফুসফুসের কলা',
       'Lung cancer & nodules': 'ফুসফুসের ক্যান্সার ও নডিউল', 'Lung circulation': 'ফুসফুসের রক্তসঞ্চালন',
       'Sleep & allergy': 'ঘুম ও অ্যালার্জি', 'Infections & prevention': 'সংক্রমণ ও প্রতিরোধ',
@@ -3728,7 +3705,6 @@ class Component extends DCLogic {
       'Back': 'ফিরে যান', 'Explore case': 'কেস দেখুন', 'What to expect': 'কী আশা করবেন',
       'Are you a doctor?': 'আপনি কি ডাক্তার?', 'Visit the Clinical Network': 'ক্লিনিক্যাল নেটওয়ার্ক দেখুন',
       'Tests & procedures': 'পরীক্ষা ও প্রক্রিয়া', 'See all tests': 'সব পরীক্ষা দেখুন',
-      'If a test has been suggested, read what it actually involves before the day.': 'কোনো পরীক্ষা পরামর্শ দেওয়া হলে, সেই দিনের আগেই তাতে আসলে কী হয় তা পড়ে নিন।',
       'Patient tools': 'রোগীর টুলস', 'Priority pathway': 'অগ্রাধিকার পথ', '90-day challenge': '৯০ দিনের চ্যালেঞ্জ',
       'Guidance': 'নির্দেশনা', 'Member portal': 'সদস্য পোর্টাল', 'Monthly': 'মাসিক',
       'Physicians & patients': 'চিকিৎসক ও রোগী', 'New': 'নতুন', '2 min': '২ মিনিট',
@@ -3757,11 +3733,7 @@ class Component extends DCLogic {
       'Related conditions': 'সম্পর্কিত রোগ', 'Which Yashoda specialists perform it': 'যশোদার যেসব বিশেষজ্ঞ এটি করেন',
       'Ask about this test': 'এই পরীক্ষা সম্পর্কে জিজ্ঞাসা করুন', 'All tests': 'সব পরীক্ষা',
       /* homepage questions, navigation and profile */
-      'Have a question about your breathing?': 'আপনার শ্বাস নিয়ে প্রশ্ন আছে?',
-      'Start here.': 'এখান থেকে শুরু করুন।',
-      'From symptoms to diagnosis, treatment and long-term lung health — find your next step with Yashoda Pulmonology.': 'উপসর্গ থেকে রোগনির্ণয়, চিকিৎসা ও দীর্ঘমেয়াদি ফুসফুসের স্বাস্থ্য পর্যন্ত — যশোদা পালমোনোলজির সঙ্গে আপনার পরবর্তী পদক্ষেপ খুঁজে নিন।',
       'What brings you here today?': 'আজ আপনি কী কারণে এসেছেন?',
-      'Find your next step': 'আপনার পরবর্তী পদক্ষেপ খুঁজুন',
       'Choose what sounds most like you.': 'আপনার সঙ্গে সবচেয়ে মেলে এমনটি বেছে নিন।',
       'I\'ve been coughing for a while. Should I get it checked?': 'অনেক দিন ধরে কাশি হচ্ছে। পরীক্ষা করানো উচিত?',
       'Understand what could be causing it': 'কারণ কী হতে পারে জানুন',
@@ -3789,6 +3761,13 @@ class Component extends DCLogic {
       'Also for doctors': 'ডাক্তারদের জন্য আরও',
       'The clinical side of ŪPIRI': 'ঊপিরির ক্লিনিক্যাল দিক',
       'Read this month\'s case': 'এই মাসের কেস পড়ুন',
+      'Not breathing right?': 'ঠিকমতো শ্বাস নিতে পারছেন না?',
+      'Let\'s find out why.': 'কারণ খুঁজে বের করি।',
+      'Show me where to start': 'কোথা থেকে শুরু করব দেখান',
+      'Been told you need a test? Read what actually happens, how long it takes, whether it hurts, and how to prepare.': 'পরীক্ষা করাতে বলা হয়েছে? তাতে আসলে কী হয়, কতক্ষণ লাগে, ব্যথা হয় কি না এবং কীভাবে প্রস্তুতি নেবেন পড়ুন।',
+      'Procedures we perform': 'আমরা যেসব প্রক্রিয়া করি',
+      'Find a pulmonologist near you': 'আপনার কাছের পালমোনোলজিস্ট খুঁজুন',
+      'Search all specialists': 'সব বিশেষজ্ঞের মধ্যে খুঁজুন',
       'Machine-translate the whole page ↗': 'সম্পূর্ণ পৃষ্ঠা মেশিন-অনুবাদ করুন ↗'
     }
   };
@@ -4451,7 +4430,24 @@ class Component extends DCLogic {
         '@context': 'https://schema.org', '@type': 'WebPage', name: pair[0], description: pair[1],
         url, inLanguage: 'en', publisher,
         isPartOf: { '@type': 'WebSite', name: 'ŪPIRI · ' + this.BRAND.name, url: this.ORIGIN },
-        breadcrumb: this.crumbs(route, null, null)
+        breadcrumb: this.crumbs(route, null, null),
+        /* §9: the homepage lists the department's procedures as indexable text,
+           so it also declares them as an ItemList of MedicalProcedure — the same
+           entities the individual procedure pages describe in full. */
+        ...(route === 'home' ? {
+          mainEntity: {
+            '@type': 'ItemList', name: 'Procedures performed by ' + this.BRAND.name + ' ' + this.BRAND.unit,
+            numberOfItems: this.PROCEDURES.length,
+            itemListElement: this.PROCEDURES.map((x, i) => ({
+              '@type': 'ListItem', position: i + 1,
+              item: {
+                '@type': 'MedicalProcedure', name: x.n, description: x.plain,
+                url: this.ORIGIN + '/tests-and-procedures/' + x.id,
+                provider: publisher
+              }
+            }))
+          }
+        } : {})
       };
     /* A second block: the page's own sections answer real search questions, so
        they are also expressed as an FAQPage. */
@@ -4585,6 +4581,10 @@ class Component extends DCLogic {
     this.findBrandLogo();
     const patch = { qd: new Date().toISOString().slice(0, 10) };
     /* the URL wins over the remembered choice, so a shared link reads as sent */
+    /* §7: on a phone every unit starts collapsed, so the section is four tidy
+       rows rather than a long scroll of cards; a wider screen has room to show
+       the first unit's team straight away. */
+    try { if (window.innerWidth < 900) patch.docUnitOpen = ''; } catch (e) { /* no window */ }
     let lang = null;
     try { lang = new URLSearchParams(location.search).get('lang'); } catch (e) { /* no URLSearchParams */ }
     try { lang = lang || localStorage.getItem('upiri:lang'); } catch (e) { /* private mode */ }
@@ -5038,7 +5038,7 @@ class Component extends DCLogic {
       id: d.id, name: d.name, unit: d.unit, desig: d.desig, qual: d.qual, exp: d.exp,
       img: d.img, imgAlt: d.name + ', ' + d.desig + ', Yashoda Hospitals ' + d.unit,
       initials: d.name.replace(/^Dr\.?\s*/, '').split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase(),
-      langLine: d.langs.join(' · '),
+      langLine: d.langs.join(' · '), hasImg: !!d.img,
       condChips: d.conds.slice(0, 4).map(c => ({ t: condName(c) })),
       open: () => this.goDoctor(d.id),
       book: this.wal('I would like to book an appointment with ' + d.name + ' (Yashoda Hospitals, ' + d.unit + ').')
@@ -5142,7 +5142,7 @@ class Component extends DCLogic {
       isHome: s.route === 'home', isRisk: s.route === 'risk', isBreath: s.route === 'breath', isJourney: s.route === 'journey', isRendo: s.route === 'rendo',
       isDoctors: s.route === 'doctors', isCorporates: s.route === 'corporates', isSchools: s.route === 'schools',
       goHome: () => this.go('home'), goRisk: () => this.go('risk'), goBreath: () => this.go('breath'), goJourney: () => this.go('journey'), goRendo: () => this.go('rendo'),
-      goDoctors: () => this.go('doctors'), goCorporates: () => this.go('corporates'), goSchools: () => this.go('schools'),
+      goDoctors: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('doctors'); }, goCorporates: () => this.go('corporates'), goSchools: () => this.go('schools'),
       wa,
       /* risk */
       rq: { t: q.t, te: q.te || '', note: q.note || '' },
@@ -5362,6 +5362,44 @@ class Component extends DCLogic {
       docFiltered: !!(s.docQuery || s.docPaed || s.docLoc !== 'All locations'
         || s.docCond !== 'All conditions' || s.docLang !== 'All languages'),
       clearDocFilters: () => this.setState({ docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false }),
+      /* §7: every pulmonologist, grouped by the unit they sit in. Groups collapse
+         so a phone shows four headings rather than fifteen cards; the first unit
+         is open by default so the section is never just a list of buttons. */
+      docTotal: this.DOCTORS.length + ' pulmonologists',
+      docUnits: (() => {
+        const order = ['Hitec City', 'Secunderabad', 'Somajiguda', 'Malakpet'];
+        const units = order.filter(u => this.DOCTORS.some(d => d.unit === u))
+          .concat([...new Set(this.DOCTORS.map(d => d.unit))].filter(u => !order.includes(u)));
+        const openUnit = s.docUnitOpen === null ? units[0] : s.docUnitOpen;
+        return units.map(u => {
+          const list = this.DOCTORS.filter(d => d.unit === u);
+          const on = openUnit === u;
+          return {
+            unit: u, count: list.length + (list.length === 1 ? ' specialist' : ' specialists'),
+            isOpen: on, open: on ? 'true' : 'false',
+            caret: 'margin-left:auto;display:flex;color:#6966A4;transition:transform .2s ease;transform:rotate(' + (on ? '180deg' : '0deg') + ')',
+            toggle: () => this.setState({ docUnitOpen: on ? '' : u }),
+            docs: list.map(d => {
+              const c = docCard(d);
+              return { ...c, langLine: 'Speaks ' + d.langs.slice(0, 3).join(' · ') };
+            })
+          };
+        });
+      })(),
+      /* §9: the procedure list is indexable text — real names, a plain-language
+         line, and the terms people actually search for. Each links to its own
+         page, which already carries MedicalProcedure schema. */
+      svcList: this.PROCEDURES.map(x => ({
+        n: x.n, plain: x.plain, kw: 'Also searched as: ' + x.kw,
+        href: '/tests-and-procedures/' + x.id,
+        open: (e) => { if (e && e.preventDefault) e.preventDefault(); this.goProc(x.id); }
+      })),
+      /* §14: unit list for the footer. TODO(yashoda): supply the street address
+         and OPD phone per unit — only the unit names are sourced today, so the
+         second line stays empty rather than carrying an invented address. */
+      footerUnits: [...new Set(this.DOCTORS.map(d => d.unit))].map(u => ({
+        unit: 'Yashoda Hospitals, ' + u, line: ''
+      })),
       homeDocs: this.DOCTORS.slice(0, 3).map(docCard),
       /* doctor profile */
       dr: doc ? docCard(doc) : {},
@@ -5401,6 +5439,8 @@ class Component extends DCLogic {
         const el = document.getElementById('questions');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       },
+
+      achievements: this.ACHIEVEMENTS.map(a => ({ t: a.t })),
 
       /* ---- clinical review status ---- */
       revText: this.REVIEW.reviewed

@@ -122,6 +122,7 @@ Both new sections are data-driven — the card markup is written once and repeat
 | `KH_ICONS` | Shared stroke icons, reused across topics |
 | `KH_SYMPTOMS`, `KH_CATEGORIES`, `KH_SUGGESTED` | Intent-grouped search and the Knowledge Hub category bands |
 | `QUESTIONS` | The homepage "What brings you here today?" cards |
+| `ACHIEVEMENTS` | Institutional achievement chips under the hero — **empty, TODO** |
 | `TOPIC_GROUPS` | The homepage "Conditions we treat" directory |
 | `DOCTORS` | Specialist finder, profiles, and condition/procedure cross-links |
 | `PROCEDURES` | Tests & procedures pages, with `dp` matching doctors who perform them |
@@ -238,6 +239,19 @@ English text.
   the hero gradient is checked by hand against its darkest and lightest stops; the ŪPIRI
   wordmark is exempt as logotype (WCAG 1.4.3).
 - Nothing depends on hover: menus open on click, and every top-level nav item navigates.
+
+## Open TODOs in the code
+
+Two things are deliberately blank rather than filled with plausible copy:
+
+- `ACHIEVEMENTS` (top of the component) — the hero chips. The three that stood there
+  ("AI second read on every X-ray", "Priority nodule appointment", "MDT Nodule Board
+  review") were removed as unsourced. The row renders nothing while the array is empty.
+  It also carries a second TODO: the cone-beam CT claim needs its scope confirmed —
+  "South India's first" vs "India's first" — and its exact modality wording, before it
+  goes anywhere near the page.
+- `footerUnits` — the footer lists the four unit names, which are sourced from the doctor
+  roster, but each unit's address line is empty pending real addresses.
 
 ## Before launch
 
