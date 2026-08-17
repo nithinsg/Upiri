@@ -3067,6 +3067,139 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   </div>
   </sc-if>
 
+  <!-- ============ WAITING-ROOM QUESTIONNAIRES: ACT / CAT ============ -->
+  <sc-if value="{{ isAct }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Asthma Control Test" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:760px;margin:0 auto">
+      <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">While you wait · 5 questions · about 2 minutes</span>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-0.02em;color:#1D1B4B;margin:16px 0 0">{{ act.name }}</h1>
+      <p style="font-size:16.5px;line-height:1.6;color:#4A4880;margin:12px 0 0;max-width:600px">{{ act.lead }}</p>
+
+      <sc-if value="{{ act.showForm }}" hint-placeholder-val="{{ true }}">
+        <p style="font-size:14px;font-weight:700;color:#69679C;margin:22px 0 0">{{ act.recall }}</p>
+        <sc-for list="{{ actItems }}" as="q" hint-placeholder-count="5">
+          <div role="group" style="margin-top:18px;padding:22px;border-radius:22px;border:1px solid rgba(44,42,107,0.1);background:rgba(255,255,255,0.75)">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.45;color:#2C2A6B;margin:0 0 14px">{{ q.n }}. {{ q.t }}</h2>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ q.opts }}" as="o" hint-placeholder-count="5">
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <div style="position:sticky;bottom:12px;margin-top:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 18px;border-radius:20px;background:rgba(255,255,255,0.92);backdrop-filter:blur(14px);border:1px solid rgba(44,42,107,0.12);box-shadow:0 18px 44px -22px rgba(29,27,75,0.5)">
+          <span style="font-size:14px;font-weight:700;color:#2C2A6B">{{ act.progress }}</span>
+          <button onClick="{{ actSubmit }}" aria-disabled="{{ act.notReady }}" style="{{ act.submitSt }}">See my score</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ act.done }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px;padding:32px;border-radius:28px;border:1px solid rgba(255,255,255,0.95);background:rgba(255,255,255,0.85);box-shadow:0 26px 60px -30px rgba(29,27,75,0.35);text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:64px;line-height:1;color:#1D1B4B">{{ act.score }}</div>
+          <div style="font-size:14px;font-weight:700;color:#69679C;margin-top:4px">{{ act.outOf }}</div>
+          <div style="margin:16px auto 0;max-width:360px;height:10px;border-radius:999px;background:rgba(44,42,107,0.1)"><div style="{{ act.bandBar }}"></div></div>
+          <div style="margin-top:16px"><span style="{{ act.bandChip }}">{{ act.bandLabel }}</span></div>
+          <p style="font-size:16px;line-height:1.65;color:#2C2A6B;margin:16px auto 0;max-width:520px">{{ act.bandMeaning }}</p>
+          <p style="font-size:15px;line-height:1.65;color:#4A4880;margin:12px auto 0;max-width:520px">{{ act.bandNext }}</p>
+          <sc-if value="{{ act.hasPrev }}" hint-placeholder-val="{{ false }}">
+            <p style="font-size:13.5px;font-weight:700;color:#69679C;margin:14px 0 0">{{ act.prevLine }}</p>
+          </sc-if>
+        </div>
+
+        <div style="margin-top:18px;padding:24px;border-radius:24px;border:2px solid #2C2A6B;background:#fff">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#2C2A6B;margin:0">Show this to your doctor</h2>
+            <span style="font-size:12.5px;font-weight:700;color:#69679C">{{ act.name }} · {{ act.takenOn }} · {{ act.score }}/25</span>
+          </div>
+          <sc-for list="{{ act.summary }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid rgba(44,42,107,0.09)">
+              <span style="flex:0 0 auto;font-size:12.5px;font-weight:800;color:#6966A4">{{ r.n }}</span>
+              <span style="flex:1;font-size:13px;line-height:1.5;color:#4A4880">{{ r.q }}</span>
+              <span style="flex:0 0 auto;max-width:44%;text-align:right;font-size:13px;font-weight:700;color:#2C2A6B">{{ r.a }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+          <a href="{{ actBook }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);text-decoration:none">Book an appointment</a>
+          <button onClick="{{ actReset }}" style="padding:14px 24px;border-radius:999px;font-size:15px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.07);border:none;cursor:pointer">Start again</button>
+          <button onClick="{{ goKnowledge }}" style="padding:14px 24px;border-radius:999px;font-size:15px;font-weight:700;color:#2C2A6B;background:transparent;border:none;cursor:pointer;text-decoration:underline">Read about asthma</button>
+        </div>
+      </sc-if>
+
+      <p style="font-size:12px;line-height:1.6;color:#6966A4;margin:26px 0 0">This questionnaire supports the conversation with your doctor. It is not a diagnosis and does not replace a clinical assessment. {{ act.credit }}</p>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isCat }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="COPD Assessment Test" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:760px;margin:0 auto">
+      <span style="display:inline-block;font-size:12px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">While you wait · 8 questions · about 3 minutes</span>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,4vw,40px);letter-spacing:-0.02em;color:#1D1B4B;margin:16px 0 0">{{ cat.name }}</h1>
+      <p style="font-size:16.5px;line-height:1.6;color:#4A4880;margin:12px 0 0;max-width:600px">{{ cat.lead }}</p>
+
+      <sc-if value="{{ cat.showForm }}" hint-placeholder-val="{{ true }}">
+        <p style="font-size:14px;font-weight:700;color:#69679C;margin:22px 0 0">{{ cat.recall }}</p>
+        <sc-for list="{{ catItems }}" as="q" hint-placeholder-count="8">
+          <div role="group" style="margin-top:18px;padding:22px;border-radius:22px;border:1px solid rgba(44,42,107,0.1);background:rgba(255,255,255,0.75)">
+            <div style="display:flex;gap:10px;align-items:baseline">
+              <span style="font-size:12.5px;font-weight:800;color:#6966A4">{{ q.n }}</span>
+              <span style="font-size:15px;font-weight:700;line-height:1.45;color:#2C2A6B">{{ q.low }}</span>
+            </div>
+            <div style="display:flex;gap:6px;margin:12px 0">
+              <sc-for list="{{ q.opts }}" as="o" hint-placeholder-count="6">
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" aria-label="{{ o.aria }}" style="{{ o.st }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+            <div style="font-size:15px;font-weight:700;line-height:1.45;color:#2C2A6B;text-align:right">{{ q.high }}</div>
+          </div>
+        </sc-for>
+        <div style="position:sticky;bottom:12px;margin-top:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 18px;border-radius:20px;background:rgba(255,255,255,0.92);backdrop-filter:blur(14px);border:1px solid rgba(44,42,107,0.12);box-shadow:0 18px 44px -22px rgba(29,27,75,0.5)">
+          <span style="font-size:14px;font-weight:700;color:#2C2A6B">{{ cat.progress }}</span>
+          <button onClick="{{ catSubmit }}" aria-disabled="{{ cat.notReady }}" style="{{ cat.submitSt }}">See my score</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cat.done }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:24px;padding:32px;border-radius:28px;border:1px solid rgba(255,255,255,0.95);background:rgba(255,255,255,0.85);box-shadow:0 26px 60px -30px rgba(29,27,75,0.35);text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:64px;line-height:1;color:#1D1B4B">{{ cat.score }}</div>
+          <div style="font-size:14px;font-weight:700;color:#69679C;margin-top:4px">{{ cat.outOf }}</div>
+          <div style="margin:16px auto 0;max-width:360px;height:10px;border-radius:999px;background:rgba(44,42,107,0.1)"><div style="{{ cat.bandBar }}"></div></div>
+          <div style="margin-top:16px"><span style="{{ cat.bandChip }}">{{ cat.bandLabel }}</span></div>
+          <p style="font-size:16px;line-height:1.65;color:#2C2A6B;margin:16px auto 0;max-width:520px">{{ cat.bandMeaning }}</p>
+          <p style="font-size:15px;line-height:1.65;color:#4A4880;margin:12px auto 0;max-width:520px">{{ cat.bandNext }}</p>
+          <sc-if value="{{ cat.hasPrev }}" hint-placeholder-val="{{ false }}">
+            <p style="font-size:13.5px;font-weight:700;color:#69679C;margin:14px 0 0">{{ cat.prevLine }}</p>
+          </sc-if>
+        </div>
+
+        <div style="margin-top:18px;padding:24px;border-radius:24px;border:2px solid #2C2A6B;background:#fff">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#2C2A6B;margin:0">Show this to your doctor</h2>
+            <span style="font-size:12.5px;font-weight:700;color:#69679C">{{ cat.name }} · {{ cat.takenOn }} · {{ cat.score }}/40</span>
+          </div>
+          <sc-for list="{{ cat.summary }}" as="r" hint-placeholder-count="8">
+            <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid rgba(44,42,107,0.09)">
+              <span style="flex:0 0 auto;font-size:12.5px;font-weight:800;color:#6966A4">{{ r.n }}</span>
+              <span style="flex:1;font-size:13px;line-height:1.5;color:#4A4880">{{ r.q }}</span>
+              <span style="flex:0 0 auto;font-size:14px;font-weight:800;color:#2C2A6B">{{ r.a }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+          <a href="{{ catBook }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);text-decoration:none">Book an appointment</a>
+          <button onClick="{{ catReset }}" style="padding:14px 24px;border-radius:999px;font-size:15px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.07);border:none;cursor:pointer">Start again</button>
+          <button onClick="{{ goKnowledge }}" style="padding:14px 24px;border-radius:999px;font-size:15px;font-weight:700;color:#2C2A6B;background:transparent;border:none;cursor:pointer;text-decoration:underline">Read about COPD</button>
+        </div>
+      </sc-if>
+
+      <p style="font-size:12px;line-height:1.6;color:#6966A4;margin:26px 0 0">This questionnaire supports the conversation with your doctor. It is not a diagnosis and does not replace a clinical assessment. {{ cat.credit }}</p>
+    </div>
+  </div>
+  </sc-if>
+
   </main>
 
   <!-- FOOTER (§14) — links, units, contact, legal. No narrative copy. -->
@@ -3142,7 +3275,9 @@ class Component extends DCLogic {
     brandLogo: null,
     docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false,
     menu: null, mobileNav: false, procId: null,
-    lang: 'en', docUnitOpen: null
+    lang: 'en', docUnitOpen: null,
+    actA: [null, null, null, null, null], actDone: false, actPrev: null,
+    catA: [null, null, null, null, null, null, null, null], catDone: false, catPrev: null
   };
   REDFLAGS = ["Coughed up blood, even once", "Cough lasting more than 3 weeks", "Unexplained weight loss", "Chest pain that doesn't settle", "Hoarse voice for over 3 weeks"];
   RISK_QS = [
@@ -3504,7 +3639,6 @@ class Component extends DCLogic {
       'I have asthma. Am I really in control?': 'నాకు ఉబ్బసం ఉంది. అది నిజంగా అదుపులో ఉందా?',
       'Check your asthma control': 'మీ ఉబ్బసం అదుపును పరిశీలించండి',
       'I have COPD. How can I keep my lungs stable?': 'నాకు COPD ఉంది. ఊపిరితిత్తులను స్థిరంగా ఎలా ఉంచుకోవాలి?',
-      'Learn about COPD care': 'COPD సంరక్షణ గురించి తెలుసుకోండి',
       'My scan showed a lung nodule. What happens next?': 'నా స్కాన్‌లో ఊపిరితిత్తుల నాడ్యూల్ కనిపించింది. తర్వాత ఏమిటి?',
       'Understand the lung nodule journey': 'నాడ్యూల్ ప్రయాణాన్ని అర్థం చేసుకోండి',
       'I want to understand my lungs better. Where do I start?': 'నా ఊపిరితిత్తుల గురించి బాగా తెలుసుకోవాలి. ఎక్కడ మొదలుపెట్టాలి?',
@@ -3530,6 +3664,7 @@ class Component extends DCLogic {
       'Procedures we perform': 'మేము చేసే ప్రక్రియలు',
       'Find a pulmonologist near you': 'మీ దగ్గరి పల్మనాలజిస్ట్‌ను కనుగొనండి',
       'Search all specialists': 'అందరు నిపుణులలో వెతకండి',
+      'Score how COPD affects you': 'COPD మీపై ఎంత ప్రభావం చూపుతోందో చూడండి',
       'Machine-translate the whole page ↗': 'పూర్తి పేజీని యంత్ర అనువాదం చేయండి ↗'
     },
     kn: {
@@ -3623,7 +3758,6 @@ class Component extends DCLogic {
       'I have asthma. Am I really in control?': 'ನನಗೆ ಅಸ್ತಮಾ ಇದೆ. ಅದು ನಿಜವಾಗಿಯೂ ನಿಯಂತ್ರಣದಲ್ಲಿದೆಯೇ?',
       'Check your asthma control': 'ನಿಮ್ಮ ಅಸ್ತಮಾ ನಿಯಂತ್ರಣ ಪರಿಶೀಲಿಸಿ',
       'I have COPD. How can I keep my lungs stable?': 'ನನಗೆ COPD ಇದೆ. ಶ್ವಾಸಕೋಶವನ್ನು ಸ್ಥಿರವಾಗಿ ಹೇಗೆ ಇಡುವುದು?',
-      'Learn about COPD care': 'COPD ಆರೈಕೆ ಬಗ್ಗೆ ತಿಳಿಯಿರಿ',
       'My scan showed a lung nodule. What happens next?': 'ನನ್ನ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಶ್ವಾಸಕೋಶದ ನಾಡ್ಯೂಲ್ ಕಂಡಿದೆ. ಮುಂದೇನು?',
       'Understand the lung nodule journey': 'ನಾಡ್ಯೂಲ್ ಪ್ರಯಾಣವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ',
       'I want to understand my lungs better. Where do I start?': 'ನನ್ನ ಶ್ವಾಸಕೋಶದ ಬಗ್ಗೆ ಚೆನ್ನಾಗಿ ತಿಳಿಯಬೇಕು. ಎಲ್ಲಿಂದ ಶುರು ಮಾಡಲಿ?',
@@ -3649,6 +3783,7 @@ class Component extends DCLogic {
       'Procedures we perform': 'ನಾವು ಮಾಡುವ ಪ್ರಕ್ರಿಯೆಗಳು',
       'Find a pulmonologist near you': 'ನಿಮ್ಮ ಹತ್ತಿರದ ಪಲ್ಮನಾಲಜಿಸ್ಟ್ ಹುಡುಕಿ',
       'Search all specialists': 'ಎಲ್ಲಾ ತಜ್ಞರಲ್ಲಿ ಹುಡುಕಿ',
+      'Score how COPD affects you': 'COPD ನಿಮ್ಮ ಮೇಲೆ ಎಷ್ಟು ಪರಿಣಾಮ ಬೀರುತ್ತಿದೆ ಎಂದು ನೋಡಿ',
       'Machine-translate the whole page ↗': 'ಪೂರ್ಣ ಪುಟವನ್ನು ಯಂತ್ರ ಅನುವಾದ ಮಾಡಿ ↗'
     },
     bn: {
@@ -3742,7 +3877,6 @@ class Component extends DCLogic {
       'I have asthma. Am I really in control?': 'আমার অ্যাজমা আছে। সত্যিই কি নিয়ন্ত্রণে আছে?',
       'Check your asthma control': 'আপনার অ্যাজমা নিয়ন্ত্রণ যাচাই করুন',
       'I have COPD. How can I keep my lungs stable?': 'আমার COPD আছে। ফুসফুস স্থিতিশীল রাখব কীভাবে?',
-      'Learn about COPD care': 'COPD চিকিৎসা সম্পর্কে জানুন',
       'My scan showed a lung nodule. What happens next?': 'আমার স্ক্যানে ফুসফুসের নডিউল ধরা পড়েছে। এরপর কী?',
       'Understand the lung nodule journey': 'নডিউল যাত্রা বুঝে নিন',
       'I want to understand my lungs better. Where do I start?': 'ফুসফুস সম্পর্কে ভালোভাবে জানতে চাই। কোথা থেকে শুরু করব?',
@@ -3768,6 +3902,7 @@ class Component extends DCLogic {
       'Procedures we perform': 'আমরা যেসব প্রক্রিয়া করি',
       'Find a pulmonologist near you': 'আপনার কাছের পালমোনোলজিস্ট খুঁজুন',
       'Search all specialists': 'সব বিশেষজ্ঞের মধ্যে খুঁজুন',
+      'Score how COPD affects you': 'COPD আপনাকে কতটা প্রভাবিত করছে দেখুন',
       'Machine-translate the whole page ↗': 'সম্পূর্ণ পৃষ্ঠা মেশিন-অনুবাদ করুন ↗'
     }
   };
@@ -3936,6 +4071,85 @@ class Component extends DCLogic {
     { g: 'Diagnostics & procedures', ids: ['pulmonary-function-testing', 'cpet', 'bronchoscopy', 'interventional-pulmonology', 'lung-transplantation'] }
   ];
 
+  /* ---------------------------------------------------------------------------
+     Waiting-room questionnaires: ACT (asthma) and CAT (COPD).
+
+     Both are validated instruments. Their items are reproduced verbatim and are
+     NOT translated by the language layer — a home-made translation of a
+     validated questionnaire is not the validated instrument, and official
+     translations are licensed separately. Do not add these strings to I18N.
+
+     TODO(yashoda/legal): confirm licensing before launch.
+       · Asthma Control Test™ — trademark of QualityMetric Incorporated; use on a
+         public hospital site should be confirmed with the rights holder.
+       · COPD Assessment Test™ — © GlaxoSmithKline group of companies. GSK permits
+         use for clinical purposes provided the instrument is unmodified and the
+         copyright notice is shown, which is why both appear on the page.
+     --------------------------------------------------------------------------- */
+  ACT = {
+    id: 'act', route: 'act', name: 'Asthma Control Test',
+    lead: 'Five questions about the last four weeks. You get a score out of 25 to show your doctor.',
+    recall: 'Think about the last 4 weeks.',
+    min: 5, max: 25,
+    credit: 'Asthma Control Test™ is a trademark of QualityMetric Incorporated. Reproduced unmodified.',
+    items: [
+      { t: 'In the past 4 weeks, how much of the time did your asthma keep you from getting as much done at work, school or at home?',
+        opts: ['All of the time', 'Most of the time', 'Some of the time', 'A little of the time', 'None of the time'] },
+      { t: 'During the past 4 weeks, how often have you had shortness of breath?',
+        opts: ['More than once a day', 'Once a day', '3 to 6 times a week', 'Once or twice a week', 'Not at all'] },
+      { t: 'During the past 4 weeks, how often did your asthma symptoms (wheezing, coughing, shortness of breath, chest tightness or pain) wake you up at night or earlier than usual in the morning?',
+        opts: ['4 or more nights a week', '2 or 3 nights a week', 'Once a week', 'Once or twice', 'Not at all'] },
+      { t: 'During the past 4 weeks, how often have you used your rescue inhaler or nebuliser medication (such as salbutamol)?',
+        opts: ['3 or more times per day', '1 or 2 times per day', '2 or 3 times per week', 'Once a week or less', 'Not at all'] },
+      { t: 'How would you rate your asthma control during the past 4 weeks?',
+        opts: ['Not controlled at all', 'Poorly controlled', 'Somewhat controlled', 'Well controlled', 'Completely controlled'] }
+    ],
+    /* option order runs worst → best, so the score is the index + 1 */
+    bands: [
+      { min: 25, label: 'Complete control', color: '#27784C', soft: '#E3F2E9',
+        meaning: 'Over the last four weeks your asthma did not get in the way at all.',
+        next: 'Bring this score to the consultation. Nothing here suggests a change is needed, but your doctor will want to see it alongside your inhaler technique and your last visit.' },
+      { min: 20, label: 'Well controlled', color: '#27784C', soft: '#E3F2E9',
+        meaning: 'Your asthma looks reasonably well controlled, with some symptoms still getting through.',
+        next: 'Show this to your doctor. Scores in this range are often improved further by checking inhaler technique and how regularly the preventer is taken.' },
+      { min: 5, label: 'Not well controlled', color: '#BE3A2F', soft: '#FBE7E5',
+        meaning: 'Your asthma was not well controlled over the last four weeks.',
+        next: 'Please show this score to your doctor today. A score in this range usually means the treatment plan, the inhaler technique or the triggers need a review — it does not mean anything has gone wrong.' }
+    ]
+  };
+
+  CAT = {
+    id: 'cat', route: 'cat', name: 'COPD Assessment Test',
+    lead: 'Eight questions about how COPD affects you day to day. You get a score out of 40 to show your doctor.',
+    recall: 'For each pair, choose the number that best describes you today.',
+    min: 0, max: 40,
+    credit: 'COPD Assessment Test™ and the CAT logo are trademarks of the GSK group of companies. © GlaxoSmithKline group of companies. Reproduced unmodified.',
+    items: [
+      { low: 'I never cough', high: 'I cough all the time' },
+      { low: 'I have no phlegm (mucus) in my chest at all', high: 'My chest is completely full of phlegm (mucus)' },
+      { low: 'My chest does not feel tight at all', high: 'My chest feels very tight' },
+      { low: 'When I walk up a hill or one flight of stairs I am not breathless', high: 'When I walk up a hill or one flight of stairs I am very breathless' },
+      { low: 'I am not limited doing any activities at home', high: 'I am very limited doing activities at home' },
+      { low: 'I am confident leaving my home despite my lung condition', high: 'I am not at all confident leaving my home because of my lung condition' },
+      { low: 'I sleep soundly', high: "I don't sleep soundly because of my lung condition" },
+      { low: 'I have lots of energy', high: 'I have no energy at all' }
+    ],
+    bands: [
+      { min: 31, label: 'Very high impact', color: '#BE3A2F', soft: '#FBE7E5',
+        meaning: 'COPD is having a very large impact on your daily life.',
+        next: 'Please show this score to your doctor today, along with anything that has changed recently — breathlessness, sputum, or how often you need your reliever.' },
+      { min: 21, label: 'High impact', color: '#A95508', soft: '#FDEBD9',
+        meaning: 'COPD is having a large impact on your daily life.',
+        next: 'Show this to your doctor. Scores in this range are worth discussing against your last visit, and alongside pulmonary rehabilitation and inhaler technique.' },
+      { min: 10, label: 'Medium impact', color: '#916300', soft: '#FBF1DC',
+        meaning: 'COPD is having a moderate impact on your daily life.',
+        next: 'Show this to your doctor so today can be compared with your previous scores.' },
+      { min: 0, label: 'Low impact', color: '#27784C', soft: '#E3F2E9',
+        meaning: 'COPD is having a small impact on your daily life.',
+        next: 'Show this to your doctor. A low score is worth recording so any change later is easy to spot.' }
+    ]
+  };
+
   /* ============ HOMEPAGE: WHAT BRINGS YOU HERE TODAY? ============
      The homepage opens with the question the patient already has, in their own
      words, and each one leads straight into the ŪPIRI experience built for it —
@@ -3944,7 +4158,7 @@ class Component extends DCLogic {
     { k: 'cough', q: "I've been coughing for a while. Should I get it checked?", cta: 'Understand what could be causing it', ic: 'wind' },
     { k: 'breath', q: 'I feel breathless. Is it something to worry about?', cta: 'Explore breathlessness', ic: 'pulse' },
     { k: 'asthma', q: 'I have asthma. Am I really in control?', cta: 'Check your asthma control', ic: 'lung' },
-    { k: 'copd', q: 'I have COPD. How can I keep my lungs stable?', cta: 'Learn about COPD care', ic: 'shield' },
+    { k: 'copd', q: 'I have COPD. How can I keep my lungs stable?', cta: 'Score how COPD affects you', ic: 'shield' },
     { k: 'nodule', q: 'My scan showed a lung nodule. What happens next?', cta: 'Understand the lung nodule journey', ic: 'scan' },
     { k: 'start', q: 'I want to understand my lungs better. Where do I start?', cta: 'Start your lung health journey', ic: 'micro' }
   ];
@@ -4286,9 +4500,12 @@ class Component extends DCLogic {
     home: '/', risk: '/risk-check', breath: '/lung-age', journey: '/nodule-journey', rendo: '/rendo-upiri',
     triage: '/symptom-checker', clubs: '/clubs', club: '/clubs/member', allergy: '/allergy-calendar',
     case: '/case-of-the-month', shikhar: '/shikhar', doctors: '/for-doctors', corporates: '/for-corporates',
-    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub', find: '/doctors', procs: '/tests-and-procedures'
+    schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub', find: '/doctors', procs: '/tests-and-procedures',
+    act: '/asthma-control-test', cat: '/copd-assessment-test'
   };
   META = {
+    act: ['Asthma Control Test (ACT) — Yashoda Pulmonology', 'Take the Asthma Control Test in the waiting room: five questions, a score out of 25, and a summary to show your pulmonologist.'],
+    cat: ['COPD Assessment Test (CAT) — Yashoda Pulmonology', 'Take the COPD Assessment Test in the waiting room: eight questions, a score out of 40, and a summary to show your pulmonologist.'],
     alumni: ['ŪPIRI Clinical Network — Yashoda Pulmonology', 'A community of doctors connected by learning, collaboration and better patient care. Case discussions, CME, mentorship and access to advanced pulmonary expertise.'],
     procs: ['Tests & Procedures — Yashoda Pulmonology', 'Pulmonary tests and procedures explained in plain language: what they are, why they are done, what happens, how to prepare and what follows.'],
     find: ['Find a Lung Specialist — Yashoda Pulmonology', 'Meet the pulmonology consultants at Yashoda Hospitals Hyderabad. Filter by condition, procedure, location and language, and book an appointment.'],
@@ -4575,6 +4792,49 @@ class Component extends DCLogic {
       border: sel ? '2px solid #2C2A6B' : '2px solid rgba(44,42,107,0.14)',
       background: sel ? '#2C2A6B' : 'rgba(255,255,255,0.9)', color: sel ? '#fff' : '#2C2A6B'
     };
+  }
+
+  /* ---- waiting-room questionnaires ---- */
+  qsKey(id) { return 'upiri:' + id; }
+  qsPick(id, i, v) {
+    const key = id === 'act' ? 'actA' : 'catA';
+    const next = this.state[key].slice();
+    next[i] = v;
+    this.setState({ [key]: next });
+  }
+  qsScore(id) {
+    const a = id === 'act' ? this.state.actA : this.state.catA;
+    return a.reduce((t, v) => t + (v === null ? 0 : v), 0);
+  }
+  qsBand(inst, score) { return inst.bands.find(b => score >= b.min) || inst.bands[inst.bands.length - 1]; }
+  qsSubmit(id) {
+    const inst = id === 'act' ? this.ACT : this.CAT;
+    const score = this.qsScore(id);
+    const rec = { score, at: new Date().toISOString() };
+    let prev = null;
+    try {
+      prev = JSON.parse(localStorage.getItem(this.qsKey(id)) || 'null');
+      localStorage.setItem(this.qsKey(id), JSON.stringify(rec));
+    } catch (e) { /* private mode: the score still shows, it just is not remembered */ }
+    this.setState(id === 'act' ? { actDone: true, actPrev: prev } : { catDone: true, catPrev: prev });
+    void inst;
+    window.scrollTo({ top: 0 });
+  }
+  qsReset(id) {
+    this.setState(id === 'act'
+      ? { actA: [null, null, null, null, null], actDone: false }
+      : { catA: [null, null, null, null, null, null, null, null], catDone: false });
+    window.scrollTo({ top: 0 });
+  }
+  qsOptSt(sel) {
+    return sel
+      ? { display: 'block', width: '100%', textAlign: 'left', padding: '14px 18px', borderRadius: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', minHeight: '48px', background: '#2C2A6B', color: '#fff', border: '2px solid #2C2A6B' }
+      : { display: 'block', width: '100%', textAlign: 'left', padding: '14px 18px', borderRadius: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', minHeight: '48px', background: '#fff', color: '#2C2A6B', border: '2px solid rgba(44,42,107,0.14)' };
+  }
+  qsNumSt(sel) {
+    return sel
+      ? { flex: '1', padding: '12px 0', borderRadius: '12px', fontSize: '16px', fontWeight: 800, cursor: 'pointer', minHeight: '48px', background: '#2C2A6B', color: '#fff', border: '2px solid #2C2A6B' }
+      : { flex: '1', padding: '12px 0', borderRadius: '12px', fontSize: '16px', fontWeight: 800, cursor: 'pointer', minHeight: '48px', background: '#fff', color: '#2C2A6B', border: '2px solid rgba(44,42,107,0.14)' };
   }
 
   componentDidMount() {
@@ -5259,7 +5519,7 @@ class Component extends DCLogic {
       navCareSt: this.navSt(s.route === 'knowledge'),
       navProcs: this.navSt(s.route === 'procs'),
       curProcs: s.route === 'procs' ? 'page' : 'false',
-      navToolsSt: this.navSt(['risk', 'triage', 'breath', 'rendo', 'shikhar', 'journey', 'clubs', 'club', 'allergy'].includes(s.route)),
+      navToolsSt: this.navSt(['risk', 'triage', 'breath', 'rendo', 'shikhar', 'journey', 'clubs', 'club', 'allergy', 'act', 'cat'].includes(s.route)),
       navProfileSt: this.profileBtnSt(['doctors', 'corporates', 'schools'].includes(s.route)),
       profileLabel: { doctors: 'Doctors', corporates: 'Corporate', schools: 'Schools' }[s.route] || 'People',
       profileItems: [
@@ -5296,6 +5556,8 @@ class Component extends DCLogic {
       navItems: [
         { t: 'Risk Check', go: () => this.go('risk') },
         { t: 'Symptom Checker', go: () => this.go('triage') },
+        { t: 'Asthma Control Test (ACT)', go: () => this.go('act') },
+        { t: 'COPD Assessment Test (CAT)', go: () => this.go('cat') },
         { t: 'Lung Age', go: () => this.go('breath') },
         { t: 'Nodule Journey', go: () => this.go('journey') },
         { t: 'Breath Clubs', go: () => this.go('clubs') },
@@ -5325,6 +5587,8 @@ class Component extends DCLogic {
           items: [
             { t: 'Risk Check', r: 'risk' },
             { t: 'Symptom Checker', r: 'triage' },
+            { t: 'Asthma Control Test (ACT)', r: 'act' },
+            { t: 'COPD Assessment Test (CAT)', r: 'cat' },
             { t: 'Lung Age', r: 'breath' },
             { t: 'Nodule Journey', r: 'journey' },
             { t: 'Breath Clubs', r: 'clubs' },
@@ -5429,8 +5693,8 @@ class Component extends DCLogic {
         go: () => ({
           cough: () => this.goTriageWith('cough'),
           breath: () => this.goTriageWith('breath'),
-          asthma: () => this.goClub('asthma'),
-          copd: () => this.goTopic('copd'),
+          asthma: () => this.go('act'),
+          copd: () => this.go('cat'),
           nodule: () => this.go('journey'),
           start: () => this.go('risk')
         })[q.k]()
@@ -5441,6 +5705,68 @@ class Component extends DCLogic {
       },
 
       achievements: this.ACHIEVEMENTS.map(a => ({ t: a.t })),
+
+      /* ---- waiting-room questionnaires (ACT / CAT) ---- */
+      isAct: s.route === 'act', isCat: s.route === 'cat',
+      ...(() => {
+        const fmt = (iso) => { try { return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
+        const build = (inst, ans, done, prev) => {
+          const answered = ans.filter(v => v !== null).length;
+          const ready = answered === inst.items.length;
+          const score = ans.reduce((t, v) => t + (v === null ? 0 : v), 0);
+          const band = this.qsBand(inst, score);
+          const delta = prev ? score - prev.score : null;
+          return {
+            name: inst.name, lead: inst.lead, recall: inst.recall, credit: inst.credit,
+            showForm: !done, done,
+            progress: answered + ' of ' + inst.items.length + ' answered',
+            pct: Math.round((answered / inst.items.length) * 100) + '%',
+            notReady: ready ? 'false' : 'true',
+            submitSt: ready
+              ? { display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px 30px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg,#F5821F,#FFA452)', boxShadow: '0 14px 32px -12px rgba(245,130,31,0.7)' }
+              : { display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px 30px', borderRadius: '999px', border: 'none', fontSize: '16px', fontWeight: 700, color: '#fff', background: '#C6CBDD', pointerEvents: 'none' },
+            score: String(score), outOf: 'out of ' + inst.max,
+            bandLabel: band.label, bandMeaning: band.meaning, bandNext: band.next,
+            bandChip: 'display:inline-block;padding:8px 20px;border-radius:999px;font-size:14px;font-weight:800;background:' + band.soft + ';color:' + band.color,
+            bandBar: 'height:10px;border-radius:999px;background:' + band.color + ';width:' + Math.round(((score - inst.min) / (inst.max - inst.min)) * 100) + '%',
+            hasPrev: !!prev,
+            prevLine: prev ? 'Last taken ' + fmt(prev.at) + ': ' + prev.score + (delta === 0 ? ' — no change' : delta > 0 ? ' — ' + Math.abs(delta) + ' point' + (Math.abs(delta) === 1 ? '' : 's') + ' higher today' : ' — ' + Math.abs(delta) + ' point' + (Math.abs(delta) === 1 ? '' : 's') + ' lower today') : '',
+            takenOn: fmt(new Date().toISOString()),
+            summary: inst.items.map((q, i) => ({
+              n: String(i + 1),
+              q: inst.id === 'act' ? q.t : q.low + ' → ' + q.high,
+              a: ans[i] === null ? '—' : (inst.id === 'act' ? q.opts[ans[i] - 1] + ' (' + ans[i] + ')' : String(ans[i]))
+            }))
+          };
+        };
+        const act = build(this.ACT, s.actA, s.actDone, s.actPrev);
+        const cat = build(this.CAT, s.catA, s.catDone, s.catPrev);
+        return {
+          act, cat,
+          actItems: this.ACT.items.map((q, i) => ({
+            n: String(i + 1), t: q.t,
+            opts: q.opts.map((label, oi) => ({
+              label, on: s.actA[i] === oi + 1 ? 'true' : 'false',
+              st: this.qsOptSt(s.actA[i] === oi + 1),
+              pick: () => this.qsPick('act', i, oi + 1)
+            }))
+          })),
+          catItems: this.CAT.items.map((q, i) => ({
+            n: String(i + 1), low: q.low, high: q.high,
+            opts: [0, 1, 2, 3, 4, 5].map(v => ({
+              label: String(v), on: s.catA[i] === v ? 'true' : 'false',
+              aria: q.low + ' to ' + q.high + ': ' + v,
+              st: this.qsNumSt(s.catA[i] === v),
+              pick: () => this.qsPick('cat', i, v)
+            }))
+          })),
+          actSubmit: () => this.qsSubmit('act'), catSubmit: () => this.qsSubmit('cat'),
+          actReset: () => this.qsReset('act'), catReset: () => this.qsReset('cat'),
+          goAct: () => this.go('act'), goCat: () => this.go('cat'),
+          actBook: this.wal('I have just done the Asthma Control Test at Yashoda Pulmonology and would like to discuss my score.'),
+          catBook: this.wal('I have just done the COPD Assessment Test at Yashoda Pulmonology and would like to discuss my score.')
+        };
+      })(),
 
       /* ---- clinical review status ---- */
       revText: this.REVIEW.reviewed
