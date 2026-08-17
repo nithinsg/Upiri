@@ -45,7 +45,7 @@ page reads `location.pathname` on load, pushes state on navigation and handles B
 | `/` | Home |
 | `/risk-check`, `/lung-age`, `/nodule-journey`, `/rendo-upiri` | Existing tools |
 | `/symptom-checker`, `/clubs`, `/allergy-calendar`, `/case-of-the-month`, `/shikhar` | Existing tools |
-| `/asthma-control-test`, `/copd-assessment-test` | ACT and CAT, scored in the waiting room |
+| `/asthma-control-test`, `/copd-assessment-test` | ACT, and CAT + mMRC, scored in the waiting room |
 | `/for-doctors`, `/for-corporates`, `/for-schools` | Existing spaces |
 | `/doctors`, `/doctors/:id` | Specialist finder and profiles (15 consultants) |
 | `/tests-and-procedures`, `/tests-and-procedures/:id` | Tests & procedures (9) |
@@ -132,7 +132,7 @@ Both new sections are data-driven — the card markup is written once and repeat
 | `KH_ICONS` | Shared stroke icons, reused across topics |
 | `KH_SYMPTOMS`, `KH_CATEGORIES`, `KH_SUGGESTED` | Intent-grouped search and the Knowledge Hub category bands |
 | `QUESTIONS` | The homepage "What brings you here today?" cards |
-| `ACT`, `CAT` | The two waiting-room questionnaires — items, options and bands |
+| `ACT`, `CAT`, `MMRC` | The waiting-room questionnaires — items, options and bands |
 | `ACHIEVEMENTS` | Institutional achievement chips under the hero — **empty, TODO** |
 | `TOPIC_GROUPS` | The homepage "Conditions we treat" directory |
 | `DOCTORS` | Specialist finder, profiles, and condition/procedure cross-links |
@@ -259,9 +259,14 @@ score, its band, what that band means, and a bordered **"Show this to your docto
 listing every item with the answer given, the instrument name, the date and the total. The
 previous score is kept in `localStorage`, so the result also says how today compares.
 
-`ACT` and `CAT` at the top of the component hold the items, the option wording and the
-bands — scoring is `sum(answers)` for both, and the band is the first whose `min` the score
-reaches.
+The COPD page carries a second instrument below the CAT block: the **mMRC Dyspnoea Scale**,
+one question graded 0–4. It answers on the spot — a single question needs no submit step —
+and its grade joins the CAT total in the doctor panel, which is how the two are read in
+clinic. `MMRC` holds the grade wording and the plain meaning for each.
+
+`ACT`, `CAT` and `MMRC` at the top of the component hold the items, the option wording and
+the bands — scoring is `sum(answers)` for ACT and CAT, and the band is the first whose `min`
+the score reaches.
 
 Two rules about these two arrays:
 
@@ -272,7 +277,9 @@ Two rules about these two arrays:
 - **Licensing is a TODO before launch** — see the comment above `ACT`. The Asthma Control
   Test is a QualityMetric trademark; the COPD Assessment Test is © GSK, which permits
   clinical use unmodified and with the copyright notice shown. Both notices render on their
-  pages. Confirm the ACT position with the rights holder before this goes live.
+  pages. Confirm the ACT position with the rights holder before this goes live. The mMRC
+  scale carries no such restriction — it descends from the Medical Research Council
+  breathlessness scale and is in general free use.
 
 ## Open TODOs in the code
 
