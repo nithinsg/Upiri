@@ -45,6 +45,7 @@ page reads `location.pathname` on load, pushes state on navigation and handles B
 | `/` | Home |
 | `/risk-check`, `/lung-age`, `/nodule-journey`, `/rendo-upiri` | Existing tools |
 | `/symptom-checker`, `/clubs`, `/allergy-calendar`, `/case-of-the-month`, `/shikhar` | Existing tools |
+| `/asthma-control-test`, `/copd-assessment-test` | ACT and CAT, scored in the waiting room |
 | `/for-doctors`, `/for-corporates`, `/for-schools` | Existing spaces |
 | `/doctors`, `/doctors/:id` | Specialist finder and profiles (15 consultants) |
 | `/tests-and-procedures`, `/tests-and-procedures/:id` | Tests & procedures (9) |
@@ -92,8 +93,8 @@ experience that answers it:
 |---|---|
 | I've been coughing for a while… | symptom checker, **cough already ticked** |
 | I feel breathless… | symptom checker, **breathlessness already ticked** |
-| I have asthma. Am I really in control? | the Asthma Club control diary |
-| I have COPD… | the COPD condition page |
+| I have asthma. Am I really in control? | the **Asthma Control Test** (ACT) |
+| I have COPD… | the **COPD Assessment Test** (CAT) |
 | My scan showed a lung nodule… | the nodule journey |
 | I want to understand my lungs better… | the risk check |
 
@@ -131,6 +132,7 @@ Both new sections are data-driven — the card markup is written once and repeat
 | `KH_ICONS` | Shared stroke icons, reused across topics |
 | `KH_SYMPTOMS`, `KH_CATEGORIES`, `KH_SUGGESTED` | Intent-grouped search and the Knowledge Hub category bands |
 | `QUESTIONS` | The homepage "What brings you here today?" cards |
+| `ACT`, `CAT` | The two waiting-room questionnaires — items, options and bands |
 | `ACHIEVEMENTS` | Institutional achievement chips under the hero — **empty, TODO** |
 | `TOPIC_GROUPS` | The homepage "Conditions we treat" directory |
 | `DOCTORS` | Specialist finder, profiles, and condition/procedure cross-links |
@@ -248,6 +250,29 @@ English text.
   the hero gradient is checked by hand against its darkest and lightest stops; the ŪPIRI
   wordmark is exempt as logotype (WCAG 1.4.3).
 - Nothing depends on hover: menus open on click, and every top-level nav item navigates.
+
+## Waiting-room questionnaires
+
+`/asthma-control-test` (ACT, 5 items, 5–25) and `/copd-assessment-test` (CAT, 8 items, 0–40)
+are meant to be filled in the lobby and shown to the clinician in the room. Each ends in a
+score, its band, what that band means, and a bordered **"Show this to your doctor"** panel
+listing every item with the answer given, the instrument name, the date and the total. The
+previous score is kept in `localStorage`, so the result also says how today compares.
+
+`ACT` and `CAT` at the top of the component hold the items, the option wording and the
+bands — scoring is `sum(answers)` for both, and the band is the first whose `min` the score
+reaches.
+
+Two rules about these two arrays:
+
+- **The items are reproduced verbatim and are never translated.** A home-made translation of
+  a validated instrument is not the validated instrument; official translations are licensed
+  separately. Their strings are deliberately absent from `I18N`, and the language switch
+  leaves them in English.
+- **Licensing is a TODO before launch** — see the comment above `ACT`. The Asthma Control
+  Test is a QualityMetric trademark; the COPD Assessment Test is © GSK, which permits
+  clinical use unmodified and with the copyright notice shown. Both notices render on their
+  pages. Confirm the ACT position with the rights holder before this goes live.
 
 ## Open TODOs in the code
 
