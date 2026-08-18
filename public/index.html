@@ -20,6 +20,12 @@
 <meta property="og:image:alt" content="ŪPIRI — the pulmonary platform of Yashoda Hospitals">
 <meta name="twitter:card" content="summary_large_image">
 <script src="/support.js" defer></script>
+<!-- Uppi, the lung companion (public/uppi/, documented in the README). A
+     deferred classic script that does nothing on load beyond arming a listener:
+     it dynamic-imports the character, the voice layer and the knowledge core
+     only once the page is idle or the visitor interacts, so this page's own
+     first paint is untouched. -->
+<script src="/uppi/boot.js" defer></script>
 </head>
 <body>
 <a href="#main" style="position:absolute;left:-9999px;top:0;z-index:100;padding:12px 20px;border-radius:0 0 12px 0;background:#2C2A6B;color:#fff;font:600 14px/1 system-ui,sans-serif;text-decoration:none" onfocus="this.style.left='0'" onblur="this.style.left='-9999px'">Skip to content</a>

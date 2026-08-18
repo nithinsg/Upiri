@@ -281,6 +281,128 @@ Two rules about these two arrays:
   scale carries no such restriction — it descends from the Medical Research Council
   breathlessness scale and is in general free use.
 
+## Uppi — the lung companion
+
+Uppi runs in from the right of the viewport on load, lands, waves, introduces himself and
+then holds a conversation about breathing. He is the chat button as well as the character:
+there is no separate bubble icon.
+
+Comments under `public/uppi/` and `api/uppi/` cite the Uppi build brief by section — "§7"
+is the red-flag triage requirement, "§14" the facial animation one, and so on. They are
+there so a future change can see which requirement a piece of code exists to satisfy.
+
+### Where the code lives
+
+```
+public/uppi/
+  boot.js          entry point — dynamic-imports everything else once the page is idle
+  avatar.js        the vector rig: named, separately animatable parts + mouth shapes
+  motion.js        entrance, run cycle, wave, idle breathing, blinking, listening, visemes
+  states.js        the 11-state machine (IDLE … URGENT) and its legal transitions
+  speech.js        speech-in and speech-out, browser-first with a server fallback
+  conversation.js  turns, the client-side red-flag pre-check, sessionStorage
+  chat.js          the panel, the dock, the greeting bubble, the CTAs
+  analytics.js     event names only, never content
+  uppi.css         all styling, every class prefixed `uppi-`
+  core/            SHARED with the API — see below
+api/uppi/
+  chat.js          the pipeline
+  transcribe.js    server speech-to-text proxy (provider-agnostic)
+  speak.js         server text-to-speech proxy (provider-agnostic)
+```
+
+`public/uppi/core/` is imported by both the browser and the serverless functions, so the
+triage rules that decide urgency exist exactly once. There is no second copy to drift.
+
+### How an answer is produced
+
+```
+message → normalise → RED FLAGS → symptom extraction → conversation memory
+        → STRUCTURED TRIAGE → knowledge retrieval → model → SAFETY GATE → answer
+```
+
+The three capitalised stages are deterministic code, not the model. **Nothing medical is
+decided by the model.** It receives the triage decision as a constraint and writes it in
+Uppi's voice; `core/safety.js` then reads the finished text and discards it outright if it
+asserts a diagnosis, rules one out, over-reassures, prescribes, or fails to convey an
+emergency. The model's one permitted decision is to *raise* urgency — never to lower it.
+
+Two consequences worth knowing:
+
+- **Emergencies never touch the network.** `detectRedFlags` runs in the browser first, so
+  "I'm coughing blood" produces the urgent screen with the 108 button in under a
+  millisecond, offline, with no API key, on a cold function.
+- **`ANTHROPIC_API_KEY` is optional.** Without it, `core/compose.js` assembles the answer
+  from the triage decision and the curated knowledge entries. That path is tested and
+  ships real, sourced, correctly-triaged prose — it is the floor, not a placeholder. Set
+  the key in Vercel to get the same content written more naturally.
+
+### Environment variables (all server-side only)
+
+| Variable | Effect if unset |
+|---|---|
+| `ANTHROPIC_API_KEY` | Answers come from the deterministic composer instead of the model. |
+| `UPPI_STT_URL` / `UPPI_STT_KEY` / `UPPI_STT_FIELD` | Server transcription is reported as unconfigured; the browser recogniser is used where it exists, and the microphone button is not rendered where it does not. |
+| `UPPI_TTS_URL` / `UPPI_TTS_KEY` / `UPPI_TTS_VOICE` | Uppi speaks with the browser voice (an `en-IN` one where the device has it). |
+
+No key is ever read in `public/`.
+
+### The knowledge layer
+
+`public/uppi/core/knowledge.js` is the entire medical content surface — one array of
+entries, each with plain-language text and the guideline family it reflects (GINA, GOLD,
+WHO, ATS/ERS, NICE, ARIA, AASM, the national TB programme). To change what Uppi knows,
+edit that array; nothing else in the application reads clinical content from anywhere
+else, and no open-internet content reaches a visitor. Editorial rules are at the top of
+the file.
+
+### The character
+
+`avatar.js` rebuilds the approved Uppi as vectors — same lung-pair head with bronchial
+tracery and ribbed trachea, same brown eyes, same navy Yashoda hoodie with the marigold
+petal mark and orange drawstrings, same khaki cargo trousers and navy-and-cream sneakers.
+It is a rig rather than the flat artwork because §14 requires a mouth that actually forms
+shapes while he speaks, which a raster cannot do. Eight mouth shapes are driven from real
+speech: word-boundary events from the browser voice, or amplitude from an `AnalyserNode`
+when hosted audio is configured.
+
+Everything above the rig talks to it through `setMouth` / `setEyes` / `blink` / `look` /
+`setExpression` and the `parts` map, and to nothing else — so a Rive board or a properly
+rigged SVG master can replace `build()` later without any other file changing.
+
+### Keyboard
+
+The launcher is a real button, the panel is a labelled dialog and the message log is a
+polite live region, so a whole conversation is possible without a mouse. Escape is
+layered, most-recent-thing-first: it cancels the microphone if it is open, then stops Uppi
+speaking, then closes the panel. Focus is restored to whatever opened it — after the dock
+is visible again, not before, or it would land on nothing.
+
+On a phone the panel takes focus rather than the text field: focusing the field there
+raises the keyboard before the visitor has asked for it and hides half of what just
+opened.
+
+### Privacy
+
+Conversations live in `sessionStorage` only and the browser discards them when the tab
+closes; "Clear it now" in the panel wipes them immediately. Nothing goes to
+`localStorage`, no cookie is set, and `analytics.js` allow-lists both the event names and
+the fields that may ride with them — the most specific thing that can leave is a
+five-value triage band.
+
+### Prerendering and performance
+
+`boot.js` is a deferred classic script that arms a listener and nothing else; the
+character, the voice layer and the knowledge core arrive through one dynamic import after
+`load` + idle, or on the first interaction. The prerenderer sets `window.__UPIRI_NO_UPPI`
+so no route ships a frozen mid-wave Uppi in its HTML. Under `prefers-reduced-motion` the
+entrance becomes a short fade and slide and every loop stops — the mouth still moves while
+he speaks, because that is captioning rather than decoration.
+
+`vercel.json` needed two changes for this to work: `Permissions-Policy` now allows
+`microphone=(self)` (it was `microphone=()`, which would have blocked the microphone
+however it was wired), and the SPA catch-all rewrite excludes `/api/`.
+
 ## Open TODOs in the code
 
 Two things are deliberately blank rather than filled with plausible copy:

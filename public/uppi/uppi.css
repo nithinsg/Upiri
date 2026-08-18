@@ -1,0 +1,547 @@
+/*
+ * Uppi's interface.
+ *
+ * Every class is prefixed `uppi-` and nothing here selects a site element, so
+ * this stylesheet cannot reach into the ŪPIRI page it is loaded onto. The
+ * palette is the site's own (§20) — Yashoda navy, marigold, and the pale blue
+ * ground — and the type stack inherits from the page rather than importing a
+ * second font.
+ *
+ * §19 governs the look: no gradients-for-the-sake-of-gradients, no glow, no
+ * neon, no "AI" signalling. Rounded cards, generous whitespace, soft shadows,
+ * one accent colour.
+ */
+
+.uppi-root {
+  --uppi-navy: #2C2A6B;
+  --uppi-navy-deep: #1D1B4B;
+  --uppi-marigold: #F5821F;
+  --uppi-ground: #EDF2F8;
+  --uppi-surface: #FFFFFF;
+  --uppi-line: rgba(44, 42, 107, 0.12);
+  --uppi-muted: #69679C;
+  --uppi-urgent: #BE3A2F;
+  --uppi-urgent-soft: #FBE7E5;
+  --uppi-warn: #916300;
+  --uppi-warn-soft: #FBF1DC;
+  --uppi-ok: #27784C;
+  --uppi-ok-soft: #E3F2E9;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--uppi-navy-deep);
+}
+
+/* ---------------------------------------------------------------------------
+   The stage — the element Uppi is carried across the screen on
+   --------------------------------------------------------------------------- */
+
+.uppi-dock {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 9000;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.uppi-dock[hidden] { display: none; }
+
+.uppi-stage {
+  width: 176px;
+  flex: none;
+  pointer-events: auto;
+  transform-origin: 100% 100%;
+}
+
+.uppi-stage svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Uppi himself is the button (§21) — there is no separate chat bubble icon. */
+.uppi-launcher {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: block;
+  border-radius: 24px;
+  transition: transform .22s cubic-bezier(.34, 1.3, .5, 1);
+}
+.uppi-launcher:hover { transform: translateY(-4px); }
+.uppi-launcher:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 6px; }
+
+.uppi-hint {
+  position: absolute;
+  right: 6px;
+  bottom: -4px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  background: var(--uppi-navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px -12px rgba(29, 27, 75, .7);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   The greeting bubble
+   --------------------------------------------------------------------------- */
+
+.uppi-bubble {
+  position: relative;
+  pointer-events: auto;
+  max-width: 330px;
+  margin-bottom: 42px;
+  padding: 18px 20px;
+  border-radius: 22px 22px 6px 22px;
+  background: var(--uppi-surface);
+  border: 1px solid var(--uppi-line);
+  box-shadow: 0 26px 60px -28px rgba(29, 27, 75, .45);
+  opacity: 0;
+  transform: translateY(10px) scale(.96);
+  transition: opacity .3s ease, transform .3s cubic-bezier(.34, 1.3, .5, 1);
+}
+.uppi-bubble.is-in { opacity: 1; transform: none; }
+.uppi-bubble p { margin: 0; font-size: 15px; line-height: 1.5; }
+.uppi-bubble-cta {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--uppi-marigold);
+  color: #fff;
+  font: 700 14px/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+}
+.uppi-bubble-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: none;
+  color: var(--uppi-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+   The panel
+   --------------------------------------------------------------------------- */
+
+.uppi-panel {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 9001;
+  width: min(760px, calc(100vw - 36px));
+  height: min(620px, calc(100vh - 110px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--uppi-surface);
+  border: 1px solid var(--uppi-line);
+  box-shadow: 0 44px 110px -40px rgba(29, 27, 75, .55);
+  opacity: 0;
+  transform: translateY(24px) scale(.97);
+  transform-origin: 100% 100%;
+  transition: opacity .26s ease, transform .3s cubic-bezier(.34, 1.2, .5, 1);
+}
+.uppi-panel.is-open { opacity: 1; transform: none; }
+.uppi-panel[hidden] { display: none; }
+
+.uppi-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 14px 22px;
+  border-bottom: 1px solid var(--uppi-line);
+  background: var(--uppi-surface);
+  flex: none;
+}
+.uppi-head-name {
+  font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -.01em;
+  color: var(--uppi-navy);
+}
+.uppi-head-role { font-size: 13px; color: var(--uppi-muted); }
+.uppi-head-spacer { flex: 1 }
+
+.uppi-iconbtn {
+  appearance: none;
+  border: 1px solid var(--uppi-line);
+  background: var(--uppi-surface);
+  color: var(--uppi-navy);
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .16s ease;
+}
+.uppi-iconbtn:hover { background: var(--uppi-ground); }
+.uppi-iconbtn:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 2px; }
+.uppi-iconbtn svg { width: 17px; height: 17px }
+
+.uppi-body { flex: 1; display: flex; min-height: 0; }
+
+/* Uppi's column: about a third of the interaction area on desktop (§3). */
+.uppi-col {
+  position: relative;
+  flex: 0 0 34%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 8px 16px;
+  background:
+    radial-gradient(120% 90% at 50% 100%, rgba(245, 130, 31, .13), transparent 62%),
+    var(--uppi-ground);
+  border-right: 1px solid var(--uppi-line);
+}
+.uppi-slot { width: 100%; max-width: 210px; display: flex; justify-content: center; }
+.uppi-slot .uppi-stage { width: 100%; transform-origin: 50% 100%; }
+
+.uppi-status {
+  margin: 8px 0 0;
+  min-height: 20px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--uppi-muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.uppi-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--uppi-marigold);
+  flex: none;
+}
+.uppi-status.is-listening .uppi-status-dot { animation: uppiPulse 1.1s ease-in-out infinite }
+@keyframes uppiPulse { 0%, 100% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.7); opacity: .45 } }
+
+/* the small live level meter while the microphone is open (§12) */
+.uppi-meter { display: flex; align-items: flex-end; gap: 3px; height: 14px }
+.uppi-meter span {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--uppi-marigold);
+  height: 4px;
+  animation: uppiBar .9s ease-in-out infinite;
+}
+.uppi-meter span:nth-child(2) { animation-delay: .12s }
+.uppi-meter span:nth-child(3) { animation-delay: .24s }
+.uppi-meter span:nth-child(4) { animation-delay: .36s }
+@keyframes uppiBar { 0%, 100% { height: 4px } 50% { height: 14px } }
+
+/* ---------------------------------------------------------------------------
+   The conversation
+   --------------------------------------------------------------------------- */
+
+.uppi-convo { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column }
+
+.uppi-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px 22px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+}
+
+.uppi-msg { max-width: 92%; font-size: 15px; line-height: 1.58 }
+.uppi-msg p { margin: 0 0 10px }
+.uppi-msg p:last-child { margin-bottom: 0 }
+
+.uppi-msg--uppi { align-self: flex-start; color: var(--uppi-navy-deep) }
+.uppi-msg--you {
+  align-self: flex-end;
+  background: var(--uppi-navy);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 18px 18px 4px 18px;
+  max-width: 84%;
+}
+.uppi-msg--you.is-interim { opacity: .55; font-style: italic }
+
+.uppi-who {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--uppi-muted);
+  margin-bottom: 5px;
+}
+
+/* An urgent answer gets its own surface so it cannot be skimmed past (§7). */
+.uppi-alert {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--uppi-urgent-soft);
+  border: 1px solid rgba(190, 58, 47, .28);
+}
+.uppi-alert-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--uppi-urgent);
+  margin-bottom: 4px;
+}
+
+.uppi-band {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.uppi-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px }
+
+.uppi-act {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--uppi-line);
+  background: var(--uppi-surface);
+  color: var(--uppi-navy);
+  font: 700 14px/1.2 'Inter', system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .16s ease, background .16s ease;
+}
+.uppi-act:hover { transform: translateY(-1px); background: var(--uppi-ground); color: var(--uppi-navy) }
+.uppi-act:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 3px }
+.uppi-act svg { width: 16px; height: 16px; flex: none }
+
+.uppi-act--book { background: var(--uppi-marigold); border-color: var(--uppi-marigold); color: #fff }
+.uppi-act--book:hover { background: #E4750F; border-color: #E4750F; color: #fff }
+.uppi-act--call { background: var(--uppi-navy); border-color: var(--uppi-navy); color: #fff }
+.uppi-act--call:hover { background: var(--uppi-navy-deep); border-color: var(--uppi-navy-deep); color: #fff }
+.uppi-act--emergency { background: var(--uppi-urgent); border-color: var(--uppi-urgent); color: #fff; font-size: 15px; padding: 14px 22px }
+.uppi-act--emergency:hover { background: #A32E24; border-color: #A32E24; color: #fff }
+
+/* ---------------------------------------------------------------------------
+   Suggested openers (§4)
+   --------------------------------------------------------------------------- */
+
+.uppi-suggest {
+  display: flex;
+  gap: 8px;
+  padding: 10px 22px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: none;
+}
+.uppi-suggest::-webkit-scrollbar { display: none }
+.uppi-suggest[hidden] { display: none }
+.uppi-chip {
+  appearance: none;
+  flex: none;
+  padding: 10px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--uppi-line);
+  background: var(--uppi-surface);
+  color: var(--uppi-navy);
+  font: 600 13.5px/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .16s ease, border-color .16s ease;
+}
+.uppi-chip:hover { background: var(--uppi-ground); border-color: rgba(44, 42, 107, .28) }
+.uppi-chip:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 2px }
+
+/* ---------------------------------------------------------------------------
+   Input
+   --------------------------------------------------------------------------- */
+
+.uppi-form {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 16px 8px;
+  border-top: 1px solid var(--uppi-line);
+}
+
+.uppi-field {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 1.5px solid var(--uppi-line);
+  border-radius: 18px;
+  padding: 13px 16px;
+  font: 400 15px/1.45 'Inter', system-ui, sans-serif;
+  color: var(--uppi-navy-deep);
+  background: var(--uppi-surface);
+  max-height: 120px;
+  min-height: 48px;
+}
+.uppi-field:focus { outline: none; border-color: rgba(245, 130, 31, .6) }
+.uppi-field:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 1px }
+.uppi-field::placeholder { color: #9A98BE }
+
+.uppi-round {
+  appearance: none;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .16s ease, background .16s ease;
+}
+.uppi-round:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 3px }
+.uppi-round svg { width: 20px; height: 20px }
+.uppi-round[disabled] { opacity: .4; cursor: default }
+
+.uppi-mic { background: var(--uppi-ground); color: var(--uppi-navy); border: 1.5px solid var(--uppi-line) }
+.uppi-mic:hover { background: #E1E8F3 }
+.uppi-mic[aria-pressed="true"] { background: var(--uppi-urgent); border-color: var(--uppi-urgent); color: #fff }
+.uppi-send { background: var(--uppi-marigold); color: #fff }
+.uppi-send:hover { transform: translateY(-1px) }
+
+.uppi-fine {
+  flex: none;
+  margin: 0;
+  padding: 0 22px 12px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--uppi-muted);
+}
+.uppi-fine button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--uppi-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* the stop-speaking control, only present while Uppi is talking (§25) */
+.uppi-stop {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--uppi-line);
+  background: var(--uppi-surface);
+  color: var(--uppi-navy);
+  font: 700 12.5px/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -14px rgba(29, 27, 75, .6);
+}
+.uppi-stop[hidden] { display: none }
+
+/* ---------------------------------------------------------------------------
+   Mobile (§23) — a bottom sheet, not a shrunken desktop panel
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .uppi-dock { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)) }
+  .uppi-stage { width: 128px }
+  .uppi-bubble { max-width: min(280px, calc(100vw - 168px)); margin-bottom: 26px; font-size: 14px }
+
+  .uppi-panel {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    /* dvh so the sheet is not cut off by mobile browser chrome */
+    height: min(90dvh, 760px);
+    border-radius: 26px 26px 0 0;
+    transform: translateY(30px);
+  }
+  .uppi-body { flex-direction: column }
+
+  /* Uppi reduces to a compact upper-body state across the top (§23) */
+  .uppi-col {
+    flex: none;
+    height: 128px;
+    border-right: 0;
+    border-bottom: 1px solid var(--uppi-line);
+    flex-direction: row;
+    align-items: center;
+    /* Uppi and whatever he is currently doing read as one centred lockup: left
+       aligned, he sits in a wide empty strip and the panel looks unfinished. */
+    justify-content: center;
+    gap: 14px;
+    padding: 0 18px;
+    overflow: hidden;
+  }
+  .uppi-slot { width: 116px; max-width: 116px; height: 128px; overflow: hidden; align-items: flex-start }
+  .uppi-slot .uppi-stage { width: 116px; margin-top: 4px }
+  .uppi-status { margin: 0; text-transform: none; font-size: 13px; letter-spacing: 0 }
+
+  .uppi-log { padding: 16px 18px 4px }
+  .uppi-msg { max-width: 100% }
+  .uppi-msg--you { max-width: 88% }
+  .uppi-suggest { padding: 8px 18px 4px }
+  .uppi-form { padding: 10px 12px 6px }
+  .uppi-fine { padding: 0 18px 10px }
+  /* thumb-friendly targets (§23) */
+  .uppi-round { width: 52px; height: 52px }
+  .uppi-act { padding: 13px 18px; font-size: 14.5px }
+  .uppi-act--emergency { width: 100%; justify-content: center; font-size: 16px; padding: 16px }
+}
+
+@media (max-width: 380px) {
+  .uppi-stage { width: 108px }
+  .uppi-bubble { max-width: calc(100vw - 148px); padding: 14px 15px }
+  .uppi-slot, .uppi-slot .uppi-stage { width: 96px; max-width: 96px }
+  .uppi-col { height: 116px; gap: 10px; padding: 0 14px }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion (§24)
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .uppi-panel, .uppi-bubble, .uppi-launcher, .uppi-act, .uppi-round { transition: none }
+  .uppi-status.is-listening .uppi-status-dot,
+  .uppi-meter span { animation: none }
+  .uppi-meter span { height: 9px }
+}

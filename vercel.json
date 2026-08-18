@@ -3,6 +3,11 @@
   "framework": null,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/uppi/*.js": {
+      "includeFiles": "public/uppi/core/**"
+    }
+  },
   "redirects": [
     {
       "source": "/upiri-2.0.html",
@@ -12,13 +17,22 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
       "source": "/support.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/uppi/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -52,7 +66,7 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
+          "value": "camera=(), microphone=(self), geolocation=()"
         }
       ]
     }
