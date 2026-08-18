@@ -1,0 +1,796 @@
+# ŪPIRI — Project State & Handoff
+
+**Written:** 2026-08-18, after the Uppi build shipped to production.
+**Purpose:** hand a cold context everything it needs to continue. This records what
+*is*, verified against the repository, not what was intended.
+
+Live: <https://upiri.vercel.app> · Repo: `nithinsg/Upiri`
+
+---
+
+## 0. TL;DR for whoever reads this first
+
+- The site is **one 5,955-line HTML file** (`public/index.html`) driven by a **custom
+  200-line template runtime** (`public/support.js`). It is **not React**. The React app
+  in `src/` is dead code kept for history.
+- **Uppi** — an animated lung-character chat companion — was added in
+  `public/uppi/` (browser) and `api/uppi/` (serverless). It is live and working.
+- Uppi's medical decisions are made by **deterministic rules**, never by the LLM. The
+  LLM only phrases them, and its output passes a gate that can reject it wholesale.
+- Everything is deployed and green. The open items are **content and credentials the
+  hospital must supply**, not code.
+
+---
+
+## 1. What we were trying to achieve
+
+Two overlapping briefs, both from the product owner:
+
+1. **The site itself** (earlier work, already shipped): a question-led pulmonary
+   platform for Yashoda Hospitals Hyderabad — patient tools, a specialist finder, a
+   knowledge hub, and waiting-room questionnaires (ACT / CAT / mMRC).
+2. **Uppi** (this build): turn the approved mascot into "a living character who enters
+   the website, listens, speaks back, shows empathy, and guides the user toward the
+   appropriate next step." Explicitly **not** a generic chatbot. The brief was 32
+   numbered sections; comments in `public/uppi/` and `api/uppi/` cite them as `§N`.
+
+The non-negotiables from the brief, all of which shaped the architecture:
+
+- Uppi is **not a doctor** and must never state or rule out a diagnosis (§6).
+- A **red-flag safety layer runs before** the normal conversational response (§7).
+- Triage must **not** be "based solely on an LLM's free-form response" (§8, §10).
+- The mouth must **actually animate** while speaking — not a bobbing PNG (§14).
+- **No fake buttons.** No placeholder responses once the backend is connected (§29).
+- Do not break existing site functionality.
+
+---
+
+## 2. Current website architecture
+
+```
+public/index.html      5,955 lines — the ENTIRE site: markup + data + logic
+public/support.js        455 lines — the template runtime that renders it
+public/uppi/…                     — Uppi, the lung companion (browser side)
+api/uppi/…                        — Uppi's serverless endpoints
+scripts/prerender.mjs    124 lines — Playwright prerender of every route into dist/
+src/                              — RETIRED React v2 app. Not built, not served.
+```
+
+### The "design-context" (dc) format
+
+`public/index.html` is a design-tool export, not hand-written HTML. Its shape:
+
+- Markup lives inside `<x-dc>` (lines 32–3289) using control-flow *elements*:
+  `<sc-if value="{{ cond }}">`, `<sc-for list="{{ arr }}" as="item">`, and
+  `{{ path }}` bindings in text and attributes.
+- Logic ships as `<script type="text/x-dc" data-dc-script>` (line 3290 onwards)
+  containing `class Component extends DCLogic` — state, data arrays, and a
+  `renderVals()` method that returns the object the template binds against.
+- The template is wrapped in an inert `<template data-dc-template>` (line 265).
+  **This wrapper is a required local edit** — without it the browser tries to parse
+  `{{ … }}` as SVG geometry and logs errors during load. A re-export needs it re-added,
+  along with the small-screen stylesheet appended to the export's `<helmet>` block.
+
+`public/support.js` implements that runtime: `{{ }}` interpolation, React-style style
+objects, `style-hover`, `onClick`/`onChange`, `value` bindings, `<sc-if>`, `<sc-for>`,
+`<helmet>` hoisting, and **in-place DOM patching** so focus, caret position and running
+CSS animations survive a state update. It exposes `window.__dc = { app, render,
+setTranslator }` and `window.__dcSetTranslator`.
+
+### Routing
+
+History-API routing inside the component: `ROUTES` (line ~4557), `pathFor()`,
+`routeFromPath()`, `syncUrl()`, and a `popstate` listener. `vercel.json` rewrites
+unknown paths to `/index.html`.
+
+### Prerendering
+
+`scripts/prerender.mjs` loads the page once per route in real Chromium, waits for the
+runtime to render, and writes the resulting HTML to `dist/`. It re-inserts the original
+`<template data-dc-template>` into every written file — **without that the page would
+hydrate from its own prerendered markup and come up inert.** The route list is read from
+the page's own data (`ROUTES` + `KH_TOPICS` + `DOCTORS` + `PROCEDURES`), so it cannot
+drift. All non-local requests are aborted, keeping the build hermetic.
+
+---
+
+## 3. Framework and dependencies
+
+**There is no frontend framework in the shipped site.** Plain ES modules and the dc
+runtime. `react`, `react-dom`, `recharts`, `lucide-react`, `tailwindcss`, `vite` are all
+in `package.json` but serve only the retired `src/` app — do not assume they are usable.
+
+| Actually used | Where |
+|---|---|
+| `@anthropic-ai/sdk` ^0.117.1 | `api/uppi/chat.js` only |
+| `playwright` ^1.56.1 (dev) | `scripts/prerender.mjs` |
+| `oxlint` ^1.71.0 (dev) | `npm run lint` |
+| `vite` ^8.1.1 (dev) | `npm run dev` static server only |
+
+```bash
+npm install
+npm run dev           # vite --root public  → http://localhost:5173
+npm run build         # prerender 62 routes into dist/  (~30s)
+npm run build:vercel  # what Vercel runs — adds nspr/nss + playwright install
+npm run lint          # oxlint, currently clean
+```
+
+`package.json` has `"type": "module"`; `api/*.js` are therefore ESM.
+
+---
+
+## 4. Important routes
+
+62 prerendered routes. `ROUTES` is at `public/index.html:4557`.
+
+| Path | Screen |
+|---|---|
+| `/` | Home — question-led hero, six patient questions |
+| `/risk-check`, `/lung-age`, `/nodule-journey`, `/rendo-upiri` | Tools |
+| `/symptom-checker` | Triage tool (separate from Uppi) |
+| `/clubs`, `/clubs/member`, `/allergy-calendar`, `/case-of-the-month`, `/shikhar` | Tools |
+| `/asthma-control-test` | ACT — 5 items, 5–25 |
+| `/copd-assessment-test` | CAT (8 items, 0–40) **+ mMRC** (grades 0–4) |
+| `/doctors`, `/doctors/:id` | Specialist finder, 15 consultants |
+| `/tests-and-procedures`, `/tests-and-procedures/:id` | 9 procedures |
+| `/knowledge-hub`, `/knowledge-hub/:topic` | 18 topics |
+| `/for-doctors`, `/for-corporates`, `/for-schools`, `/alumni` | Spaces |
+| `/api/uppi/chat`, `/api/uppi/transcribe`, `/api/uppi/speak` | Serverless |
+
+`?startScreen=<name>` still works as a review override.
+
+---
+
+## 5. Important components (in `public/index.html`)
+
+Data arrays at the top of the `<script type="text/x-dc">` block — change content here,
+never in markup:
+
+| Array | Line | Feeds |
+|---|---|---|
+| `REDFLAGS` | 3317 | Risk-check red-flag list |
+| `TSYM`, `TLEVELS` | 3349, 3359 | Symptom-checker symptoms and urgency bands |
+| `ACHIEVEMENTS` | 3538 | Hero chips — **deliberately `[]`, see §18** |
+| `LANGS`, `I18N` | 3567, 3574 | en / te / kn / bn, ~193 keys each |
+| `DOCTORS` (15) | 3948 | Finder, profiles, cross-links |
+| `PROCEDURES` (9) | 3969 | Tests & procedures pages |
+| `ACT`, `CAT`, `MMRC` | 4124, 4156, 4193 | Waiting-room instruments |
+| `QUESTIONS` (6) | 4215 | Homepage "What brings you here today?" |
+| `KH_TOPICS` (18) | 4283 | Knowledge Hub topics + detail pages |
+| `KH_ARTICLES` (12), `KH_VIDEOS` (33), `KH_CASES` (6) | — | Hub libraries |
+
+Reading language: `window.__dcSetTranslator` is installed at `public/index.html:4783`.
+The runtime applies it to static markup, `{{ }}` values, and reader-facing attributes
+(`aria-label`, `placeholder`, `title`, `alt`). A missing key falls back to English.
+**ACT / CAT / mMRC wording is deliberately absent from `I18N`** — a home-made
+translation of a validated instrument is not the validated instrument.
+
+---
+
+## 6. Uppi implementation
+
+```
+public/uppi/
+  boot.js          79   entry point — lazy, deferred, prerender-aware
+  avatar.js       521   the vector rig + mouth shapes + palette
+  motion.js       370   entrance, run cycle, wave, idle, listening, visemes
+  states.js       121   11-state machine and its legal transitions
+  speech.js       373   TTS and STT abstractions
+  conversation.js 144   turns, client-side red-flag pre-check, sessionStorage
+  chat.js         697   panel, dock, greeting bubble, CTAs, accessibility
+  analytics.js     52   allow-listed events, never content
+  uppi.css        547   all styling, every class prefixed `uppi-`
+  core/                 SHARED WITH THE API — single source of truth
+    redflags.js   354   normalisation + emergency detection
+    symptoms.js   153   symptom lexicon, duration parsing, extraction
+    triage.js     292   the urgency decision engine
+    knowledge.js  278   the entire curated medical content surface
+    safety.js     138   output validation gate
+    compose.js    164   deterministic answer composition + GREETING
+    contact.js     39   phone numbers, booking path, routes
+api/uppi/
+  chat.js         332   the pipeline
+  transcribe.js    93   STT proxy (provider-agnostic)
+  speak.js         77   TTS proxy (provider-agnostic)
+```
+
+**`public/uppi/core/` is imported by both the browser and the serverless functions.**
+`api/uppi/chat.js` does `import … from '../../public/uppi/core/triage.js'`. Vercel's file
+tracer follows those static ESM imports — verified in production. The triage rules exist
+exactly once; there is no second copy to drift.
+
+### Mounting
+
+`public/index.html:28` adds `<script src="/uppi/boot.js" defer></script>`. That is the
+**only** change made to the site file. `boot.js` arms listeners and does nothing else
+until `load` + `requestIdleCallback({timeout:1800})` or the first user interaction,
+then dynamic-imports `chat.js`. Uppi mounts to `document.body`, **outside `<x-dc>`**, so
+the dc runtime's DOM patching can never clobber it. `window.__uppi` is exposed for tests.
+
+`boot.js` declines to run when `window.__UPIRI_NO_UPPI` is set, when
+`Element.prototype.animate` is missing, or if already booted.
+
+---
+
+## 7. Current Uppi asset(s)
+
+**There is no image file for Uppi.** No PNG, no SVG file, no Rive board.
+
+Uppi is **generated as inline SVG at runtime** by `build()` in
+`public/uppi/avatar.js:303`, viewBox `0 0 372 572`.
+
+**Why:** the approved reference artwork reached this project as images inside a
+conversation, not as files that could be committed. §14 of the brief also requires a
+mouth that forms real shapes while speaking, which a raster cannot do. So the character
+was rebuilt as a vector rig matching the reference: lung-pair head with a cleft and
+bronchial tracery, ribbed trachea, large brown eyes, navy Yashoda hoodie with orange
+drawstrings and the marigold petal mark, khaki cargo trousers, navy-and-cream sneakers.
+
+Palette is `SKIN` in `avatar.js:30` — nothing outside that object sets a colour on Uppi:
+`lung #EFA294`, `navy #22305F`, `marigold #F5821F`, `khaki #C9A26B`, `iris #6E3B1C`.
+
+**Named parts** (`data-part` attributes, queried in `UppiAvatar`'s constructor):
+`head`, `body`, `legs`, `leg-left`, `leg-right`, `arm-left`, `arm-right`, `eye` (×2),
+`look` (×2, the pupil group), `brow-left`, `brow-right`, `mouth`, `mouth-shape`,
+`mouth-tongue`, `mouth-teeth`, `shadow`.
+
+**To drop in the real artwork later:** replace `build()` and the part lookup in
+`UppiAvatar`'s constructor. Everything above the rig talks to it only through
+`setMouth` / `setEyes` / `blink` / `look` / `setBrows` / `setExpression` and the `parts`
+map. No other file needs to change. This was a deliberate design constraint.
+
+---
+
+## 8. Current Uppi animation system
+
+`public/uppi/motion.js`, all Web Animations API + CSS transforms (compositor only).
+
+Pivots are set as inline `transform-origin` in **viewBox user units** (SVG's default
+`transform-box: view-box`), e.g. the right shoulder is `232px 348px`. Eyes and brows use
+`transform-box: fill-box; transform-origin: center` instead, because they rotate/scale
+about themselves.
+
+| Phase | Implementation |
+|---|---|
+| Entrance | `translateX(calc(100vw + 220px))` → `0`, 1500ms, `cubic-bezier(.16,.62,.28,1)` |
+| Run cycle | legs ±24°, arms swing, body bob, 300ms stride, `iterations` = duration/stride |
+| Landing | `scale(1.055,.93)` → `scale(.982,1.028)` → `1`, 420ms overshoot |
+| Wave | right arm 6-keyframe oscillation, 1450ms, head tips along |
+| Idle | breathing 4200ms, head sway 8400ms, weight shift 11000ms, all `Infinity` |
+| Listening | lean-in 420ms then 3200ms loop, plus a nod every 2.8–5.4s |
+| Thinking | head tilt loop, eyes glance to 4 spots at 700–1200ms intervals |
+| Concerned | almost still — 5200ms breath only (an urgent screen must feel steady) |
+| Blinking | `avatar.blink()` on a random 2.6–6.2s timer, 18% chance of a double-blink |
+| Speaking | see below |
+
+**Mouth (§14).** Eight shapes in `MOUTHS` (`avatar.js:63`): `closed`, `small`, `mid`,
+`wide`, `o`, `smile`, `soft`, `concerned`. Each is three paths (dark interior, teeth
+strip, tongue) drawn around the same anchor at (160, 262) so swapping `d` reads as motion.
+`startSpeaking(source)` runs a 92ms interval driven by, in order of fidelity:
+
+1. `source.getLevel()` — real RMS amplitude from an `AnalyserNode` over hosted TTS audio;
+2. `source.getChar()` — the character being spoken, from `SpeechSynthesisUtterance`
+   `onboundary`, mapped through `visemeFor()`;
+3. a rotating fallback pattern.
+
+The same shape never repeats twice running (a held pose for 200ms looks stuck).
+
+**Reduced motion.** `prefersReducedMotion()` is checked once in the `Motion` constructor.
+The entrance becomes a 420ms fade+slide, every loop is skipped, and the wave is a single
+expression change — **but the mouth still animates while speaking**, because that is
+captioning, not decoration.
+
+---
+
+## 9. Current chatbot architecture
+
+`public/uppi/chat.js` — class `UppiChat`, constructed and mounted by `boot.js`.
+
+Three visual states, one avatar instance moved between hosts (`this.stage` is
+re-parented, so animation state carries across rather than restarting):
+
+1. **Dock** — Uppi bottom-right at 176px (128px ≤760px, 108px ≤380px), inside a
+   `<button class="uppi-launcher">`. **Uppi himself is the chat button** (§21); after
+   the greeting an "Ask Uppi" pill appears on him. There is no bubble icon.
+2. **Greeting bubble** — appears after the entrance with the fixed line from
+   `GREETING`, a "Tell Uppi" CTA, and a dismiss ×. Auto-dismisses after 16s.
+3. **Panel** — `role="dialog"`, `aria-modal="false"`, `tabindex="-1"`.
+   Desktop: 760×620 max, bottom-right, Uppi column `flex: 0 0 34%` beside the
+   conversation. Mobile (≤760px): bottom sheet, Uppi as a compact 128px upper-body
+   strip across the top, conversation below.
+
+`fitToViewport()` (chat.js:400) is the one place `visualViewport` is read. It pins the
+panel's bottom edge with **`top`, not `bottom`** — a fixed element's `bottom` resolves
+against the layout viewport, which on a phone assumes the browser chrome has scrolled
+away, so `bottom: 0` can sit below what is visible, and the keyboard moves the two apart.
+
+Accessibility: message log is `role="log" aria-live="polite"`; the mic carries
+`aria-pressed`; focus lands in the field on desktop and on the dialog on touch (a
+surprise keyboard hides half the panel); **Escape is layered** — mic, then speech, then
+close; focus is restored *after* the dock is un-hidden (focusing a hidden element
+silently does nothing).
+
+Rendering safety: Uppi's reply is rendered as text nodes, never `innerHTML`. Action
+labels are `textContent`. A `route` action whose `href` fails `/^\/[a-z0-9/-]*$/i` is
+dropped rather than rendered.
+
+---
+
+## 10. Current backend/API architecture
+
+Three Vercel Node serverless functions (confirmed deployed: `lambdaRuntimeStats
+{"nodejs":3}`).
+
+### `POST /api/uppi/chat`
+
+```
+readBody → rate limit → clean(messages) → detectRedFlags(latest)
+  → mergeExtractions(all user turns) → triage() → retrieve()
+  → [emergency? short-circuit and return]
+  → compose() deterministic answer
+  → [ANTHROPIC_API_KEY? generate() → raise_urgency? → validate()]
+  → payload()
+```
+
+Response shape (`payload()`, chat.js:317):
+
+```jsonc
+{
+  "response": "…",
+  "urgency": "routine|insufficient|doctor|urgent|emergency",
+  "symptoms_detected": ["cough"],
+  "follow_up_question": "…" | null,
+  "appointment_recommended": true,
+  "emergency_recommended": false,
+  "crisis": false,
+  "suggested_actions": [{ "id", "kind": "book|call|emergency|route", "label", "href?" }],
+  "band": { "id", "label", "color", "soft", "when" },
+  "sources": ["GINA global asthma strategy", …],
+  "engine": "model|rules|rules-safety-fallback|rules-provider-fallback|model-escalated"
+}
+```
+
+`engine` is the debugging handle — it says which path produced the text. The client adds
+two more: `client-rules` (browser red-flag short-circuit) and `offline`.
+
+Limits: 24 messages, 2000 chars each, 20 requests/min/IP (in-memory, per-instance —
+best-effort only; `TODO(infra)` at chat.js:113 to move to a durable store).
+
+An emergency **never calls the model** — there is nothing for it to improve and the
+visitor should be leaving.
+
+### `GET|POST /api/uppi/transcribe`, `GET|POST /api/uppi/speak`
+
+`GET` returns `{"configured": boolean}` — the client asks before rendering a microphone
+or attempting hosted speech, so no dead button and no red 503 in every visitor's console.
+`POST` proxies to whatever `UPPI_STT_URL` / `UPPI_TTS_URL` point at. Unconfigured they
+return `503` with a machine-readable `error` code.
+
+---
+
+## 11. Current LLM implementation
+
+`api/uppi/chat.js`, `generate()` at line ~232.
+
+- Model **`claude-opus-5`**, official `@anthropic-ai/sdk`, `new Anthropic({ timeout:
+  20_000, maxRetries: 1 })`. API key read **only** here; nothing in `public/` sees one.
+- `max_tokens: 1200`, `output_config: { effort: 'low', format: { type: 'json_schema',
+  schema: OUTPUT_SCHEMA } }`. Low effort is deliberate — the hard reasoning already
+  happened in the triage rules, and a patient in a lobby feels every extra second.
+- System prompt is a **character brief**, not a rulebook, marked
+  `cache_control: { type: 'ephemeral' }`. The prohibitions that matter are enforced
+  downstream in code where they cannot be argued with.
+- **Not streamed, deliberately.** A safety gate cannot validate text it has not finished
+  reading, and showing a sentence that is about to be retracted is worse than a 2s wait.
+- The model returns exactly three fields (`OUTPUT_SCHEMA`, chat.js:88):
+  `reply`, `raise_urgency` (`doctor|urgent|emergency|null`), `raise_reason`.
+
+**The model's only decision is to raise urgency.** `URGENCY.indexOf()` comparison at
+chat.js:192 means a lower value is silently ignored. If it raises to `emergency`, its
+reply is **discarded** and `composeUrgent()` writes the copy — emergency wording is never
+the model's. `raise_reason` is deliberately **not** put in the payload: it is unvalidated
+model prose and the UI must never render text that skipped the gate.
+
+### The safety gate — `public/uppi/core/safety.js`
+
+`validate(text, decision)` rejects the whole text (never patches a sentence) on any of:
+
+`diagnosis-asserted` · `diagnosis-declared` · `diagnosis-verb` · `ruled-out` ·
+`false-reassurance` · `claims-clinician` · `prescribes` · `antibiotic-advice` ·
+`ai-disclosure-language` · `emergency-not-conveyed` · `over-escalated`
+
+On rejection the deterministic composition ships instead and `engine` records it.
+
+### Without a key
+
+`compose()` in `public/uppi/core/compose.js` assembles: empathy acknowledgement (if an
+emotion cue is present) → knowledge entry text → triage verdict → one follow-up question.
+**This is tested and ships real, sourced, correctly-triaged prose. It is the floor, not
+a placeholder.** That is the only arrangement in which a health assistant should be
+allowed to depend on a remote model at all.
+
+---
+
+## 12. Current symptom/triage logic
+
+All in `public/uppi/core/`, all deterministic, all shared browser↔server.
+
+### `redflags.js` — the emergency layer
+
+Nine rules: `cannot-speak`, `blue-lips`, `severe-breathless`, `chest-pain`, `fainting`,
+`confusion`, `haemoptysis`, `anaphylaxis`, `self-harm` (routed to Tele-MANAS 14416).
+
+`normalise()` lowercases, expands contractions, folds colloquial vocabulary onto clinical
+terms (Hinglish/Telugu-English: `saans`, `dum ghut`, `daggu`, `kapham`, `khoon`,
+`balgam`, `ayasam`, `damma`…), and turns sentence punctuation into `|` clause markers.
+
+Two guards stop the obvious false positives:
+
+- **Negation** — `isNegated()` looks back to the nearest clause boundary. Crucially, the
+  filler gaps inside patterns are written as `~N` and compiled through `G`, which
+  *excludes negators from the gap itself*. A plain `\w+\s+` gap silently swallows the
+  negation it was meant to respect: "cough but no blood" would match "cough … blood" with
+  "but no" invisible in the middle.
+- **Hypothetical framing** — "what should I do if…", "is coughing blood serious?" are
+  questions, not reports. Overridden when the message also self-reports ("I am", "since
+  this morning"), and never applied to the crisis rule.
+
+Calibration note: **breathlessness at rest alone is *not* an emergency rule.** It is
+serious, but it is also how someone with long-standing fibrosis describes an ordinary
+Tuesday. It needs a severity or rate-of-change qualifier. Plain at-rest breathlessness is
+handled by the triage rules as `urgent`. Likewise `tightness` is absent from the
+chest-pain rule — a tight chest is how most people describe an asthma flare.
+
+### `symptoms.js` — extraction
+
+14 symptoms: `cough`, `breathless`, `wheeze`, `tightness`, `sputum`, `fever`,
+`weightloss`, `hoarse`, `snoring`, `daysleepy`, `allergy`, `nightsym`, `exercise`,
+`chestpain`. Plus context: `smoker`, `exsmoker`, `child`, `elderly`, `pregnant`,
+`knownAsthma/Copd/Ild/Tb`, `inhaler`, `relieverOveruse`, `worsening`,
+`wantsAppointment`, `wantsEducation`, `pollution`.
+
+`parseDuration()` returns days, taking the **longest** duration mentioned ("cough for 4
+weeks, fever for 2 days" is a 4-week cough). `atRest` / `onExertion` are extracted
+explicitly rather than left to the model — that qualifier separates a reassuring story
+from an urgent one.
+
+`mergeExtractions()` folds every user turn, so "cough" in one message and "three weeks"
+in the next triages on both.
+
+### `triage.js` — the decision
+
+Five bands: `emergency` → `urgent` (24h) → `doctor` (this week) → `insufficient` →
+`routine`. `urgent` is kept separate from `doctor` because "today" and "this month" are
+different instructions, and it matches the bands the site's own symptom checker uses.
+
+18 rules. Thresholds follow mainstream guidance: the three-week cough rule (NICE NG12 /
+WHO TB screening / India NTEP), reliever overuse as poor asthma control (GINA),
+smoker-with-symptoms (GOLD, NICE NG12).
+
+`insufficient` is category D from the brief — a symptom with no qualifiers is *not* a
+clean bill of health. `FOLLOW_UPS` returns **one** question, ordered by clinical value.
+
+### `knowledge.js` — the content surface (§11)
+
+17 entries, each with `plain` (patient-facing text), `match` terms, `symptoms`, and
+`sources` naming a guideline family: GINA, GOLD, WHO, ATS/ERS, NICE, ARIA, AASM, India
+NTEP. `retrieve()` is deterministic local scoring — no embeddings, no network, nothing to
+be down.
+
+**To change what Uppi knows, edit `ENTRIES`.** Nothing else in the application reads
+clinical content from anywhere else. Editorial rules are at the top of the file.
+
+---
+
+## 13. Current voice/STT implementation
+
+`public/uppi/speech.js`, class `SpeechInput`.
+
+- **Primary:** browser `SpeechRecognition` / `webkitSpeechRecognition`, `lang = 'en-IN'`,
+  `interimResults = true`. Chrome, Edge, Safari.
+- **Fallback:** `MediaRecorder` → `POST /api/uppi/transcribe` → provider. Firefox.
+- `available()` returns true immediately if the browser API exists; otherwise it probes
+  `GET /api/uppi/transcribe` once. **If neither can work the microphone button is not
+  rendered at all** — `chat.js` sets `this.micBtn.hidden`.
+- `cancel()` sets a `_cancelled` flag and every handler goes through `_emit()`. (An
+  earlier version rewrote `this.h`, which permanently killed `onFinal` for the rest of
+  the session after one cancel.)
+- Errors map to `SPEECH_ERRORS`: permission → "That's okay — you can type your question
+  instead."; no-speech → "I didn't quite catch that…"; failed → a typing nudge.
+- 20-second recording cap, bounding what is ever uploaded.
+
+**`vercel.json` `Permissions-Policy` must stay `microphone=(self)`.** It was
+`microphone=()`, which would have blocked the mic however it was wired.
+
+---
+
+## 14. Current TTS implementation
+
+`public/uppi/speech.js`, class `TextToSpeech`.
+
+- **Default:** browser `speechSynthesis`. Free, offline, no key, and its `onboundary`
+  events drive the mouth. Voice selection prefers `en-IN` (neural/natural/google variants
+  first), then `en-GB`, `en-AU`, any `en`. `rate 0.97`, `pitch 1.04` — unhurried rather
+  than a children's cartoon (§16).
+- **Optional hosted:** the constructor fires one background `GET /api/uppi/speak` to
+  learn whether a provider is configured. Only then will `speak()` POST for audio, which
+  is routed through an `AnalyserNode` so the mouth follows the real waveform.
+- `unlock()` speaks an empty zero-volume utterance on the first pointer/key event — iOS
+  will not speak until the page has had a real gesture.
+- `stop()` cancels both paths; a "Stop" control appears while speaking, and Escape stops
+  it. Reply text is always on screen regardless, so a missing voice loses nothing.
+
+---
+
+## 15. Environment variables required
+
+**None are required.** Everything degrades honestly. All are server-side only; nothing in
+`public/` reads `process.env`.
+
+| Variable | Unset behaviour |
+|---|---|
+| `ANTHROPIC_API_KEY` | Answers come from `compose.js` instead of the model. Fully functional, less warm. **Recommended.** |
+| `UPPI_STT_URL` / `UPPI_STT_KEY` / `UPPI_STT_FIELD` | Server transcription reports unconfigured; browser recogniser used where present, mic hidden where not. `UPPI_STT_FIELD` is a dot path to the transcript, default `text`. |
+| `UPPI_TTS_URL` / `UPPI_TTS_KEY` / `UPPI_TTS_VOICE` | Browser voice is used. |
+
+---
+
+## 16. Vercel configuration
+
+Project `upiri` (`prj_1aPULrG4qAKHT4FBtbWzHBNMHS2e`), team
+`team_DW7304BkK7V45Wi6ZygM2GF4`.
+
+`vercel.json`:
+
+- `framework: null`, `buildCommand: "npm run build:vercel"`, `outputDirectory: "dist"`.
+- Rewrite `"/((?!api/).*)" → "/index.html"`. **The negative lookahead is required** —
+  a plain `/(.*)` swallows the API routes.
+- `Permissions-Policy: camera=(), microphone=(self), geolocation=()`.
+- `/uppi/(.*)` cached `max-age=3600, stale-while-revalidate=86400`.
+- **`cleanUrls` must never be re-added** — it has broken this site before.
+
+Three traps already hit and fixed; do not re-introduce them:
+
+1. **`vercel-build` + `buildCommand` = double build.** Vercel auto-runs a script named
+   `vercel-build` *in addition to* the configured `buildCommand`. The script is now
+   called `build:vercel` precisely so nothing picks it up by convention. This had been
+   silently prerendering all 62 routes twice on every deploy, predating Uppi.
+2. **A `functions` block multiplies builds.** `functions: { "api/uppi/*.js": … }` made
+   Vercel create a build entry per function and run the build command for each — four
+   passes. It was removed; the file tracer follows the `public/uppi/core/` imports on its
+   own, verified in production.
+3. The build image ships Playwright but **not** a browser, and lacks `libnspr4`/`libnss3`
+   — hence `(dnf install -y nspr nss || true) && playwright install chromium` in
+   `build:vercel`.
+
+---
+
+## 17. Known bugs
+
+**No known functional bugs.** 263 assertions passed before the ship, and production was
+verified live.
+
+Honest caveats, none of which are broken code:
+
+| | |
+|---|---|
+| **Speech recognition is unverified end-to-end** | Headless Chromium has no `SpeechRecognition` and no STT provider is configured, so neither path was exercised in a real dictation. The *absence* behaviour (mic hidden) is tested. **Needs a manual pass in Chrome on a real device.** |
+| Restored conversations lose their CTAs | `restoreLog()` re-renders text only; a reload mid-conversation drops the action buttons. The text still names 108 and the call centre. |
+| Rate limiter is per-instance | In-memory `Map`, so it bounds one misbehaving client per lambda instance, not globally. Fine for accidental loops, not for abuse. |
+| Uppi does not translate | The language switch (te/kn/bn) does not reach Uppi's replies — the model and the knowledge base are English-only. |
+
+---
+
+## 18. Things already completed
+
+**Site (pre-Uppi, all live):** question-led homepage; working navigation with Profile →
+Doctors; 15-consultant finder grouped by unit; 9 procedure pages; 18-topic Knowledge Hub;
+ACT, CAT and mMRC waiting-room instruments; four-language reading layer; WCAG AA contrast
+pass; 62-route prerendering; full-site interaction audit (1110 controls, 20 routes, 2
+widths).
+
+**Uppi (this build, all live):**
+
+- Entrance: runs in from the right, decelerates, lands with compression, looks at you,
+  waves, speaks and shows the greeting.
+- Conversation: text input, suggested openers, multi-turn memory, follow-up questions.
+- Rules-first triage with the LLM constrained and gated.
+- Red-flag escalation that works offline, with no key, on a cold function.
+- Appointment CTA → `/doctors`; call CTA → `tel:+918065906165`; emergency → `tel:108`.
+- Eight-shape mouth driven by real speech timing or audio amplitude.
+- 11-state machine with declared transitions.
+- Browser TTS with `en-IN` preference and a stop control.
+- Mobile bottom sheet, keyboard-aware, thumb-friendly targets, 320–1440px verified.
+- Accessibility: keyboard-only operation, live region, focus management, focus rings,
+  reduced-motion path.
+- Privacy: `sessionStorage` only, cleared on tab close, one-click wipe, allow-listed
+  analytics carrying no content.
+- Three deployment fixes (microphone policy, `/api` rewrite, double build).
+
+---
+
+## 19. Things partially completed
+
+| Item | State |
+|---|---|
+| **Uppi's artwork** | A faithful vector rig, not the approved master file. Swap path is documented (§7) and is a one-function change. |
+| **Hosted TTS** | Provider interface, proxy endpoint and `AnalyserNode` mouth-driving are all written and wired. No provider configured, so the code path has never run against real audio. |
+| **Server STT** | Same — `MediaRecorder` → proxy → provider is complete but unexercised. |
+| **`ACHIEVEMENTS`** | Array exists at `index.html:3538`, renders nothing while empty. Awaiting the hospital's approved list. `www.yashodahospitals.com` was unreachable from the build sandbox, so it could not be scraped. |
+| **`footerUnits`** | Four unit names present; street-address lines empty (`index.html:5719`). |
+| **Translations** | te/kn/bn cover the site (~193 keys each) but not Uppi, and have had no native-speaker review. |
+
+---
+
+## 20. Things NOT yet implemented
+
+- **No automated test suite is committed.** The 263 assertions were run from scratch
+  harnesses (`_test.mjs`, `_rig.mjs`, `_model.mjs`, `_vp.mjs`, plus core/edge suites)
+  which were **deleted before commit**. `git ls-files` shows no test files. Recreating
+  them as a committed `test/` directory is the single highest-value next task.
+- No CI. No GitHub Actions workflow exists.
+- No conversation persistence beyond the tab, by design (§26) — so no "resume where you
+  left off" across visits.
+- No handoff from Uppi to a human (no live-chat escalation, no callback request form).
+- No rate limiting that survives instance recycling.
+- No Uppi entry point anywhere except the floating dock — he is not embedded in the hero
+  or on condition pages.
+- No analytics collector is wired; `analytics.js` dispatches a DOM event that nothing
+  currently listens to.
+
+---
+
+## 21. Current deployment status
+
+**Live and green.**
+
+| | |
+|---|---|
+| Production deployment | `dpl_DZ528KiUZ6TkqWCviZ1atuD8ufq6` — READY |
+| Production commit | `ccaa30d` on `claude/file-access-request-jqxrqt` |
+| Aliases | `upiri.vercel.app`, `upiri-nithinstar1011-2613s-projects.vercel.app` |
+| Build | 46s, prerender ran **once**, 62/62 routes |
+| Functions | `lambdaRuntimeStats {"nodejs":3}` |
+| Manifest | `/prerender-manifest.json` → `2026-08-18T09:53:15.233Z`, 62/62 |
+| Verified live | `GET /api/uppi/transcribe` → `200 {"configured":false}` with `permissions-policy: microphone=(self)` |
+| PR | [#19](https://github.com/nithinsg/Upiri/pull/19), rebase-merged |
+
+---
+
+## 22. Important design decisions already made
+
+These are the decisions a fresh context would otherwise re-litigate. **Do not reverse any
+of them without asking the product owner.**
+
+1. **The LLM never decides anything medical.** Rules decide; the model phrases; a gate
+   validates. This is the architectural spine, not an implementation detail.
+2. **The model may raise urgency, never lower it.** A second pair of eyes that can only
+   sound the alarm.
+3. **The deterministic composer is the floor, not a fallback stub.** A health assistant
+   should not be unusable because a remote API is down.
+4. **Red flags run client-side first.** An emergency response that depends on a fetch
+   succeeding is not an emergency response.
+5. **Emergency copy is never the model's.** `composeUrgent()` writes it.
+6. **The reply is not streamed.** A gate cannot validate unfinished text.
+7. **`raise_reason` is not in the payload.** Unvalidated model prose must not reach the UI.
+8. **Uppi is the button.** No generic chat bubble icon (§21).
+9. **A control that cannot work is not rendered.** The microphone hides itself rather
+   than existing as a dead button (§29).
+10. **The rig, not the raster.** Required by §14, and it makes the master-asset swap a
+    one-function change.
+11. **`urgent` is a distinct band from `doctor`.** "Today" and "this month" are different
+    instructions; collapsing them makes the advice useless.
+12. **Validated instruments (ACT/CAT/mMRC) are verbatim and never translated.**
+13. **Uppi mounts outside `<x-dc>`.** The dc runtime patches its own subtree.
+14. **Uppi never appears in prerendered HTML.** `window.__UPIRI_NO_UPPI`.
+15. **Escape is layered:** mic → speech → close.
+16. **The panel is positioned by `top`, computed from `visualViewport`.**
+17. **`public/uppi/core/` is shared, not duplicated.** One copy of the triage rules.
+18. **No invented clinical claims, ever.** A standing instruction from the product owner:
+    every achievement, "first", volume figure or procedure name must be sourced from
+    Yashoda's own material or supplied by him. Where it cannot be sourced, leave a
+    clearly-marked TODO rather than plausible copy. `ACHIEVEMENTS = []` exists because of
+    this rule.
+19. **Where a rewrite is asked for, offer 2–3 options in chat** and put the best pick in
+    the code — do not silently choose. (Product owner's standing instruction.)
+
+---
+
+## 23. Files that must NOT be modified unnecessarily
+
+| Path | Why |
+|---|---|
+| `public/index.html` | 5,955 lines, one file, no build step. A careless line-range edit **has already broken every non-homepage route once** — the "EXPLORE PULMONARY CARE" section contains nested `<section>` elements, so cutting at the first `</section>` split the markup and swallowed later `sc-if` blocks. Always match tags in a balanced way; always verify a non-homepage route renders afterwards. |
+| `public/index.html:265` `<template data-dc-template>` | Removing it makes the browser parse `{{ … }}` as SVG geometry. Required local edit over the raw export. |
+| `public/support.js` | The runtime the whole site depends on. The translation hook (`tx`, `T_ATTRS`, `setTranslator`) is load-bearing for four languages. |
+| `scripts/prerender.mjs` | The `TEMPLATE` re-insertion is what keeps prerendered pages hydratable. The `localOnly` route-abort keeps the build hermetic (7min → 30s). The `noUppi` init script keeps Uppi out of the HTML. |
+| `vercel.json` | See §16 — three separate traps live here. |
+| `package.json` scripts | `build:vercel` must **not** be renamed back to `vercel-build`. |
+| `public/uppi/core/*` | Imported by both browser and serverless. A change ships to both. |
+| `src/` | Retired v2 React app. Do not "fix" it; do not build it. |
+| `ACT` / `CAT` / `MMRC` in `index.html` | Reproduced verbatim; licensing TODO open. |
+
+---
+
+## 24. Current git status
+
+```
+Branch (dev):   claude/publish-html-repo-hcls2s   @ e7cb9ec
+Branch (prod):  claude/file-access-request-jqxrqt @ ccaa30d   ← Vercel deploys this
+Working tree:   clean (before this handoff document)
+```
+
+Recent history:
+
+```
+e7cb9ec fix(deploy): stop Vercel running the prerender twice per deploy
+e49e76d fix(deploy): drop the functions block — it ran the build once per function
+de4e160 feat: Uppi — an interactive lung companion with rules-first triage
+791d90c feat: add the mMRC Dyspnoea Scale below CAT on the COPD page
+94dd7a8 feat: ACT and CAT questionnaires for the waiting room
+```
+
+**Workflow, and its one recurring trap:** develop on `claude/publish-html-repo-hcls2s`,
+PR into `claude/file-access-request-jqxrqt`, which Vercel deploys to production. PRs are
+**rebase-merged**, so after every merge the dev branch holds commits whose *content* is
+already on production under different SHAs. Before starting new work:
+
+```bash
+git fetch origin claude/file-access-request-jqxrqt
+git reset --soft origin/claude/file-access-request-jqxrqt   # trees are identical
+```
+
+Skipping this produces duplicated content and a merge conflict on every subsequent PR.
+
+---
+
+## 25. Latest successful build/test result
+
+Run 2026-08-18 immediately before the ship, all from a clean tree:
+
+| Suite | Assertions | Result |
+|---|---|---|
+| core (triage bands, red-flag negation, duration parsing, safety gate) | 66 | pass |
+| edge (adversarial phrasings, Hinglish/Telugu-English, hypotheticals) | 15 | pass |
+| model (stubbed provider: request shape, escalation, de-escalation refused, all fallbacks) | 32 | pass |
+| rig (≥4 distinct mouth shapes while speaking, stop, listening, blinking, urgent face) | 12 | pass |
+| acceptance (browser, 320/375/390/430/768/1440px) | 138 | pass |
+| **Total** | **263** | **0 failures** |
+
+`npm run build` → `prerendered 62/62 routes into dist` · `npm run lint` → clean.
+
+**These harnesses were deleted before commit and are not in the repository.** See §20.
+
+---
+
+## 26. Next logical tasks
+
+In the order they are worth doing:
+
+1. **Commit a real test suite.** Recreate the five harnesses under `test/`, add
+   `npm test`, and wire a GitHub Action. Right now every regression is invisible.
+   The hardest-won assertions to preserve: red-flag negation ("cough but no blood"),
+   hypothetical framing ("is coughing blood serious?"), mobile flex-shrink
+   (`min-height: 0` — without it a long reply pushes the input off the sheet), and
+   measuring only *after* the panel transition settles.
+2. **Manual voice pass** in Chrome and Safari on a real phone — the one untested path.
+3. **Set `ANTHROPIC_API_KEY`** in Vercel and re-read a dozen replies for tone.
+4. **Chase the blocked content** (see below). `wa.me/91XXXXXXXXXX` is the most damaging:
+   every Book CTA on the site opens WhatsApp against a number that does not exist, and
+   Uppi now routes people there.
+5. Restore CTAs on `restoreLog()`.
+6. Consider a second Uppi entry point (hero, condition pages) — currently dock-only.
+
+### Blocked on the product owner / hospital
+
+| Item | Where |
+|---|---|
+| `wa.me/91XXXXXXXXXX` — real booking number | `index.html:4990` (`wal()`), `src/config.js:2` |
+| Approved achievements list | `ACHIEVEMENTS`, `index.html:3538` |
+| Cone-beam CT claim — "South India's first" vs "India's first", exact modality wording | `index.html:3532` |
+| Four unit street addresses | `footerUnits`, `index.html:5719` |
+| ACT licensing confirmation (QualityMetric trademark; CAT is © GSK; mMRC unencumbered) | `index.html:4117` |
+| Native-speaker review of te/kn/bn | `I18N`, `index.html:3574` |
+| Verification of 33 YouTube ids (sourced by search; YouTube unreachable from the build env) | `KH_VIDEOS` |
+| Real photography — every visual is currently SVG or CSS | site-wide |
+| Live appointment booking URL to replace `/doctors` | `public/uppi/core/contact.js:25` |
