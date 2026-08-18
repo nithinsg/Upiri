@@ -12,6 +12,7 @@
  */
 
 import { UppiAvatar } from './avatar.js';
+import { UppiRiveAvatar, available as riveAvailable } from './avatar-rive.js';
 import { Motion, prefersReducedMotion } from './motion.js';
 import { UppiStateMachine } from './states.js';
 import { Presence } from './presence.js';
@@ -204,7 +205,13 @@ export class UppiChat {
     root.appendChild(this.panel);
 
     /* --- the character --- */
-    this.avatar = new UppiAvatar(this.stage);
+    /*
+     * One line, and the character asset is swappable (§32). `avatar-rive.js`
+     * implements the same interface against a rigged Rive board and reports
+     * itself unavailable until one is committed, so this reads as the vector
+     * rig today and as the board the moment there is a board.
+     */
+    this.avatar = riveAvailable() ? new UppiRiveAvatar(this.stage) : new UppiAvatar(this.stage);
     this.motion = new Motion(this.avatar, this.stage);
     this.states = new UppiStateMachine(this.avatar, this.motion);
     this.presence = null;
