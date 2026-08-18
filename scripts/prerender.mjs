@@ -46,9 +46,16 @@ await new Promise((r) => server.listen(PORT, '127.0.0.1', r));
 const localOnly = (route) =>
   route.request().url().startsWith(`http://127.0.0.1:${PORT}`) ? route.continue() : route.abort();
 
+/* Uppi is a runtime companion, not page content: he greets a visitor and holds
+   a conversation. Baking a frozen mid-wave character into every route's HTML
+   would ship dead markup to crawlers and make the prerendered file heavier for
+   nothing, so the boot script is told to stand down here. */
+const noUppi = () => { window.__UPIRI_NO_UPPI = 1; };
+
 /* Routes come from the page's own data, so the list cannot drift from it. */
 const browser = await chromium.launch();
 const probe = await browser.newPage();
+await probe.addInitScript(noUppi);
 await probe.route('**/*', localOnly);
 await probe.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: 'domcontentloaded' });
 await probe.waitForFunction(() => window.__dc && window.__dc.app, null, { timeout: 15000 });
@@ -78,6 +85,7 @@ await mkdir(OUT, { recursive: true });
 await cp(PUBLIC, OUT, { recursive: true });
 
 const page = await browser.newPage();
+await page.addInitScript(noUppi);
 await page.route('**/*', localOnly);
 let written = 0;
 const problems = [];
