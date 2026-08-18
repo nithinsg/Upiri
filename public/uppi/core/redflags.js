@@ -288,6 +288,12 @@ export const RED_FLAGS = [
       rx('\\b(?:sputum|phlegm|mucus|spit)\\s+~3blood\\w*\\b'),
       rx('\\b(?:blood|bloody)\\s+(?:stained\\s+)?(?:sputum|phlegm|mucus|cough)\\b'),
       rx('\\bcoughing\\s+blood\\b'),
+      /* Blood named first, with the cough a few words later. Real messages
+         arrive part-translated — "khoon aa raha hai when I cough" folds to
+         "blood aa raha hai when i cough", where every ordered pattern above
+         misses because the Hindi verb sits in the middle. The gap excludes
+         negators, so "no blood when I cough" still does not fire. */
+      rx('\\bblood\\b(?!\\s+(?:pressure|test|report|sugar|group|count|bank|work|donation))\\s+~5(?:cough\\w*|sputum|phlegm|spit\\w*|mucus)'),
       rx('\\bvomit\\w*\\s+blood\\b')
     ]
   },

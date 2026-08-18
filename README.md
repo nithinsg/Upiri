@@ -299,9 +299,10 @@ there so a future change can see which requirement a piece of code exists to sat
 ```
 public/uppi/
   boot.js          entry point — dynamic-imports everything else once the page is idle
-  avatar.js        the vector rig: named, separately animatable parts + mouth shapes
-  motion.js        entrance, run cycle, wave, idle breathing, blinking, listening, visemes
-  states.js        the 11-state machine (IDLE … URGENT) and its legal transitions
+  avatar.js        the vector rig: named parts, switchable arm poses, ten visemes
+  motion.js        run-in, land, wave, idle, curious, tired, sleeping, listening, speaking
+  states.js        the 18-state machine, driven by runtime inputs rather than by calls
+  presence.js      scroll, pointer proximity, inactivity, dozing and waking
   speech.js        speech-in and speech-out, browser-first with a server fallback
   conversation.js  turns, the client-side red-flag pre-check, sessionStorage
   chat.js          the panel, the dock, the greeting bubble, the CTAs
@@ -311,7 +312,10 @@ public/uppi/
 api/uppi/
   chat.js          the pipeline
   transcribe.js    server speech-to-text proxy (provider-agnostic)
-  speak.js         server text-to-speech proxy (provider-agnostic)
+  speak.js         server text-to-speech proxy, with character-timing support
+test/
+  run.mjs          `npm test` — every suite, one exit code
+  core / conversation / rig / browser test suites
 ```
 
 `public/uppi/core/` is imported by both the browser and the serverless functions, so the
@@ -320,9 +324,19 @@ triage rules that decide urgency exist exactly once. There is no second copy to 
 ### How an answer is produced
 
 ```
-message → normalise → RED FLAGS → symptom extraction → conversation memory
+message → normalise → RED FLAGS → symptom extraction → CONVERSATION STATE
         → STRUCTURED TRIAGE → knowledge retrieval → model → SAFETY GATE → answer
 ```
+
+`core/engine.js` runs everything up to the model in one function, `assess()`, which
+both the browser and the serverless function call — so the answer the browser can
+produce offline is the same answer the server would have produced.
+
+**Uppi does not ask the same question twice.** `core/state.js` keeps a ledger of what
+the conversation has established and what has already been asked. A slot is filled by
+a yes *or* a no — "the cough is dry" answers the phlegm question — and a question that
+has been asked is never asked again, in any wording. When every useful question has
+been asked, Uppi stops interviewing and says what the next step is.
 
 The three capitalised stages are deterministic code, not the model. **Nothing medical is
 decided by the model.** It receives the triage decision as a constraint and writes it in
@@ -361,13 +375,23 @@ the file.
 
 ### The character
 
+Uppi runs in, lands, waves once, and then **stops waving**: his resting pose is a hand
+on his hip with the other arm down, breathing and blinking and occasionally glancing
+around. Leave the page alone and he grows curious, then tired, then dozes; move the
+pointer towards him or open the panel and he wakes at once. `states.js` decides all of
+that from runtime inputs — `isListening`, `energy`, `emotion`, `userInactive` — which
+is how a Rive state machine works, and is why swapping in a `.riv` board is a one-file
+change.
+
 `avatar.js` rebuilds the approved Uppi as vectors — same lung-pair head with bronchial
 tracery and ribbed trachea, same brown eyes, same navy Yashoda hoodie with the marigold
 petal mark and orange drawstrings, same khaki cargo trousers and navy-and-cream sneakers.
-It is a rig rather than the flat artwork because §14 requires a mouth that actually forms
-shapes while he speaks, which a raster cannot do. Eight mouth shapes are driven from real
-speech: word-boundary events from the browser voice, or amplitude from an `AnalyserNode`
-when hosted audio is configured.
+It is a rig rather than the flat artwork because the brief requires a mouth that actually
+forms shapes while he speaks, which a raster cannot do. Ten viseme shapes are driven from
+real speech, in this order of fidelity: per-character timings from a provider that returns
+them (ElevenLabs' `with-timestamps` shape is normalised by `api/uppi/speak.js`), then the
+browser voice's word-boundary events, and only then amplitude — a mouth driven by volume
+alone opens on loud consonants and closes through quiet vowels.
 
 Everything above the rig talks to it through `setMouth` / `setEyes` / `blink` / `look` /
 `setExpression` and the `parts` map, and to nothing else — so a Rive board or a properly
