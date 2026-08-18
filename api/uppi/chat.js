@@ -27,12 +27,13 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 
-import { detectRedFlags, urgentOpening, normalise } from '../../public/uppi/core/redflags.js';
-import { extractSymptoms, mergeExtractions } from '../../public/uppi/core/symptoms.js';
-import { triage, URGENCY, BANDS } from '../../public/uppi/core/triage.js';
-import { retrieve, asContext, sourcesOf } from '../../public/uppi/core/knowledge.js';
-import { compose, composeUrgent } from '../../public/uppi/core/compose.js';
+import { URGENCY, BANDS } from '../../public/uppi/core/triage.js';
+import { asContext } from '../../public/uppi/core/knowledge.js';
+import { composeUrgent, compose } from '../../public/uppi/core/compose.js';
+import { assess, payloadFrom, emotionFor } from '../../public/uppi/core/engine.js';
 import { validate } from '../../public/uppi/core/safety.js';
+import { intentLabel } from '../../public/uppi/core/intents.js';
+import { QUESTIONS } from '../../public/uppi/core/state.js';
 import { CALL_CENTRE_DISPLAY } from '../../public/uppi/core/contact.js';
 
 const MODEL = 'claude-opus-5';
@@ -158,49 +159,44 @@ export default async function handler(req, res) {
   const latest = messages[messages.length - 1];
   if (latest.role !== 'user') { res.status(400).json({ error: 'last_message_must_be_user' }); return; }
 
-  /* ---- 1–2. normalise + red flags, on the newest message ---- */
-  const flags = detectRedFlags(latest.content);
-
-  /* ---- 3–4. symptom extraction across the whole conversation ---- */
-  const userTurns = messages.filter((m) => m.role === 'user');
-  const extraction = mergeExtractions(userTurns.map((m) => extractSymptoms(m.content)));
-
-  /* ---- 5. structured triage ---- */
-  let decision = triage(extraction, flags);
-
-  /* ---- 6. knowledge retrieval ---- */
-  const entries = retrieve(normalise(latest.content), extraction.symptoms, 3);
+  /* ---- 1–6. the whole deterministic pipeline, shared with the browser ---- */
+  const assessment = assess(messages);
+  let { decision } = assessment;
+  const { state, teaching } = assessment;
 
   /* An emergency short-circuits everything downstream. The model is not
      consulted, because there is nothing here for it to improve and every
      millisecond of latency is spent on a person who should be leaving. */
   if (decision.emergencyRecommended) {
-    res.status(200).json(payload(composeUrgent(urgentOpening(flags.flags), flags.crisis), decision, extraction, entries, 'rules'));
+    res.status(200).json(payloadFrom(assessment, assessment.text, 'rules'));
     return;
   }
 
   /* ---- 7–8. model generation, then the safety gate ----
-     The deterministic answer is composed FIRST, so there is always something
+     The deterministic answer is already composed, so there is always something
      real to send however the next few lines go. */
-  let text = compose({ message: latest.content, extraction, decision, entries });
+  let text = assessment.text;
   let engine = 'rules';
 
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const generated = await generate(messages, decision, entries, extraction);
+      const generated = await generate(messages, assessment);
       if (generated) {
         /* the model's one permitted decision: raise, never lower */
         if (generated.raise_urgency && URGENCY.indexOf(generated.raise_urgency) > URGENCY.indexOf(decision.urgency)) {
-          decision = raiseTo(decision, generated.raise_urgency, generated.raise_reason, extraction);
+          decision = raiseTo(decision, generated.raise_urgency, generated.raise_reason);
+          assessment.decision = decision;
+          assessment.emotion = emotionFor(decision, state);
           if (decision.emergencyRecommended) {
-            res.status(200).json(payload(
+            res.status(200).json(payloadFrom(
+              assessment,
               composeUrgent("I'm concerned about what you're describing — it may need urgent medical attention.", false),
-              decision, extraction, entries, 'model-escalated'
+              'model-escalated'
             ));
             return;
           }
           /* urgency changed under it, so the fallback text is restated too */
-          text = compose({ message: latest.content, extraction, decision, entries });
+          text = compose({ message: messages[messages.length - 1].content, state, decision, teaching, previousUrgency: assessment.previousUrgency });
         }
         const checked = validate(generated.reply, decision);
         if (checked.ok) { text = checked.text; engine = 'model'; }
@@ -214,7 +210,7 @@ export default async function handler(req, res) {
     }
   }
 
-  res.status(200).json(payload(text, decision, extraction, entries, engine));
+  res.status(200).json(payloadFrom(assessment, text, engine));
 }
 
 /* ---------------------------------------------------------------------------
@@ -234,18 +230,59 @@ function anthropic() {
  * retracted is worse than a two-second wait. Replies are short, so the wait is
  * short.
  */
-async function generate(messages, decision, entries, extraction) {
+async function generate(messages, assessment) {
+  const { decision, state, entries, teaching, intents, primaryConcern } = assessment;
+
+  /*
+   * The model is given the STRUCTURED STATE, not just the last message (§12).
+   * That is what stops it re-asking something already answered: it can see the
+   * ledger of what has been established and what has already been put to the
+   * visitor, so it has no reason to reach for a question the rules have already
+   * ruled out.
+   */
+  const known = [];
+  const say = (k, v) => { if (v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && !v.length)) known.push('- ' + k + ': ' + (Array.isArray(v) ? v.join(', ') : v)); };
+
+  say('what this is about', primaryConcern ? intentLabel(primaryConcern) : null);
+  say('topics raised', intents.map(intentLabel));
+  say('symptoms described', state.symptomLabels);
+  say('explicitly ruled out by the visitor', state.denied);
+  say('how long', state.duration != null ? durationSentence(state.duration) : null);
+  say('severity in their words', state.severity);
+  say('onset', state.onset);
+  say('happens at rest', state.atRest ? 'yes' : null);
+  say('happens on exertion', state.onExertion ? (state.exertionOnly ? 'yes, and only on exertion' : 'yes') : null);
+  say('effort it takes', state.exertionFloors ? state.exertionFloors + ' floors' : null);
+  say('triggers named', state.triggerLabels);
+  say('getting worse', state.worsening ? 'yes' : null);
+  say('age group', state.ageGroup);
+  say('smoking', smokingSentence(state.smokingExposure));
+  say('conditions they already live with', state.knownConditions);
+  say('inhaler', state.medications.inhaler ? (state.medications.notHelping ? 'uses one, and says it is not helping as usual' : 'uses one') : null);
+  say('happened before', state.previousEpisodes ? 'yes' : null);
+  say('family history', state.familyHistory.map((f) => f.condition + ' (' + f.who + ')'));
+
   const brief = [
     'ASSESSMENT (made before you were called — convey it, do not change it):',
     '- urgency: ' + decision.urgency + (decision.band && decision.band.when ? ' (' + decision.band.when + ')' : ''),
     decision.reasons.length ? '- because: ' + decision.reasons.join('; ') : '- because: nothing specific has been established yet',
     '- appointment recommended: ' + (decision.appointmentRecommended ? 'yes' : 'no'),
-    decision.followUp ? '- the question to end on: ' + decision.followUp : '- no follow-up question needed',
-    extraction.symptoms.length ? '- symptoms heard so far: ' + extraction.labels.join(', ') : '- no symptoms identified yet',
-    extraction.durationDays != null ? '- duration mentioned: about ' + extraction.durationDays + ' days' : ''
+    '',
+    'WHAT THIS CONVERSATION HAS ALREADY ESTABLISHED — treat all of it as known:',
+    known.length ? known.join('\n') : '- nothing yet',
+    '',
+    'QUESTIONS ALREADY PUT TO THIS VISITOR — do not ask any of these again in any wording:',
+    state.questionsAlreadyAsked.length ? state.questionsAlreadyAsked.map(questionText).filter(Boolean).map((q) => '- ' + q).join('\n') : '- none yet',
+    '',
+    decision.followUp
+      ? 'THE ONE QUESTION TO END ON (ask this, in your own words): ' + decision.followUp
+      : 'DO NOT ASK A QUESTION. This conversation already knows what it needs — use the reply to say what the next step is instead.',
+    state.learned.length ? '\nWHAT THEY JUST TOLD YOU (open by acknowledging this specifically, briefly): ' + state.learned.join(', ') : ''
   ].filter(Boolean).join('\n');
 
-  const grounding = asContext(entries);
+  /* Only material this conversation has NOT already been given, so the model
+     cannot be led into repeating a paragraph the visitor already read. */
+  const grounding = asContext(teaching ? [teaching.entry] : entries.slice(0, 1));
 
   const response = await anthropic().messages.create({
     model: MODEL,
@@ -281,6 +318,30 @@ async function generate(messages, decision, entries, extraction) {
   }
 }
 
+function durationSentence(days) {
+  if (days >= 3650) return 'years — long-standing';
+  if (days >= 60) return Math.round(days / 30) + ' months';
+  if (days >= 14) return Math.round(days / 7) + ' weeks';
+  return Math.round(days) + ' days';
+}
+
+function smokingSentence(s) {
+  if (!s || !s.status) return null;
+  const bits = [s.status === 'current' ? 'currently smokes' : s.status === 'ex' ? 'used to smoke' : 'has never smoked'];
+  if (s.perDay) bits.push(s.perDay + ' a day');
+  if (s.packYears) bits.push(s.packYears + ' pack years');
+  if (s.pollution) bits.push('also exposed to smoke or poor air');
+  return bits.join(', ');
+}
+
+/* The ledger stores question ids; the model needs to see what was actually
+   asked, or it cannot avoid re-asking it. */
+function questionText(id) {
+  const q = QUESTIONS.find((x) => x.id === id);
+  if (!q) return null;
+  try { return q.q({ symptoms: [], context: [], denied: [] }); } catch { return null; }
+}
+
 /*
  * Applies the model's escalation to the rules' decision. Everything the rules
  * established is kept; only the band and the buttons move up.
@@ -294,7 +355,7 @@ const BOOKING_ACTIONS = [
   { id: 'call-centre', kind: 'call', label: 'Call the Yashoda Call Centre' }
 ];
 
-function raiseTo(decision, urgency, reason, _extraction) {
+function raiseTo(decision, urgency, reason) {
   const emergency = urgency === 'emergency';
   const hasBooking = decision.actions.some((a) => a.kind === 'book');
   return {
@@ -308,25 +369,5 @@ function raiseTo(decision, urgency, reason, _extraction) {
       ? EMERGENCY_ACTIONS
       : hasBooking ? decision.actions : BOOKING_ACTIONS.concat(decision.actions),
     band: BANDS[urgency]
-  };
-}
-
-/* ---------------------------------------------------------------------------
-   Response shape (§10)
-   --------------------------------------------------------------------------- */
-
-function payload(text, decision, extraction, entries, engine) {
-  return {
-    response: text,
-    urgency: decision.urgency,
-    symptoms_detected: extraction.labels,
-    follow_up_question: decision.followUp,
-    appointment_recommended: !!decision.appointmentRecommended,
-    emergency_recommended: !!decision.emergencyRecommended,
-    crisis: !!decision.crisis,
-    suggested_actions: decision.actions,
-    band: decision.band || BANDS[decision.urgency] || BANDS.routine,
-    sources: sourcesOf(entries),
-    engine
   };
 }

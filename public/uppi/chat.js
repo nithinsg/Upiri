@@ -13,7 +13,8 @@
 
 import { UppiAvatar } from './avatar.js';
 import { Motion, prefersReducedMotion } from './motion.js';
-import { UppiStateController } from './states.js';
+import { UppiStateMachine } from './states.js';
+import { Presence } from './presence.js';
 import { TextToSpeech, SpeechInput, SPEECH_ERRORS } from './speech.js';
 import { Conversation } from './conversation.js';
 import { GREETING } from './core/compose.js';
@@ -205,17 +206,18 @@ export class UppiChat {
     /* --- the character --- */
     this.avatar = new UppiAvatar(this.stage);
     this.motion = new Motion(this.avatar, this.stage);
-    this.states = new UppiStateController(this.avatar, this.motion);
+    this.states = new UppiStateMachine(this.avatar, this.motion);
+    this.presence = null;
 
     this.speech = new SpeechInput({
-      onStart: () => { this.micOn = true; this.micBtn.setAttribute('aria-pressed', 'true'); this.micBtn.innerHTML = icon('stopMic', 18); this.setStatus('Listening', true); this.states.to('LISTENING'); },
+      onStart: () => { this.micOn = true; this.micBtn.setAttribute('aria-pressed', 'true'); this.micBtn.innerHTML = icon('stopMic', 18); this.setStatus('Listening', true); this.states.set('isListening', true); track('uppi_voice_started'); },
       onPartial: (t) => this.showInterim(t),
       onFinal: (t) => { this.clearInterim(); this.submit(t, 'voice'); },
       onEnd: () => { this.micOn = false; this.micBtn.setAttribute('aria-pressed', 'false'); this.micBtn.innerHTML = icon('mic', 20); },
       onError: (code) => {
         this.clearInterim();
         this.setStatus('');
-        this.states.to('IDLE');
+        this.states.set('isListening', false);
         this.say(SPEECH_ERRORS[code] || SPEECH_ERRORS.failed, null, { speak: false });
         track('uppi_error', { reason: 'mic_' + code });
       }
@@ -248,13 +250,13 @@ export class UppiChat {
     this.field.addEventListener('input', () => this.autosize());
 
     this.micBtn.addEventListener('click', () => {
-      if (this.micOn) { this.speech.stop(); this.setStatus(''); this.states.to('IDLE'); }
-      else { this.tts.stop(); this.speech.start(); track('uppi_voice_conversation_started'); }
+      if (this.micOn) { this.speech.stop(); this.setStatus(''); this.states.set('isListening', false); }
+      else { this.tts.stop(); this.speech.start(); track('uppi_chat_started', { mode: 'voice' }); }
     });
 
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-      if (this.micOn) { this.speech.cancel(); this.setStatus(''); this.states.to('IDLE'); return; }
+      if (this.micOn) { this.speech.cancel(); this.setStatus(''); this.states.set('isListening', false); return; }
       if (this.tts.speaking) { this.stopSpeaking(); return; }
       if (this.open) this.closePanel();
     });
@@ -289,20 +291,37 @@ export class UppiChat {
   /* ---------------- entrance and greeting ---------------- */
 
   async enter() {
-    await this.states.to('ENTRY');
-    track('uppi_opened', { source: 'entrance' });
+    try { await this.states.enter(); }
+    catch { /* the entrance is decoration; the companion still has to work */ }
+    track('uppi_greeting', { source: 'entrance' });
+    this.startPresence();
     /* Someone returning mid-conversation does not need introducing again. */
     if (!this.conversation.isEmpty) { this.showHint(); return; }
     this.greet();
   }
 
   greet() {
+    this.showBubble(GREETING, 'Tell Uppi', 16000);
+    /* spoken and shown at the same time (§5) */
+    this.speakAs(GREETING);
+    track('uppi_greeting');
+  }
+
+  /**
+   * The speech bubble beside the dock. Used for the greeting and, rarely, for
+   * one of the presence layer's offers of help (§7) — same component, so a
+   * nudge can never look like a different kind of thing from Uppi talking.
+   */
+  showBubble(text, ctaLabel, dismissAfter) {
+    if (this.open) return;
+    if (this._bubbleTimer) { clearTimeout(this._bubbleTimer); this._bubbleTimer = null; }
+    if (this.hint) { this.hint.remove(); this.hint = null; }
     this.bubble.hidden = false;
     this.bubble.innerHTML = '';
     const p = elem('p');
-    p.textContent = GREETING;
+    p.textContent = text;
     this.bubble.appendChild(p);
-    const cta = elem('button', 'uppi-bubble-cta', 'Tell Uppi' + icon('arrow', 15));
+    const cta = elem('button', 'uppi-bubble-cta', (ctaLabel || 'Tell Uppi') + icon('arrow', 15));
     cta.type = 'button';
     cta.addEventListener('click', () => this.openPanel());
     this.bubble.appendChild(cta);
@@ -312,12 +331,13 @@ export class UppiChat {
     x.addEventListener('click', (e) => { e.stopPropagation(); this.dismissBubble(); });
     this.bubble.appendChild(x);
     requestAnimationFrame(() => this.bubble.classList.add('is-in'));
+    this._bubbleTimer = setTimeout(() => this.dismissBubble(), dismissAfter || 13000);
+  }
 
-    /* spoken and shown at the same time (§2) */
-    this.speakAs(GREETING, 'GREETING');
-    track('uppi_greeting_completed');
-
-    this._bubbleTimer = setTimeout(() => this.dismissBubble(), 16000);
+  /** Anything the visitor does that means "I'm here" (§8). */
+  wake() {
+    if (this.presence) this.presence.wake();
+    else this.states.setAll({ energy: 1, userInactive: false, attention: 1 });
   }
 
   dismissBubble() {
@@ -327,7 +347,25 @@ export class UppiChat {
     setTimeout(() => { this.bubble.hidden = true; this.showHint(); }, 260);
   }
 
-  /* the persistent, elegant access point of §21 — Uppi, with his name on it */
+  /**
+   * Starts Uppi noticing the visitor (§7, §8). Deliberately after the entrance:
+   * the inactivity clock should start when he arrives, not while he is still
+   * running in.
+   */
+  startPresence() {
+    if (this.presence) return;
+    this.presence = new Presence(this.states, {
+      isOpen: () => this.open,
+      isEngaged: () => this.conversation.messages.length > 0,
+      anchor: () => this.stage,
+      onNudge: (text, kind) => {
+        this.showBubble(text, 'Ask Uppi', 12000);
+        track('uppi_nudge', { kind });
+      }
+    });
+  }
+
+  /* the persistent, elegant access point of §24 — Uppi, with his name on it */
   showHint() {
     if (this.hint || this.open) return;
     this.hint = elem('span', 'uppi-hint', 'Ask Uppi');
@@ -340,6 +378,7 @@ export class UppiChat {
   openPanel() {
     if (this.open) return;
     this.open = true;
+    this.wake();
     this.lastFocus = document.activeElement;
     this.dismissBubble();
     if (this.hint) { this.hint.remove(); this.hint = null; }
@@ -355,7 +394,8 @@ export class UppiChat {
 
     if (this.conversation.isEmpty && !this.log.children.length) this.say(GREETING, null, { speak: false });
     this.renderOpeners();
-    this.states.to('IDLE');
+    this.wake();
+    this.states.settle();
     /* Focus has to land inside the dialog for a keyboard or screen-reader user.
        On a desktop that is the input. On a touch device it is the dialog
        itself: focusing the textarea there throws up the keyboard before the
@@ -378,7 +418,7 @@ export class UppiChat {
       this.launcher.appendChild(this.stage);
       this.dock.hidden = false;
       this.showHint();
-      this.states.to('IDLE');
+      this.states.settle();
       /* Focus is restored only now. Calling focus() on the launcher while the
          dock is still hidden silently does nothing, and the visitor is left on
          <body> with nowhere to tab back to. */
@@ -499,7 +539,7 @@ export class UppiChat {
     } else {
       this.scroll();
     }
-    if (o.speak !== false) this.speakAs(text, o.state || 'SPEAKING');
+    if (o.speak !== false) this.speakAs(text);
     return wrap;
   }
 
@@ -531,16 +571,16 @@ export class UppiChat {
       if (act.kind === 'emergency') {
         node = button('uppi-act--emergency', 'phone', 'Call ' + EMERGENCY_DISPLAY + ' — emergency');
         node.href = 'tel:' + EMERGENCY_TEL;
-        node.addEventListener('click', () => track('uppi_call_cta_clicked', { category: 'emergency' }));
+        node.addEventListener('click', () => track('call_clicked', { category: 'emergency' }));
       } else if (act.kind === 'call') {
         /* §9: on a phone this must be a big, obviously tappable call button */
         node = button('uppi-act--call', 'phone', 'Call ' + CALL_CENTRE_DISPLAY);
         node.href = 'tel:' + CALL_CENTRE_TEL;
-        node.addEventListener('click', () => track('uppi_call_cta_clicked', { category: 'call-centre' }));
+        node.addEventListener('click', () => track('call_clicked', { category: 'call-centre' }));
       } else if (act.kind === 'book') {
         node = button('uppi-act--book', 'calendar', BOOK_LABEL);
         node.href = BOOK_PATH;
-        node.addEventListener('click', (e) => { track('uppi_appointment_cta_clicked'); this.navigate(e, BOOK_PATH); });
+        node.addEventListener('click', (e) => { track('appointment_clicked'); this.navigate(e, BOOK_PATH); });
       } else if (act.kind === 'route' && typeof act.href === 'string' && /^\/[a-z0-9/-]*$/i.test(act.href)) {
         node = button('', 'arrow', String(act.label || 'Open'), true);
         node.href = act.href;
@@ -594,26 +634,40 @@ export class UppiChat {
     this.stopSpeaking();
     this.suggest.hidden = true;
     this.addYou(text);
-    if (source !== 'voice') track('uppi_text_conversation_started', { source: source || 'text' });
+    if (source !== 'voice') track('uppi_chat_started', { mode: 'text', source: source || 'text' });
 
+    /*
+     * §20: Uppi thinks visibly rather than showing a spinner — and the thinking
+     * beat has to be long enough to read as thought. Without a floor, a cached
+     * or rules-only answer returns in ~10ms and the character snaps between two
+     * poses, which looks like a glitch rather than like someone considering
+     * what you said. A fifth of a second is enough to register and short enough
+     * that nobody waits for it.
+     */
+    const startedAt = Date.now();
+    let urgentSeen = false;
     const result = await this.conversation.send(text, (stage) => {
-      if (stage === 'urgent') { this.setStatus('Urgent'); this.states.to('URGENT'); }
-      else { this.setStatus('Thinking'); this.states.to('THINKING'); }
+      if (stage === 'urgent') { urgentSeen = true; this.setStatus('Urgent'); this.states.set('isUrgent', true); }
+      else { this.setStatus('Thinking'); this.states.set('isThinking', true); }
     });
+    const elapsed = Date.now() - startedAt;
+    if (!urgentSeen && elapsed < 420) await new Promise((r) => setTimeout(r, 420 - elapsed));
 
     this.busy = false;
     this.sendBtn.disabled = false;
     this.setStatus('');
-    if (!result) { this.states.to('IDLE'); return; }
+    this.states.set('isThinking', false);
+    if (!result) { this.states.resolve(); return; }
 
-    /* the face is chosen from the triage band, not from the words */
-    const next = this.states.stateForUrgency(result.urgency);
-    if (next !== 'IDLE') await this.states.to(next);
+    /* The face is chosen from the triage band and the engine's emotion, never
+       from the words — one call, so the expression cannot contradict the
+       advice (§23). */
+    this.states.applyResult(result);
 
-    this.say(result.response, result, { state: next === 'IDLE' ? 'SPEAKING' : next });
+    this.say(result.response, result);
 
-    if (result.emergency_recommended) track('uppi_emergency_shown', { urgency: result.urgency });
-    if (result.appointment_recommended) track('uppi_appointment_recommended', { urgency: result.urgency, engine: result.engine });
+    if (result.emergency_recommended) track('urgent_state_triggered', { urgency: result.urgency });
+    if (result.appointment_recommended) track('appointment_recommended', { urgency: result.urgency, engine: result.engine });
     if (result.offline) track('uppi_error', { reason: 'backend_unreachable' });
     /* §7: an urgent answer gets the screen to itself. Offering "I've been
        coughing" underneath "go to A&E now" is exactly the burial the brief
@@ -629,20 +683,25 @@ export class UppiChat {
    * SPEAKING so the rig animates; when the voice finishes it settles back into
    * whatever the triage result called for.
    */
-  speakAs(text, state) {
-    const settle = state && state !== 'SPEAKING' && state !== 'GREETING' ? state : 'IDLE';
+  speakAs(text) {
     if (!this.tts.supported) {
       /* §27: no voice available — the text is already on screen, so nothing is
          lost; Uppi just does not read it out. */
-      this.states.to(settle === 'IDLE' ? 'IDLE' : settle);
+      this.states.resolve();
       return;
     }
     this.stopBtn.hidden = false;
-    this.states.to('SPEAKING', this.tts.source());
+    const source = this.tts.source();
+    if (source) source.text = text;
+    this.states.setSpeechSource(source);
+    this.states.set('isTalking', true);
+    track('uppi_voice_started', { mode: 'tts' });
     this.tts.speak(text, {
       onEnd: () => {
         this.stopBtn.hidden = true;
-        this.states.to(settle);
+        this.states.setSpeechSource(null);
+        this.states.set('isTalking', false);
+        track('uppi_voice_completed');
       }
     });
   }
@@ -651,7 +710,8 @@ export class UppiChat {
     if (!this.tts.speaking) { this.stopBtn.hidden = true; return; }
     this.tts.stop();
     this.stopBtn.hidden = true;
-    this.states.to('IDLE');
+    this.states.setSpeechSource(null);
+    this.states.set('isTalking', false);
     track('uppi_speech_stopped');
   }
 
@@ -683,12 +743,14 @@ export class UppiChat {
     this.log.innerHTML = '';
     this.say(GREETING, null, { speak: false });
     this.renderOpeners();
-    this.states.to('IDLE');
+    this.wake();
+    this.states.settle();
     this.field.focus({ preventScroll: true });
     track('uppi_conversation_cleared');
   }
 
   destroy() {
+    if (this.presence) { this.presence.destroy(); this.presence = null; }
     this.states.destroy();
     this.tts.stop();
     this.speech.cancel();

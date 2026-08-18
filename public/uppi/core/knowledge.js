@@ -27,6 +27,15 @@
  *     are supplied by the hospital, not written by whoever edits this file.
  */
 
+/*
+ * TODO(content): there is no entry for RECURRENT CHEST INFECTIONS / suspected
+ * bronchiectasis, and one belongs here — repeated courses of antibiotics for
+ * the chest is a common reason people write in. It is deliberately left blank
+ * rather than filled with plausible copy: the wording needs to come from
+ * Yashoda Pulmonology or from BTS/ERS bronchiectasis guidance with a named
+ * source, like every other entry in this file. Until then the triage rule still
+ * routes it correctly — the reply simply carries no teaching paragraph.
+ */
 export const ENTRIES = [
   {
     id: 'acute-cough',
@@ -232,10 +241,19 @@ export const ENTRIES = [
    Retrieval
    --------------------------------------------------------------------------- */
 
+/*
+ * Whole words only. A plain `includes()` scores "ild" against "childhood" and
+ * "tb" against "subtle", which is how a first message of "I've had this since
+ * childhood" came back with a paragraph about pulmonary fibrosis.
+ */
+function mentions(text, term) {
+  return new RegExp('\\b' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(text);
+}
+
 function scoreEntry(entry, text, symptoms) {
   let score = 0;
   for (const term of entry.match) {
-    if (text.includes(term)) score += term.includes(' ') ? 3 : 2;
+    if (mentions(text, term)) score += term.includes(' ') ? 3 : 2;
   }
   for (const s of entry.symptoms) {
     if (symptoms.includes(s)) score += 2;
@@ -252,14 +270,25 @@ function scoreEntry(entry, text, symptoms) {
  * @param {number} limit how many entries to return
  */
 export function retrieve(normalisedText, symptoms, limit) {
+  return scored(normalisedText, symptoms, limit).map((x) => x.entry);
+}
+
+/**
+ * The same ranking, with the scores kept.
+ *
+ * The composer needs them: choosing what to say next is a trade-off between
+ * relevance and not repeating itself, and that trade-off cannot be made on an
+ * unordered list. Preferring novelty over relevance is how a companion ends up
+ * answering "only when I walk quickly" with a paragraph about COPD.
+ */
+export function scored(normalisedText, symptoms, limit) {
   const text = String(normalisedText || '');
   const syms = symptoms || [];
   return ENTRIES
     .map((e) => ({ entry: e, score: scoreEntry(e, text, syms) }))
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, limit || 3)
-    .map((x) => x.entry);
+    .slice(0, limit || 3);
 }
 
 /** Flattens the retrieved entries into the grounding block sent to the model. */
