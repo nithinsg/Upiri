@@ -18,10 +18,7 @@
  *      analytics.
  */
 
-import { detectRedFlags, urgentOpening } from './core/redflags.js';
-import { extractSymptoms, mergeExtractions } from './core/symptoms.js';
-import { triage } from './core/triage.js';
-import { composeUrgent } from './core/compose.js';
+import { assess, payloadFrom } from './core/engine.js';
 import { CALL_CENTRE_DISPLAY } from './core/contact.js';
 
 const KEY = 'upiri:uppi:session';
@@ -78,25 +75,14 @@ export class Conversation {
     this.messages = this.messages.slice(-MAX_TURNS);
     this._persist();
 
-    /* 1. the safety layer, locally and immediately */
-    const flags = detectRedFlags(content);
-    if (flags.hit) {
+    /* 1. the safety layer, locally and immediately.
+       The same pipeline the server runs, on the same rules, so an emergency is
+       answered before a request has even been opened. */
+    const assessment = assess(this.messages);
+    this.assessment = assessment;
+    if (assessment.flags.hit) {
       if (onStage) onStage('urgent');
-      const extraction = mergeExtractions(this.messages.filter((m) => m.role === 'user').map((m) => extractSymptoms(m.content)));
-      const decision = triage(extraction, flags);
-      const result = {
-        response: composeUrgent(urgentOpening(flags.flags), flags.crisis),
-        urgency: 'emergency',
-        symptoms_detected: extraction.labels,
-        follow_up_question: null,
-        appointment_recommended: false,
-        emergency_recommended: true,
-        crisis: !!flags.crisis,
-        suggested_actions: decision.actions,
-        band: decision.band,
-        sources: [],
-        engine: 'client-rules'
-      };
+      const result = payloadFrom(assessment, assessment.text, 'client-rules');
       this._record(result);
       return result;
     }
@@ -115,22 +101,13 @@ export class Conversation {
       this._record(result);
       return result;
     } catch {
-      const result = {
-        response: OFFLINE,
-        urgency: 'routine',
-        symptoms_detected: [],
-        follow_up_question: null,
-        appointment_recommended: false,
-        emergency_recommended: false,
-        crisis: false,
-        suggested_actions: [{ id: 'call-centre', kind: 'call', label: 'Call the Yashoda Call Centre' }],
-        band: { id: 'offline', label: '', color: '#2C2A6B', soft: '#E7E7F4', when: '' },
-        sources: [],
-        engine: 'offline',
-        offline: true
-      };
-      /* An unreachable backend is not a turn Uppi should remember — leaving it
-         out means the next attempt continues the real conversation. */
+      /* The backend is unreachable — but the whole assessment already ran in
+         this tab, so Uppi answers from it rather than apologising. The visitor
+         gets the real triage decision; only the model's phrasing is missing. */
+      const result = payloadFrom(assessment, assessment.text, 'offline');
+      result.offline = true;
+      if (assessment.state.symptoms.length === 0) result.response = OFFLINE;
+      this._record(result);
       return result;
     }
   }

@@ -21,6 +21,8 @@
  * decision the visitor cannot see the basis of reads as arbitrary.
  */
 
+import { nextQuestion } from './state.js';
+
 export const URGENCY = ['routine', 'insufficient', 'doctor', 'urgent', 'emergency'];
 
 function rank(u) { return URGENCY.indexOf(u); }
@@ -55,7 +57,7 @@ const RULES = [
   {
     urgency: 'urgent',
     test: (e) => e.context.includes('relieverOveruse'),
-    reason: 'needing your reliever inhaler far more often than usual'
+    reason: 'your reliever inhaler not holding the way it should'
   },
   {
     urgency: 'urgent',
@@ -66,6 +68,24 @@ const RULES = [
     urgency: 'urgent',
     test: (e) => e.context.includes('child') && (e.symptoms.includes('breathless') || e.symptoms.includes('wheeze')) && e.context.includes('worsening'),
     reason: "your child's breathing getting worse"
+  },
+  {
+    urgency: 'urgent',
+    test: (e) => e.symptoms.includes('breathless') && e.severity === 'severe',
+    reason: 'breathlessness you are describing as severe'
+  },
+  {
+    urgency: 'urgent',
+    /* A reliever that has stopped working is the definition of an asthma attack
+       that is not being controlled — GINA treats it as an acute presentation
+       however calm the rest of the message sounds. */
+    test: (e) => e.medicationNotHelping && (e.symptoms.includes('breathless') || e.symptoms.includes('wheeze') || e.symptoms.includes('tightness')),
+    reason: 'your inhaler not working the way it usually does'
+  },
+  {
+    urgency: 'urgent',
+    test: (e) => e.symptoms.includes('breathless') && e.onset === 'sudden',
+    reason: 'breathlessness that came on suddenly'
   },
 
   /* ---- doctor: a pulmonology appointment is advisable ---- */
@@ -121,6 +141,45 @@ const RULES = [
   },
   {
     urgency: 'doctor',
+    /* New exertional breathlessness that has persisted for weeks is the classic
+       presentation that needs spirometry rather than reassurance (GOLD, NICE
+       NG12) — and before this rule existed the conversation could accumulate
+       every detail of it and still land on "tell me more". */
+    test: (e) => e.symptoms.includes('breathless') && e.onExertion && e.durationDays != null && e.durationDays >= 14,
+    reason: 'breathlessness on exertion that has been going on for weeks'
+  },
+  {
+    urgency: 'doctor',
+    test: (e) => e.symptoms.includes('breathless') && e.durationDays != null && e.durationDays >= 60,
+    reason: 'breathlessness that has been there for months'
+  },
+  {
+    urgency: 'doctor',
+    test: (e) => e.context.includes('recurrentInfections'),
+    reason: 'chest infections that keep coming back'
+  },
+  {
+    urgency: 'doctor',
+    test: (e) => e.context.includes('scanResult'),
+    reason: 'a scan or breathing-test result that deserves a specialist read'
+  },
+  {
+    urgency: 'doctor',
+    test: (e) => (e.familyHistory || []).some((f) => f.condition === 'lung cancer') && (e.symptoms.length > 0 || e.context.includes('smoker') || e.context.includes('exsmoker')),
+    reason: 'lung cancer in the family alongside what you are noticing yourself'
+  },
+  {
+    urgency: 'doctor',
+    test: (e) => e.context.includes('child') && e.symptoms.includes('cough') && e.durationDays != null && e.durationDays >= 28,
+    reason: "a cough in a child that has lasted more than a month"
+  },
+  {
+    urgency: 'doctor',
+    test: (e) => e.context.includes('relieverFrequent') && !e.context.includes('relieverOveruse'),
+    reason: 'needing your reliever inhaler most days, which usually means the treatment needs revisiting'
+  },
+  {
+    urgency: 'doctor',
     test: (e) => e.context.includes('wantsAppointment'),
     reason: 'you asked to see someone'
   },
@@ -135,6 +194,13 @@ const RULES = [
     urgency: 'routine',
     test: (e) => e.symptoms.includes('allergy') && !e.symptoms.includes('breathless'),
     reason: 'allergy symptoms in the nose and eyes'
+  },
+  {
+    urgency: 'routine',
+    /* Family history on its own is a reason to talk and to know the warning
+       signs — not a reason to send someone to a clinic today. */
+    test: (e) => (e.familyHistory || []).length > 0 && e.symptoms.length === 0,
+    reason: 'a family history worth understanding properly'
   }
 ];
 
@@ -143,57 +209,10 @@ const RULES = [
    --------------------------------------------------------------------------- */
 
 /*
- * §17: one or two questions, never ten. Each entry says when it is worth
- * asking and what it unlocks. The engine takes the first that applies, so the
- * order here is the order of clinical value.
+ * The questions themselves, and the ledger that stops one being asked twice,
+ * live in `state.js` — because the choice depends on the whole conversation,
+ * not on this turn's urgency. §17 still holds: one question, never a list.
  */
-const FOLLOW_UPS = [
-  {
-    id: 'duration',
-    when: (e) => e.symptoms.includes('cough') && e.durationDays == null,
-    q: 'How long has the cough been going on — days, weeks, or longer?'
-  },
-  {
-    id: 'rest-or-exertion',
-    when: (e) => e.symptoms.includes('breathless') && !e.atRest && !e.onExertion,
-    q: 'Does the breathlessness come on when you move around, or does it happen even when you are sitting still?'
-  },
-  {
-    id: 'wheeze-timing',
-    when: (e) => e.symptoms.includes('wheeze') && !e.symptoms.includes('nightsym'),
-    q: 'Is the wheeze worse at any particular time — at night, early morning, or after being around dust or smoke?'
-  },
-  {
-    id: 'sputum',
-    when: (e) => e.symptoms.includes('cough') && !e.symptoms.includes('sputum') && !e.symptoms.includes('fever'),
-    q: 'Is the cough dry, or does anything come up with it?'
-  },
-  {
-    id: 'smoking',
-    when: (e) => (e.symptoms.includes('cough') || e.symptoms.includes('breathless')) && !e.context.includes('smoker') && !e.context.includes('exsmoker'),
-    q: 'Do you smoke, or did you at any point?'
-  },
-  {
-    id: 'inhaler-control',
-    when: (e) => e.context.includes('knownAsthma') && !e.context.includes('relieverOveruse') && !e.context.includes('inhaler'),
-    q: 'How often are you reaching for your reliever inhaler in a normal week?'
-  },
-  {
-    id: 'snoring-witness',
-    when: (e) => e.symptoms.includes('snoring') && !e.symptoms.includes('daysleepy'),
-    q: 'Has anyone told you that you stop breathing or gasp during sleep — and how do you feel during the day?'
-  },
-  {
-    id: 'triggers',
-    when: (e) => e.symptoms.length > 0 && !e.context.includes('pollution'),
-    q: 'Is there anything that reliably sets it off — dust, smoke, cold air, exercise, a particular room?'
-  },
-  {
-    id: 'open',
-    when: () => true,
-    q: 'Tell me a little more about what you are noticing, and when it happens.'
-  }
-];
 
 /* ---------------------------------------------------------------------------
    Suggested actions
@@ -220,6 +239,8 @@ function actionsFor(urgency, e) {
   if ((e.context.includes('smoker') || e.context.includes('exsmoker')) && urgency !== 'emergency') acts.push({ id: 'quit', kind: 'route', label: 'Rendo ŪPIRI — 90-day quit programme', href: '/rendo-upiri' });
   if (urgency === 'routine' && e.symptoms.length > 0) acts.push({ id: 'symptom-checker', kind: 'route', label: 'Run the full Symptom Checker', href: '/symptom-checker' });
   if (e.symptoms.includes('allergy')) acts.push({ id: 'allergy', kind: 'route', label: 'Hyderabad allergy calendar', href: '/allergy-calendar' });
+  if (e.context.includes('noduleOrScan')) acts.push({ id: 'nodule', kind: 'route', label: 'How a lung nodule is followed up', href: '/nodule-journey' });
+  if (e.symptoms.includes('snoring') || e.symptoms.includes('daysleepy')) acts.push({ id: 'sleep', kind: 'route', label: 'Sleep studies at Yashoda', href: '/tests-and-procedures' });
   return acts;
 }
 
@@ -234,12 +255,13 @@ function actionsFor(urgency, e) {
  *            appointmentRecommended:boolean, emergencyRecommended:boolean,
  *            actions:Array<object>, band:object}}
  */
-export function triage(extraction, redFlags) {
+export function triage(extraction, redFlags, state) {
   if (redFlags && redFlags.hit) {
     return {
       urgency: 'emergency',
       reasons: redFlags.flags.map((f) => f.why),
       followUp: null,
+      followUpId: null,
       appointmentRecommended: false,
       emergencyRecommended: true,
       crisis: !!redFlags.crisis,
@@ -265,12 +287,20 @@ export function triage(extraction, redFlags) {
   }
 
   const reasons = fired.filter((r) => r.urgency === urgency).map((r) => r.reason);
-  const followUp = urgency === 'emergency' ? null : (FOLLOW_UPS.find((f) => f.when(extraction)) || {}).q || null;
+
+  /* One question, chosen against the ledger: never one already asked, never one
+     whose answer is already on record. Null is a legitimate answer — it means
+     this conversation has what it needs and should act instead. */
+  const question = (urgency === 'emergency' || urgency === 'urgent') ? null : nextQuestion(extraction, {
+    asked: (state && state.questionsAlreadyAsked) || [],
+    filled: (state && state.filled) || undefined
+  });
 
   return {
     urgency,
     reasons,
-    followUp,
+    followUp: question ? question.text : null,
+    followUpId: question ? question.id : null,
     appointmentRecommended: urgency === 'urgent' || urgency === 'doctor',
     emergencyRecommended: false,
     crisis: false,

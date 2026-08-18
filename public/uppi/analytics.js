@@ -12,16 +12,23 @@
  * no analytics at all costs nothing.
  */
 
+/* The nine names §28 asks for, plus the few this build already emitted. A name
+   that is not on this list is dropped rather than sent — the list is the
+   contract, not a suggestion. */
 const ALLOWED = new Set([
+  /* §28 */
   'uppi_opened',
-  'uppi_greeting_completed',
-  'uppi_text_conversation_started',
-  'uppi_voice_conversation_started',
+  'uppi_greeting',
+  'uppi_chat_started',
+  'uppi_voice_started',
+  'uppi_voice_completed',
+  'appointment_recommended',
+  'appointment_clicked',
+  'call_clicked',
+  'urgent_state_triggered',
+  /* additional, same rules */
+  'uppi_nudge',
   'uppi_symptom_category_selected',
-  'uppi_appointment_recommended',
-  'uppi_appointment_cta_clicked',
-  'uppi_call_cta_clicked',
-  'uppi_emergency_shown',
   'uppi_conversation_completed',
   'uppi_conversation_cleared',
   'uppi_speech_stopped',
@@ -31,7 +38,7 @@ const ALLOWED = new Set([
 /* The only fields that may ride along with an event. Anything else is dropped
    rather than trusted, so a future caller cannot accidentally leak a message
    into telemetry by passing the wrong object. */
-const FIELDS = ['urgency', 'turns', 'source', 'reason', 'category', 'engine'];
+const FIELDS = ['urgency', 'turns', 'source', 'reason', 'category', 'engine', 'kind', 'mode'];
 
 export function track(name, props) {
   if (!ALLOWED.has(name)) return;

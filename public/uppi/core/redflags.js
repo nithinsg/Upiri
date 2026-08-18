@@ -134,17 +134,43 @@ const HYPOTHETICAL = [
    morning" is a report, not a question. */
 const SELF_REPORT = /\b(?:i\s+am|i\s+have|i\s+had|my\s+\w+\s+(?:is|are|has|have)|right\s+now|since\s+(?:this|yesterday|last)|started\s+(?:this|yesterday|last)|currently|at\s+the\s+moment|today)\b/;
 
-function isHypothetical(text) {
+export function isHypothetical(text) {
   if (SELF_REPORT.test(text)) return false;
   return HYPOTHETICAL.some((re) => re.test(text));
 }
 
 /* Looks back from the match for a negator, stopping at a clause boundary so a
    negation in a previous clause cannot cancel this one. */
-function isNegated(text, index) {
+export function isNegated(text, index) {
   const before = text.slice(Math.max(0, index - 60), index);
   const clause = before.split(CLAUSE).pop();
   return NEGATORS.test(clause);
+}
+
+/**
+ * Tests a list of patterns against already-normalised text and reports both
+ * outcomes separately: what was asserted, and what was explicitly denied.
+ *
+ * The denial half matters as much as the assertion. "Is the cough dry, or does
+ * anything come up with it?" answered with "it's dry" has ANSWERED the question
+ * — and a companion that asks it again two turns later is the single most
+ * irritating thing a symptom checker does. So a negated match fills the slot
+ * rather than leaving it empty.
+ *
+ * @param {string} text normalised text
+ * @param {RegExp[]} patterns
+ * @returns {{hit:boolean, denied:boolean}}
+ */
+export function matchPatterns(text, patterns) {
+  let denied = false;
+  for (const pattern of patterns) {
+    const re = new RegExp(pattern.source, pattern.flags.replace('g', ''));
+    const m = re.exec(text);
+    if (!m) continue;
+    if (isNegated(text, m.index)) { denied = true; continue; }
+    return { hit: true, denied: false };
+  }
+  return { hit: false, denied };
 }
 
 /* ---------------------------------------------------------------------------

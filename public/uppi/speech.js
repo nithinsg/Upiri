@@ -35,6 +35,8 @@ const VOICE_PREFS = [
   (v) => /^en/i.test(v.lang)
 ];
 
+import { visemeFor } from './avatar.js';
+
 export class TextToSpeech {
   constructor() {
     this.mode = 'browser';
@@ -45,6 +47,10 @@ export class TextToSpeech {
     this.analyser = null;
     this.buffer = null;
     this._char = null;
+    /* a provider's character timings, mapped to visemes and played against the
+       audio clock (§18) */
+    this.schedule = null;
+    this._scheduleAt = 0;
     this._unlocked = false;
     this.supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
     if (this.supported) this._loadVoices();
@@ -113,7 +119,23 @@ export class TextToSpeech {
         body: JSON.stringify({ text })
       });
       if (!res.ok) { this.mode = 'browser-only'; return false; }
-      const blob = await res.blob();
+
+      /*
+       * Two provider shapes (§18). Plain audio bytes animate from amplitude;
+       * JSON with per-character timings animates from the timings, which is the
+       * only way the right mouth shape lands on the right sound.
+       */
+      let blob;
+      const type = res.headers.get('content-type') || '';
+      if (type.indexOf('json') !== -1) {
+        const data = await res.json();
+        if (!data || !data.audio) { this.mode = 'browser-only'; return false; }
+        blob = base64ToBlob(data.audio, data.mime || 'audio/mpeg');
+        this.schedule = buildSchedule(data.timings);
+      } else {
+        blob = await res.blob();
+        this.schedule = null;
+      }
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audio.preload = 'auto';
@@ -127,6 +149,7 @@ export class TextToSpeech {
       });
       URL.revokeObjectURL(url);
       this.audio = null;
+      this.schedule = null;
       if (o.onEnd) o.onEnd();
       return true;
     } catch {
@@ -188,6 +211,8 @@ export class TextToSpeech {
     this.utterance = null;
     this._char = null;
     this.analyser = null;
+    this.schedule = null;
+    this._scheduleAt = 0;
   }
 
   get speaking() {
@@ -195,9 +220,25 @@ export class TextToSpeech {
     try { return this.supported && window.speechSynthesis.speaking; } catch { return false; }
   }
 
-  /** The source the motion layer reads to animate the mouth. */
+  /**
+   * The source the motion layer reads to animate the mouth, in the order of
+   * fidelity §18 asks for: a real character-timed schedule first, then the
+   * browser voice's boundary characters, and only then amplitude.
+   */
   source() {
     return {
+      /* the audio clock, not a timer we started — they drift apart */
+      getVisemeAt: () => {
+        if (!this.schedule || !this.schedule.length || !this.audio) return null;
+        const t = this.audio.currentTime;
+        /* the schedule is short and ordered, so a linear scan from the last
+           index is cheaper and steadier than a binary search per frame */
+        let i = this._scheduleAt || 0;
+        if (i >= this.schedule.length || this.schedule[i].at > t) i = 0;
+        while (i + 1 < this.schedule.length && this.schedule[i + 1].at <= t) i++;
+        this._scheduleAt = i;
+        return this.schedule[i].viseme;
+      },
       getLevel: () => {
         if (!this.analyser || !this.buffer) return null;
         this.analyser.getByteTimeDomainData(this.buffer);
@@ -211,6 +252,47 @@ export class TextToSpeech {
       getChar: () => this._char
     };
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Timed visemes
+   --------------------------------------------------------------------------- */
+
+function base64ToBlob(b64, mime) {
+  const bytes = atob(b64);
+  const buf = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) buf[i] = bytes.charCodeAt(i);
+  return new Blob([buf], { type: mime });
+}
+
+/**
+ * Character timings → a viseme schedule.
+ *
+ * Consecutive characters that map to the same shape collapse into one entry,
+ * and a gap between words becomes an explicit closed mouth — without that the
+ * mouth hangs open between words, which is the single most artificial thing a
+ * talking character can do.
+ *
+ * @param {Array<{ch:string,start:number,end:number}>} timings seconds
+ * @returns {Array<{at:number, viseme:string}>} seconds
+ */
+export function buildSchedule(timings) {
+  if (!Array.isArray(timings) || !timings.length) return null;
+  const out = [];
+  let last = null;
+  for (let i = 0; i < timings.length; i++) {
+    const t = timings[i];
+    const ch = t.ch || '';
+    const next = timings[i + 1] ? timings[i + 1].ch : '';
+    const viseme = /[a-z]/i.test(ch) ? visemeFor(ch, next) : 'neutral';
+    if (viseme === last) continue;
+    out.push({ at: t.start, viseme });
+    last = viseme;
+  }
+  /* close the mouth when the clip ends */
+  const end = timings[timings.length - 1];
+  if (end && last !== 'neutral') out.push({ at: end.end, viseme: 'neutral' });
+  return out;
 }
 
 /* ---------------------------------------------------------------------------

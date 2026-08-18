@@ -17,7 +17,7 @@
  * because that is captioning, not decoration.
  */
 
-import { MOUTHS, visemeFor } from './avatar.js';
+import { MOUTHS, visemeFor, visemeSchedule } from './avatar.js';
 
 export function prefersReducedMotion() {
   try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
@@ -49,6 +49,7 @@ export class Motion {
     this.reduced = prefersReducedMotion();
     this._speaking = null;
     this._blinkTimer = null;
+    this._glanceTimer = null;
   }
 
   /* ---------------- lifecycle ---------------- */
@@ -66,37 +67,44 @@ export class Motion {
     this.clearLoops();
     this.stopSpeaking();
     this.stopBlinking();
+    this.stopGlancing();
   }
 
-  /* ---------------- entrance (§1) ---------------- */
+  /* ---------------- poses ---------------- */
 
   /**
-   * Uppi runs in from the right, decelerates, lands, settles, looks at the
-   * visitor and waves. Resolves when the wave is finished and he is idling.
+   * The resting pose (§6). Hand on hip, other arm relaxed — the single change
+   * that stops Uppi looking like he is waving at the visitor forever.
    */
-  async enter() {
+  poses(left, right) {
+    this.a.setPose('left', left);
+    this.a.setPose('right', right);
+  }
+
+  /* ---------------- entrance (§5) ---------------- */
+
+  /**
+   * Off-screen right → running in → decelerating. Resolves when he arrives.
+   * The state machine owns the sequence; this owns the movement.
+   */
+  async runIn() {
     const { stage } = this;
     stage.style.willChange = 'transform, opacity';
+    this.poses('rest', 'rest');
 
     if (this.reduced) {
-      /* §24: the elaborate entrance becomes a short, calm arrival */
+      /* §25: the elaborate entrance becomes a short, calm arrival */
       await stage.animate(
         [{ transform: 'translateX(26px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
         { duration: 420, easing: EASE_SOFT, fill: 'both' }
       ).finished.catch(() => {});
-      this.a.setExpression('idle');
-      this.startIdle();
       return;
     }
 
-    /* 1–3. off-screen right, running in, decelerating.
-       The distance is expressed in viewport widths so the run reads the same on
+    /* The distance is expressed in viewport widths so the run reads the same on
        a 320px phone and a 2560px monitor. */
     const run = stage.animate(
-      [
-        { transform: 'translateX(calc(100vw + 220px))' },
-        { transform: 'translateX(0)' }
-      ],
+      [{ transform: 'translateX(calc(100vw + 220px))' }, { transform: 'translateX(0)' }],
       { duration: 1500, easing: EASE_RUN, fill: 'both' }
     );
     this.runCycle(1500);
@@ -109,8 +117,11 @@ export class Motion {
     this.a.look(-0.7, 0);
     this.a.setMouth('small');
     await run.finished.catch(() => {});
+  }
 
-    /* 4–5. weight lands: a short compression and one overshoot, no more */
+  /** Weight lands: one short compression, one overshoot, then he looks at you. */
+  async land() {
+    if (this.reduced) { this.a.look(0, 0); this.a.setExpression('default'); return; }
     this.a.parts.svg.animate(
       [
         { transform: 'scale(1,1)' },
@@ -120,19 +131,12 @@ export class Motion {
       ],
       { duration: 420, easing: EASE_SETTLE, fill: 'none' }
     );
-    await wait(180);
-
-    /* 6. he looks at you */
+    await wait(240);
+    /* he looks at the visitor before he does anything else */
     this.a.look(0, 0);
-    this.a.setExpression('idle');
+    this.a.setExpression('default');
     this.startBlinking();
-    await wait(220);
-
-    /* 7. the wave */
-    await this.wave();
-
-    /* 8. and settles into breathing */
-    this.startIdle();
+    await wait(200);
   }
 
   /** Legs and arms cycling for the duration of a run, slowing as he arrives. */
@@ -154,11 +158,22 @@ export class Motion {
       { duration: stride / 2, iterations: cycles * 2, easing: 'ease-in-out', fill: 'none' }));
   }
 
-  /** Three unhurried waves from the shoulder, with the head tipping along. */
+  /**
+   * Three unhurried waves from the shoulder, then the arm comes back DOWN.
+   *
+   * The arm is switched into its waving pose for the duration and out of it
+   * afterwards. Previously the rig was drawn mid-wave, so "stop waving" was not
+   * something the animation layer could express at all (§6).
+   */
   async wave() {
     const { armRight, head } = this.a.parts;
     this.a.setExpression('happy');
-    if (this.reduced) { await wait(200); this.a.setExpression('idle'); return; }
+    this.a.setPose('right', 'wave');
+    if (this.reduced) {
+      await wait(320);
+      this.a.setPose('right', 'rest');
+      return;
+    }
     const w = armRight.animate(
       [
         { transform: 'rotate(0deg)' },
@@ -176,14 +191,20 @@ export class Motion {
       { duration: 1450, easing: 'ease-in-out', fill: 'none' }
     );
     await w.finished.catch(() => {});
-    this.a.setExpression('idle');
+    /* down again, and into the resting pose */
+    this.a.setPose('right', 'rest');
   }
 
   /* ---------------- idle (§1: subtle breathing, blinking) ---------------- */
 
   startIdle() {
     this.clearLoops();
+    /* §6: hand on hip, shoulders down. This is the DEFAULT — not a pose he
+       reaches on request. */
+    this.poses('hip', 'rest');
+    this.a.setExpression('default');
     this.startBlinking();
+    this.startGlancing();
     if (this.reduced) return;
     const { body, head, svg } = this.a.parts;
 
@@ -204,6 +225,202 @@ export class Motion {
     ));
   }
 
+  /**
+   * The eyes wander and come back to the visitor (§6, §8).
+   *
+   * This is the cheapest thing in the file and the one that does most of the
+   * work: a face whose eyes never move is a picture, whatever else is
+   * animating around it.
+   */
+  startGlancing(interval) {
+    this.stopGlancing();
+    const gap = interval || 3200;
+    const spots = [[0, 0], [0.45, -0.15], [0, 0], [-0.5, 0.1], [0, 0], [0.2, 0.3], [0, 0], [-0.3, -0.3]];
+    let n = 0;
+    const tick = () => {
+      if (!this.a.parts.svg.isConnected) return;
+      /* look at the visitor twice as often as anywhere else */
+      this.a.look(...spots[n++ % spots.length]);
+      this._glanceTimer = setTimeout(tick, gap + Math.random() * gap * 0.8);
+    };
+    this._glanceTimer = setTimeout(tick, gap);
+  }
+
+  stopGlancing() {
+    if (this._glanceTimer) clearTimeout(this._glanceTimer);
+    this._glanceTimer = null;
+  }
+
+  /** Turns the eyes towards a point in the viewport — the presence layer's cue. */
+  lookToward(x, y) {
+    const box = this.a.parts.svg.getBoundingClientRect();
+    if (!box.width) return;
+    const cx = box.left + box.width / 2;
+    const cy = box.top + box.height * 0.36;
+    this.a.look(
+      Math.max(-1, Math.min(1, (x - cx) / (box.width * 2.4))),
+      Math.max(-1, Math.min(1, (y - cy) / (box.height * 1.6)))
+    );
+  }
+
+  /* ---------------- greeting, happy, waiting ---------------- */
+
+  startGreeting() {
+    this.clearLoops();
+    this.poses('hip', 'rest');
+    this.a.setExpression('happy');
+    this.startBlinking();
+    this.startGlancing(2600);
+    if (this.reduced) return;
+    const { body } = this.a.parts;
+    this.track(body.animate(
+      [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.02) translateY(-1px)' }, { transform: 'scaleY(1)' }],
+      { duration: 3600, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+  }
+
+  startHappy() {
+    this.startIdle();
+    this.a.setExpression('happy');
+    if (this.reduced) return;
+    /* one small bob — pleasure, not a bounce */
+    this.a.parts.svg.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(-6px)' }, { transform: 'translateY(0)' }],
+      { duration: 620, easing: EASE_SETTLE }
+    );
+  }
+
+  /** Present but not demanding: he waits, and lets the visitor read the page. */
+  startWaiting() {
+    this.startIdle();
+    this.startGlancing(5200);
+    this.a.setExpression('neutral');
+  }
+
+  /* ---------------- curious, tired, sleeping (§8) ---------------- */
+
+  /** Head tilt, brows up, eyes on the visitor. "Need a hand?" */
+  startCurious() {
+    this.clearLoops();
+    this.poses('hip', 'rest');
+    this.a.setExpression('curious');
+    this.stopGlancing();
+    this.a.look(0, 0);
+    this.startBlinking(2000, 3800);
+    if (this.reduced) return;
+    const { head, body } = this.a.parts;
+    this.track(head.animate(
+      [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-7deg) translateY(-2px)' }],
+      { duration: 420, easing: EASE_SETTLE, fill: 'forwards' }
+    ));
+    this.track(body.animate(
+      [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.014)' }, { transform: 'scaleY(1)' }],
+      { duration: 3800, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+  }
+
+  /**
+   * Heavy-lidded, slower, with the occasional yawn. Charm rather than reproach:
+   * he is not sulking that you did not talk to him, he is just a character in a
+   * quiet room (§8).
+   */
+  startTired() {
+    this.clearLoops();
+    this.poses('hip', 'rest');
+    this.a.setExpression('tired');
+    this.stopGlancing();
+    this.startBlinking(3200, 6400);
+    if (this.reduced) return;
+    const { body, head } = this.a.parts;
+    this.track(body.animate(
+      [{ transform: 'scaleY(1) translateY(0)' }, { transform: 'scaleY(1.02) translateY(1px)' }, { transform: 'scaleY(1) translateY(0)' }],
+      { duration: 6200, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+    this.track(head.animate(
+      [{ transform: 'rotate(0deg) translateY(0)' }, { transform: 'rotate(-3deg) translateY(3px)' }, { transform: 'rotate(0deg) translateY(0)' }],
+      { duration: 9000, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+
+    const yawn = () => {
+      if (!this.a.parts.svg.isConnected) return;
+      this.a.setMouth('yawn');
+      this.a.setLids(0.7, 260);
+      this.a.parts.head.animate(
+        [{ transform: 'rotate(0deg)' }, { transform: 'rotate(4deg) translateY(-3px)' }, { transform: 'rotate(0deg)' }],
+        { duration: 900, easing: 'ease-in-out' }
+      );
+      this.timers.push(setTimeout(() => { this.a.setMouth('soft'); this.a.setLids(0.45, 320); }, 900));
+      this.timers.push(setTimeout(yawn, 11000 + Math.random() * 7000));
+    };
+    this.timers.push(setTimeout(yawn, 3200));
+  }
+
+  /** Dozing: eyes shut, deep slow breathing, the head dipping and catching. */
+  startSleeping() {
+    this.clearLoops();
+    this.poses('rest', 'rest');
+    this.stopGlancing();
+    this.stopBlinking();
+    this.a.setExpression('asleep');
+    if (this.reduced) return;
+    const { body, head } = this.a.parts;
+    this.track(body.animate(
+      [{ transform: 'scaleY(1) translateY(0)' }, { transform: 'scaleY(1.03) translateY(2px)' }, { transform: 'scaleY(1) translateY(0)' }],
+      { duration: 7200, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+    this.track(head.animate(
+      [
+        { transform: 'rotate(0deg) translateY(0)' },
+        { transform: 'rotate(-5deg) translateY(7px)', offset: 0.45 },
+        { transform: 'rotate(-2deg) translateY(2px)', offset: 0.55 },
+        { transform: 'rotate(-5deg) translateY(7px)', offset: 0.9 },
+        { transform: 'rotate(0deg) translateY(0)' }
+      ],
+      { duration: 7200, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+  }
+
+  /** Wakes up: eyes open, a startle, then back to whatever is next (§8). */
+  async wake() {
+    /* Deliberately does NOT clear the loops: waking is a flourish played over
+       whatever the machine has already resolved to. Clearing here stopped the
+       breathing that the new state had just started. */
+    this.a.setLids(0, 160);
+    if (!this.reduced) {
+      this.a.parts.svg.animate(
+        [{ transform: 'translateY(0) scale(1,1)' }, { transform: 'translateY(-5px) scale(.99,1.02)' }, { transform: 'translateY(0) scale(1,1)' }],
+        { duration: 460, easing: EASE_SETTLE }
+      );
+      this.a.parts.head.animate(
+        [{ transform: 'rotate(-4deg) translateY(4px)' }, { transform: 'rotate(2deg) translateY(-2px)' }, { transform: 'rotate(0deg) translateY(0)' }],
+        { duration: 520, easing: EASE_SETTLE, fill: 'none' }
+      );
+    }
+    await this.a.blink();
+  }
+
+  /* ---------------- appointment, goodbye ---------------- */
+
+  /** Caring and slightly forward — the buttons matter more than he does here. */
+  startAppointment() {
+    this.clearLoops();
+    this.poses('hip', 'rest');
+    this.a.setExpression('caring');
+    this.startBlinking(2600, 5200);
+    this.startGlancing(4200);
+    if (this.reduced) return;
+    this.track(this.a.parts.body.animate(
+      [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.013)' }, { transform: 'scaleY(1)' }],
+      { duration: 4600, iterations: Infinity, easing: 'ease-in-out' }
+    ));
+  }
+
+  async startGoodbye() {
+    this.a.setExpression('happy');
+    await this.wave();
+    this.startIdle();
+  }
+
   /* ---------------- listening (§13) ---------------- */
 
   /*
@@ -214,7 +431,10 @@ export class Motion {
    */
   startListening() {
     this.clearLoops();
+    this.stopGlancing();
+    this.poses('hip', 'rest');
     this.a.setExpression('listening');
+    this.a.look(0, 0);
     this.startBlinking(2200, 4200);
     const { body, head } = this.a.parts;
 
@@ -248,6 +468,9 @@ export class Motion {
 
   startThinking() {
     this.clearLoops();
+    this.stopGlancing();
+    /* hand to the chin — the pose does more than the head tilt does (§20) */
+    this.poses('chin', 'rest');
     this.a.setExpression('thinking');
     this.startBlinking(1400, 2600);
     if (this.reduced) return;
@@ -274,7 +497,10 @@ export class Motion {
 
   startConcerned() {
     this.clearLoops();
+    this.stopGlancing();
+    this.poses('rest', 'rest');
     this.a.setExpression('concerned');
+    this.a.look(0, 0);
     this.startBlinking(2600, 5000);
     if (this.reduced) return;
     const { body } = this.a.parts;
@@ -324,6 +550,8 @@ export class Motion {
   startSpeaking(source) {
     this.stopSpeaking();
     this.clearLoops();
+    this.stopGlancing();
+    this.poses('hip', 'rest');
     this.a.setExpression('speaking');
     this.startBlinking(2400, 5200);
 
@@ -341,26 +569,59 @@ export class Motion {
       ));
     }
 
+    /*
+     * Sources, in order of fidelity (§18):
+     *
+     *   1. getVisemeAt(ms)  a real schedule — character-level timings from the
+     *                       speech provider, mapped to visemes and played back
+     *                       against the audio clock. This is the only source
+     *                       that puts the right shape on the right sound.
+     *   2. getChar()        the character currently being spoken, from the
+     *                       browser voice's boundary events.
+     *   3. getLevel()       amplitude. Deliberately LAST: a mouth driven by
+     *                       volume alone opens on every loud consonant and
+     *                       closes through every quiet vowel, which is the
+     *                       "flapping jaw" the brief rules out. It is used only
+     *                       when nothing better exists, and only to choose
+     *                       between three openness bands rather than shapes.
+     *   4. the text's own vowel rhythm, when there is no timing at all.
+     */
+    const started = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const fallback = source && source.text ? visemeSchedule(source.text) : null;
     let last = '';
     let i = 0;
+
     const step = () => {
-      let shape;
-      const level = source && source.getLevel ? source.getLevel() : null;
-      if (typeof level === 'number') {
-        shape = level < 0.06 ? 'closed' : level < 0.18 ? 'small' : level < 0.4 ? 'mid' : level < 0.68 ? 'smile' : 'wide';
-      } else {
-        const ch = source && source.getChar ? source.getChar() : null;
-        shape = ch ? visemeFor(ch) : ['mid', 'small', 'wide', 'mid', 'o', 'small'][i % 6];
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - started;
+      let shape = null;
+
+      if (source && typeof source.getVisemeAt === 'function') {
+        shape = source.getVisemeAt(now);
       }
+      if (!shape && source && typeof source.getChar === 'function') {
+        const ch = source.getChar();
+        if (ch) shape = visemeFor(ch);
+      }
+      if (!shape && source && typeof source.getLevel === 'function') {
+        const level = source.getLevel();
+        if (typeof level === 'number') shape = level < 0.06 ? 'neutral' : level < 0.2 ? 'sh' : level < 0.45 ? 'ai' : 'aa';
+      }
+      if (!shape && fallback && fallback.length) {
+        /* no timing at all: walk the text's own shape sequence at a natural
+           speaking rate, so the mouth still tracks the sentence */
+        shape = fallback[Math.floor(now / 92) % fallback.length].viseme;
+      }
+      if (!shape) shape = ['ai', 'sh', 'aa', 'ai', 'o', 'mbp'][i % 6];
+
       /* never the same shape twice running — a mouth that holds a pose for
          200ms looks stuck, and one extra step of variation fixes it */
-      if (shape === last && MOUTHS[shape]) shape = shape === 'closed' ? 'small' : shape === 'wide' ? 'mid' : 'closed';
+      if (shape === last && MOUTHS[shape]) shape = shape === 'neutral' ? 'sh' : shape === 'aa' ? 'ai' : 'neutral';
       last = shape;
       i++;
-      this.a.setMouth(shape);
+      this.a.setViseme(shape);
     };
     step();
-    this._speaking = setInterval(step, 92);
+    this._speaking = setInterval(step, 88);
   }
 
   stopSpeaking() {
