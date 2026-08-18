@@ -3,11 +3,6 @@
   "framework": null,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "dist",
-  "functions": {
-    "api/uppi/*.js": {
-      "includeFiles": "public/uppi/core/**"
-    }
-  },
   "redirects": [
     {
       "source": "/upiri-2.0.html",
