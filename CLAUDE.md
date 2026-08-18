@@ -8,8 +8,12 @@ read it. Live at <https://upiri.vercel.app>.
 
 ---
 
-## The five things most likely to trip you up
+## The six things most likely to trip you up
 
+0. **Set inputs on Uppi's state machine; never call the motion layer directly.**
+   `states.set('isListening', true)`, not `motion.startListening()`. The machine is
+   the only thing that talks to the rig, and that is what keeps his face from
+   contradicting his advice.
 1. **This is not React.** The site is one 5,955-line `public/index.html` rendered by a
    custom runtime in `public/support.js`. `react`/`vite`/`tailwind` in `package.json`
    belong to the retired `src/` app. Do not import them, do not "modernise" the site.
@@ -33,8 +37,9 @@ read it. Live at <https://upiri.vercel.app>.
 public/index.html      the entire site — markup, data arrays, component logic
 public/support.js      the dc template runtime ({{ }}, sc-if, sc-for, in-place patching)
 public/uppi/           Uppi, the lung companion (browser)
-public/uppi/core/      SHARED with api/ — triage, red flags, knowledge, safety
+public/uppi/core/      SHARED with api/ — engine, triage, red flags, knowledge, safety
 api/uppi/              three Vercel Node serverless functions
+test/                  the committed suite — `npm test`
 scripts/prerender.mjs  Playwright prerender of 62 routes into dist/
 src/                   RETIRED React v2. Not built, not served. Leave it alone.
 ```
@@ -89,17 +94,57 @@ Consequences you must preserve:
 |---|---|
 | `boot.js` | Lazy entry. Bails on `window.__UPIRI_NO_UPPI` (set by the prerenderer). |
 | `avatar.js` | Runtime-generated SVG rig, viewBox `0 0 372 572`. No image file exists. |
-| `motion.js` | WAAPI: entrance, run cycle, wave, idle, listening, thinking, visemes. |
-| `states.js` | 11 states with declared transitions. |
+| `motion.js` | WAAPI: run-in, land, wave, idle, curious, tired, sleeping, visemes. |
+| `states.js` | **18 states driven by runtime inputs**, not by direct calls. See below. |
+| `presence.js` | Scroll, pointer, inactivity, doze and wake. Sets inputs only. |
 | `speech.js` | TTS + STT, browser-first with a replaceable server fallback. |
 | `conversation.js` | Turns, client-side red-flag pre-check, `sessionStorage` only. |
 | `chat.js` | Dock, greeting bubble, panel, CTAs, accessibility. |
-| `core/redflags.js` | 9 emergency rules, with negation and hypothetical guards. |
-| `core/symptoms.js` | 14 symptoms + context, duration parsing, at-rest/exertion. |
-| `core/triage.js` | 18 rules → `emergency`/`urgent`/`doctor`/`insufficient`/`routine`. |
+| `core/engine.js` | **`assess(messages)` — the whole pipeline, shared browser↔server.** |
+| `core/redflags.js` | 10 emergency rules, with negation and hypothetical guards. |
+| `core/symptoms.js` | Symptoms, denials, duration, severity, onset, triggers, exposure. |
+| `core/state.js` | **The conversation state and the question ledger.** See below. |
+| `core/intents.js` | The §13 taxonomy. Names what is being discussed, never a diagnosis. |
+| `core/triage.js` | 26 rules → `emergency`/`urgent`/`doctor`/`insufficient`/`routine`. |
 | `core/knowledge.js` | **The entire medical content surface.** 17 guideline-cited entries. |
 | `core/safety.js` | The output gate. |
 | `core/contact.js` | Phone numbers and booking path — single source. |
+
+### The behaviour machine — set inputs, never states
+
+`states.js` resolves runtime inputs (`isTalking`, `isListening`, `isThinking`,
+`emotion`, `attention`, `energy`, `isUrgent`, `isAppointment`, `userInactive`,
+`scrolling`, and the one-shot `trigger*`) into one of 18 states. **Callers set
+inputs; only the machine picks a state, and only the machine talks to the rig.**
+
+```js
+chat.states.set('isListening', true);   // right
+chat.motion.startListening();           // wrong — bypasses the machine
+```
+
+Read `target()` in `states.js` top to bottom and you have the complete
+description of what Uppi does in any situation. Those input names are chosen to
+map onto Rive state-machine inputs, so the `.riv` swap stays a one-file change.
+
+### The question ledger — why he does not repeat himself
+
+`core/state.js` holds the structured state (§9) and two things that make the
+conversation a conversation:
+
+- **A slot is filled by a yes OR a no.** "The cough is dry" answers the phlegm
+  question as firmly as "green phlegm" does. Denials come from `matchPatterns`
+  in `redflags.js`, which reports assertion and denial separately.
+- **`questionsAlreadyAsked`** is rebuilt deterministically by replaying the
+  selection over the conversation prefix, and cross-checked against the
+  `echoes` of each question so a model-rephrased question still counts.
+
+A question is offered only when its slot is empty **and** it has never been
+asked. `nextQuestion` returning `null` is correct, not a gap: a conversation
+that knows enough should act rather than keep interrogating.
+
+Likewise `compose.js` never sends a paragraph twice — `selectTeaching` consults
+a ledger of what has already been said, and returns `null` when the relevant
+material is spent.
 
 **To change what Uppi knows, edit `core/knowledge.js`'s `ENTRIES` array.** Nothing else
 reads clinical content from anywhere else.
@@ -110,9 +155,24 @@ there ships to both. That is deliberate — the triage rules must exist exactly 
 ### The character asset
 
 There is **no PNG, SVG file or Rive board**. `build()` in `avatar.js` generates the rig
-at runtime. Everything above it talks only through `setMouth` / `setEyes` / `blink` /
-`look` / `setBrows` / `setExpression` and the `parts` map, so replacing `build()` swaps
-in a real rigged asset without touching another file. Keep that boundary intact.
+at runtime. Everything above it talks only through `setMouth` / `setViseme` / `setEyes` /
+`setLids` / `blink` / `look` / `setBrows` / `setExpression` / `setPose` and the `parts`
+map, so replacing `build()` swaps in a real rigged asset without touching another file.
+Keep that boundary intact.
+
+**Arms hold poses, not one fixed shape.** `setPose('right', 'wave' | 'rest' | 'hip' |
+'point')` and `setPose('left', 'hip' | 'rest' | 'chin')` switch between pre-built groups.
+The default idle is `left: hip, right: rest`. The old rig drew the right arm permanently
+raised, which is why Uppi appeared to wave forever — it was the geometry, not the
+animation. Do not reintroduce a raised default.
+
+Two SVG traps this rig has already hit:
+
+- **`hidden` does nothing on SVG elements** — it is an HTML global attribute. Use
+  `style.display`. Every arm pose was visible at once until this was found.
+- **Gradient, clip-path and filter ids must be per instance.** Uppi is mounted twice
+  when the panel is open, and duplicate ids make the second instance paint with the
+  first one's definitions.
 
 ---
 
@@ -155,10 +215,22 @@ npm run build   # prerender 62 routes into dist/ (~30s)
 npm run lint    # oxlint — keep it clean
 ```
 
-There is **no committed test suite**. The 263 assertions that validated the Uppi build
-ran from scratch harnesses that were deleted before commit. Recreating them under
-`test/` is the highest-value outstanding task — see `docs/UPPI_PROJECT_STATE.md` §26 for
-the specific regressions worth pinning.
+```bash
+npm test              # 285 assertions across four suites (~90s)
+npm test conversation # one suite by name
+```
+
+`test/` has no dependencies beyond Playwright, which the prerender already needs.
+
+| Suite | What it pins |
+|---|---|
+| `core.test.mjs` | Red flags with their negation and hypothetical guards, duration parsing, extraction including denials, every triage band, retrieval, the safety gate. |
+| `conversation.test.mjs` | The six conversations in §30 of the brief, plus the properties that must hold across all of them: no repeated question, no repeated paragraph, nothing forgotten, one question per reply. |
+| `rig.test.mjs` | The ten visemes, the digraph mapping, the schedule, and the approved palette. |
+| `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
+
+`test/_server.mjs` mounts the real `api/uppi/*` handlers next to `public/`, so the
+browser suite exercises the deployed code rather than a mock.
 
 ---
 
@@ -184,9 +256,11 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 ## Verifying a change
 
 1. `npm run lint`
-2. `npm run build` — must report `prerendered 62/62 routes`
-3. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
-4. For Uppi changes, check 320px and 1440px, and confirm the emergency path with the
-   network offline
+2. `npm test` — must report `all suites passed` (285 assertions)
+3. `npm run build` — must report `prerendered 62/62 routes`
+4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:
    `grep -c "uppi-root" dist/index.html` → `0`
+
+The browser suite already covers the seven widths, the offline emergency path and the
+console, so step 2 replaces most of what used to be a manual pass.
