@@ -313,6 +313,7 @@ api/uppi/
   chat.js          the pipeline
   transcribe.js    server speech-to-text proxy (provider-agnostic)
   speak.js         server text-to-speech proxy, with character-timing support
+  callback.js      call-back requests — name, phone and triage band, nothing else
 test/
   run.mjs          `npm test` — every suite, one exit code
   core / conversation / rig / browser test suites
@@ -361,6 +362,7 @@ Two consequences worth knowing:
 | `ANTHROPIC_API_KEY` | Answers come from the deterministic composer instead of the model. |
 | `UPPI_STT_URL` / `UPPI_STT_KEY` / `UPPI_STT_FIELD` | Server transcription is reported as unconfigured; the browser recogniser is used where it exists, and the microphone button is not rendered where it does not. |
 | `UPPI_TTS_URL` / `UPPI_TTS_KEY` / `UPPI_TTS_VOICE` | Uppi speaks with the browser voice (an `en-IN` one where the device has it). |
+| `UPPI_CALLBACK_URL` / `UPPI_CALLBACK_KEY` | **The call-back offer is not shown at all.** Uppi still gives the booking and call CTAs. Set this to a destination a person actually monitors before enabling it — "someone will call you back" is a promise the hospital makes, not the website. |
 
 No key is ever read in `public/`.
 

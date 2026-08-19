@@ -28,6 +28,8 @@ const ALLOWED = new Set([
   'urgent_state_triggered',
   /* additional, same rules */
   'uppi_nudge',
+  'callback_opened',
+  'callback_submitted',
   'uppi_symptom_category_selected',
   'uppi_conversation_completed',
   'uppi_conversation_cleared',

@@ -309,6 +309,20 @@ function verdict(decision, brief) {
   }
 }
 
+/**
+ * The offer to be rung back.
+ *
+ * Phrased as Uppi doing the work rather than as a form to fill in, because the
+ * point of it is that someone who is unwell does not have to hold on a phone
+ * line. Says exactly what is passed on, because asking for a phone number
+ * without saying where it goes is not a fair ask.
+ */
+export function callbackOffer(decision) {
+  const soon = decision.urgency === 'urgent' || decision.urgency === 'emergency';
+  return 'If it\'s easier, I can ask the Yashoda team to call you' + (soon ? ' — they can usually reach you quickly' : '') +
+    '. Tap "Ask Yashoda to call me" below and give me your name and number, and I\'ll pass it straight to them. Nothing else from our conversation goes with it.';
+}
+
 /* ---------------------------------------------------------------------------
    Composition
    --------------------------------------------------------------------------- */
@@ -330,6 +344,7 @@ export function compose({ message, state, decision, teaching, previousUrgency, b
   /* ---- urgent: the instruction goes first and nothing is stacked on it ---- */
   if (decision.urgency === 'urgent') {
     parts.push(verdict(decision, false));
+    if (!state.callbackOffered) parts.push(callbackOffer(decision));
     if (teaching) parts.push(teaching.entry.plain[teaching.from]);
     parts.push('If it gets worse before you are seen — if speaking becomes hard, or your lips or fingertips change colour — treat that as an emergency and call 108.');
     return present(parts.join('\n\n'));
@@ -379,11 +394,15 @@ export function compose({ message, state, decision, teaching, previousUrgency, b
     : verdict(decision, repeat >= 1);
   if (v) parts.push(v);
 
+  /* The offer to have someone ring them, once the band says they should be
+     seen. Said once — repeating an offer of help every turn is pestering. */
+  if (decision.appointmentRecommended && !state.callbackOffered) parts.push(callbackOffer(decision));
+
   /* One question — already checked against the ledger, so it cannot be one
      that has been asked or one whose answer is on record. */
   if (decision.followUp) parts.push(decision.followUp);
   else if (decision.appointmentRecommended) {
-    parts.push('You\'ve told me enough to be useful. The next step is someone listening to your chest — the buttons below will get you there.');
+    parts.push('You\'ve told me enough to be useful. The next step is someone listening to your chest.');
   } else if (!state.isFirstTurn) {
     parts.push('If anything changes, or you think of something you forgot to mention, tell me and I\'ll take another look.');
   }

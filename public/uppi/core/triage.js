@@ -227,9 +227,17 @@ function actionsFor(urgency, e) {
   if (urgency === 'emergency') {
     acts.push({ id: 'emergency-call', kind: 'emergency', label: 'Call 108 — emergency ambulance' });
     acts.push({ id: 'call-centre', kind: 'call', label: 'Call Yashoda' });
+    /* A call back is LAST here and never instead of 108. Someone coughing blood
+       must not sit by the phone waiting to be rung — the offer exists so a
+       relative can arrange the follow-up, and the copy says so. */
+    acts.push({ id: 'callback', kind: 'callback', label: 'Also ask Yashoda to call me back' });
     return acts;
   }
   if (urgency === 'urgent' || urgency === 'doctor') {
+    /* First, because it is the least work for someone who is unwell: they leave
+       a name and a number and Yashoda rings them. The client drops it if no
+       destination is configured. */
+    acts.push({ id: 'callback', kind: 'callback', label: 'Ask Yashoda to call me' });
     acts.push({ id: 'book', kind: 'book', label: 'Book a Pulmonology Appointment' });
     acts.push({ id: 'call-centre', kind: 'call', label: 'Call the Yashoda Call Centre' });
   }

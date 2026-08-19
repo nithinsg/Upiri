@@ -10,9 +10,26 @@
  *     and touching the page must wake him instantly.
  */
 
+import http from 'node:http';
 import { chromium } from 'playwright';
 import { describe, ok, eq, includes, report } from './_harness.mjs';
 import { startServer } from './_server.mjs';
+
+/*
+ * A stand-in for whatever CRM or webhook the hospital points call-back requests
+ * at, so the test can assert on what actually leaves the building — which is
+ * the part of this feature worth guarding.
+ */
+const received = [];
+const sink = http.createServer(async (req, res) => {
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  try { received.push(JSON.parse(Buffer.concat(chunks).toString('utf8'))); } catch { received.push(null); }
+  res.statusCode = 200;
+  res.end('{"ok":true}');
+});
+await new Promise((r) => sink.listen(4181, r));
+process.env.UPPI_CALLBACK_URL = 'http://localhost:4181/hook';
 
 const PORT = 4179;
 const app = await startServer(PORT);
@@ -158,6 +175,146 @@ describe('No console errors anywhere in that run');
 eq(errors.length, 0, 'zero errors' + (errors.length ? ': ' + errors.join(' | ') : ''));
 await ctx.close();
 
+/* ---------------- the popup, on real timers ---------------- */
+
+/*
+ * Driven by the clock, not by poking the state machine. The first version of
+ * the scroll nudge passed every input-level check and still never fired for a
+ * real visitor, because it demanded unbroken scrolling and everyone pauses to
+ * read. Only elapsed time catches that.
+ */
+describe('Uppi offers help when someone is idle (§7, §8)');
+{
+  const w = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const p = await w.newPage();
+  await p.addInitScript(() => { window.__UPPI_PRESENCE_TIMING = { glanceAfter: 900, curiousAfter: 2200, tiredAfter: 60000, sleepAfter: 90000 }; });
+  await p.goto(app.url + '/');
+  await p.waitForSelector('.uppi-launcher', { timeout: 20000 });
+  await p.waitForTimeout(4200);
+  await p.evaluate(() => window.__uppi.dismissBubble());
+  await p.waitForTimeout(3200);
+  const bubble = await p.evaluate(() => {
+    const b = document.querySelector('.uppi-bubble');
+    return b && !b.hidden ? (b.querySelector('p')?.textContent || '') : '';
+  });
+  ok(bubble.length > 0, 'a popup appears for a visitor who does nothing');
+  includes(bubble.toLowerCase(), 'help', 'and it offers help (' + JSON.stringify(bubble) + ')');
+  eq(await p.evaluate(() => window.__uppi.states.state), 'CURIOUS', 'and Uppi looks curious while asking');
+  await w.close();
+}
+
+describe('Uppi offers help when someone only scrolls (§7)');
+{
+  const w = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const p = await w.newPage();
+  await p.addInitScript(() => { window.__UPPI_PRESENCE_TIMING = { readingTime: 1200, readingDistance: 1, glanceAfter: 60000, curiousAfter: 90000 }; });
+  await p.goto(app.url + '/');
+  await p.waitForSelector('.uppi-launcher', { timeout: 20000 });
+  await p.waitForTimeout(4200);
+  await p.evaluate(() => window.__uppi.dismissBubble());
+  await p.waitForTimeout(500);
+
+  /* bursts with reading pauses — how a person actually reads a page */
+  let shown = '';
+  for (let i = 0; i < 12 && !shown; i++) {
+    await p.mouse.wheel(0, 420);
+    await p.waitForTimeout(700);
+    shown = await p.evaluate(() => {
+      const b = document.querySelector('.uppi-bubble');
+      return b && !b.hidden ? (b.querySelector('p')?.textContent || '') : '';
+    });
+  }
+  ok(shown.length > 0, 'a popup appears for someone reading, pauses and all');
+  includes(shown.toLowerCase(), 'find', 'and it offers to help them find something (' + JSON.stringify(shown) + ')');
+  await w.close();
+}
+
+/* ---------------- the call-back request ---------------- */
+
+describe('Asking Yashoda to call back (§15)');
+{
+  const w = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const p = await w.newPage();
+  const errs = [];
+  p.on('pageerror', (e) => errs.push(e.message));
+  await p.goto(app.url + '/');
+  await p.waitForSelector('.uppi-launcher', { timeout: 20000 });
+  await p.waitForTimeout(4200);
+  await p.evaluate(() => window.__uppi.dismissBubble());
+  await p.evaluate(() => window.__uppi.openPanel());
+  await p.waitForTimeout(800);
+  ok(await p.evaluate(() => window.__uppi.callbackReady), 'the offer is enabled when a destination is configured');
+
+  await p.fill('.uppi-field', "I've been coughing for three weeks and it's getting worse");
+  await p.keyboard.press('Enter');
+  await p.waitForTimeout(2600);
+  eq(await p.evaluate(() => window.__uppi.conversation.lastResult.urgency), 'doctor', 'the conversation reaches an appointment recommendation');
+  eq(await p.evaluate(() => window.__uppi.avatar.pose.right), 'phone', 'and Uppi has the phone in his hand while he offers');
+  ok(await p.isVisible('.uppi-act--callback'), 'the call-back CTA is shown');
+  const reply = await p.evaluate(() => [...document.querySelectorAll('.uppi-msg--uppi')].pop().textContent);
+  ok(/call you/i.test(reply), 'and he says the offer out loud rather than leaving it to a button');
+
+  await p.click('.uppi-act--callback');
+  await p.waitForTimeout(500);
+  ok(await p.isVisible('.uppi-callback'), 'the form opens');
+  includes(await p.textContent('.uppi-callback-fine'), 'Nothing else from this conversation is sent', 'and says exactly what leaves');
+
+  /* it must not send half a request */
+  await p.fill('.uppi-callback input[name=name]', 'R');
+  await p.fill('.uppi-callback input[name=phone]', '12345');
+  await p.click('.uppi-callback button[type=submit]');
+  await p.waitForTimeout(300);
+  ok((await p.textContent('.uppi-callback-status')).length > 0, 'a one-letter name is refused');
+  await p.fill('.uppi-callback input[name=name]', 'Ravi Kumar');
+  await p.click('.uppi-callback button[type=submit]');
+  await p.waitForTimeout(300);
+  includes(await p.textContent('.uppi-callback-status'), 'short', 'a five-digit number is refused');
+  eq(received.length, 0, 'and nothing has been sent while the form is invalid');
+
+  await p.fill('.uppi-callback input[name=phone]', '98765 43210');
+  await p.fill('.uppi-callback input[name=preferredTime]', 'after 6pm');
+  await p.click('.uppi-callback button[type=submit]');
+  await p.waitForTimeout(1600);
+  ok(!(await p.$('.uppi-callback')), 'the form closes once it is sent');
+  ok(/passed your details/i.test(await p.evaluate(() => [...document.querySelectorAll('.uppi-msg--uppi')].pop().textContent)), 'and Uppi confirms it himself');
+
+  eq(received.length, 1, 'exactly one request reached the destination');
+  const got = received[0] || {};
+  eq(got.name, 'Ravi Kumar', 'the name is passed on');
+  eq(got.phone, '+919876543210', 'the number is normalised to E.164');
+  eq(got.preferredTime, 'after 6pm', 'the preferred time is passed on');
+  eq(got.urgency, 'doctor', 'and how soon they should be seen, which is what makes the call useful');
+  /* the part that matters most */
+  const leaked = JSON.stringify(got).toLowerCase();
+  ok(leaked.indexOf('cough') === -1, 'the symptoms do NOT leave with it');
+  ok(leaked.indexOf('worse') === -1, 'nor anything else they typed');
+  eq(Object.keys(got).sort().join(','), 'name,phone,preferredTime,requestedAt,source,urgency,urgencyLabel', 'and nothing beyond the agreed fields is sent');
+  eq(errs.length, 0, 'no page errors through the whole flow');
+  await w.close();
+}
+
+describe('With no destination configured, the offer does not exist');
+{
+  const saved = process.env.UPPI_CALLBACK_URL;
+  delete process.env.UPPI_CALLBACK_URL;
+  const w = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const p = await w.newPage();
+  await p.goto(app.url + '/');
+  await p.waitForSelector('.uppi-launcher', { timeout: 20000 });
+  await p.waitForTimeout(4200);
+  await p.evaluate(() => window.__uppi.dismissBubble());
+  await p.evaluate(() => window.__uppi.openPanel());
+  await p.waitForTimeout(900);
+  eq(await p.evaluate(() => window.__uppi.callbackReady), false, 'the client is told there is nowhere to send it');
+  await p.fill('.uppi-field', "I've been coughing for three weeks and it's getting worse");
+  await p.keyboard.press('Enter');
+  await p.waitForTimeout(2600);
+  ok(!(await p.$('.uppi-act--callback')), 'so no form is offered — a dropped phone number is worse than no form');
+  ok(await p.isVisible('.uppi-act--book'), 'and the working CTAs are still there');
+  await w.close();
+  process.env.UPPI_CALLBACK_URL = saved;
+}
+
 /* ---------------- widths ---------------- */
 
 describe('Every width in §27');
@@ -203,4 +360,5 @@ await rm.close();
 
 await browser.close();
 await app.close();
+await new Promise((r) => sink.close(r));
 report('browser');

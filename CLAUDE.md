@@ -38,7 +38,7 @@ public/index.html      the entire site — markup, data arrays, component logic
 public/support.js      the dc template runtime ({{ }}, sc-if, sc-for, in-place patching)
 public/uppi/           Uppi, the lung companion (browser)
 public/uppi/core/      SHARED with api/ — engine, triage, red flags, knowledge, safety
-api/uppi/              three Vercel Node serverless functions
+api/uppi/              four Vercel Node serverless functions
 test/                  the committed suite — `npm test`
 scripts/prerender.mjs  Playwright prerender of 62 routes into dist/
 src/                   RETIRED React v2. Not built, not served. Leave it alone.
@@ -96,7 +96,7 @@ Consequences you must preserve:
 | `avatar.js` | Runtime-generated SVG rig, viewBox `0 0 372 660`. No image file exists. |
 | `motion.js` | WAAPI: run-in, land, wave, idle, curious, tired, sleeping, visemes. |
 | `states.js` | **18 states driven by runtime inputs**, not by direct calls. See below. |
-| `presence.js` | Scroll, pointer, inactivity, doze and wake. Sets inputs only. |
+| `presence.js` | Scroll, pointer, inactivity, doze, wake, and the offers of help. |
 | `speech.js` | TTS + STT, browser-first with a replaceable server fallback. |
 | `conversation.js` | Turns, client-side red-flag pre-check, `sessionStorage` only. |
 | `chat.js` | Dock, greeting bubble, panel, CTAs, accessibility. |
@@ -108,7 +108,7 @@ Consequences you must preserve:
 | `core/triage.js` | 26 rules → `emergency`/`urgent`/`doctor`/`insufficient`/`routine`. |
 | `core/knowledge.js` | **The entire medical content surface.** 17 guideline-cited entries. |
 | `core/safety.js` | The output gate. |
-| `core/contact.js` | Phone numbers and booking path — single source. |
+| `core/contact.js` | Phone numbers, booking path and the call-back route — single source. |
 
 ### The behaviour machine — set inputs, never states
 
@@ -181,6 +181,40 @@ Two SVG traps this rig has already hit:
 
 ---
 
+### Offering help, and offering to ring back
+
+Two things Uppi does unprompted, both governed by restraint.
+
+**The offers of help (§7, §8).** `presence.js` shows a bubble when someone has
+been idle (`curiousAfter`, 46s) or has been *reading* — a scroll session that
+survives the pauses a person takes, not unbroken scrolling. The first version
+demanded 5.2s of continuous scrolling and therefore never fired for a real
+reader; the reading-session model in `onScroll` is the fix, and
+`browser.test.mjs` drives it on the real clock because no input-level test
+catches that class of bug. Capped at two a session, behind a 95s cooldown, and
+silent once a conversation starts. `DEFAULT_TIMING` is overridable via
+`window.__UPPI_PRESENCE_TIMING`.
+
+**The call-back request (§15).** When triage says someone should be seen, Uppi
+offers to have the Yashoda team ring them: `setPose('right','phone')`, an offer
+line from `callbackOffer()`, and a two-field form that POSTs to
+`/api/uppi/callback`.
+
+Three rules that must not be relaxed:
+
+1. **Only name, phone, preferred time and the triage BAND leave.** Never the
+   conversation, never the symptoms. The consent line under the form says so,
+   and `browser.test.mjs` asserts the exact key set that reaches the
+   destination.
+2. **Nothing is logged.** Not on success, not on failure.
+3. **No destination configured → the offer is not rendered at all.** `GET
+   /api/uppi/callback` reports `configured`, and `chat.js` drops the CTA when it
+   is false. A form that takes a worried patient's number and discards it is
+   worse than no form. Same rule as the microphone.
+
+In an **emergency** the ambulance is the first action and the call back is the
+last, never a substitute for going now — pinned by a test on the action order.
+
 ## Standing instructions from the product owner
 
 These override your own judgement about what would be nice to write.
@@ -221,7 +255,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 285 assertions across four suites (~90s)
+npm test              # 326 assertions across four suites (~2min)
 npm test conversation # one suite by name
 ```
 
@@ -232,7 +266,7 @@ npm test conversation # one suite by name
 | `core.test.mjs` | Red flags with their negation and hypothetical guards, duration parsing, extraction including denials, every triage band, retrieval, the safety gate. |
 | `conversation.test.mjs` | The six conversations in §30 of the brief, plus the properties that must hold across all of them: no repeated question, no repeated paragraph, nothing forgotten, one question per reply. |
 | `rig.test.mjs` | The ten visemes, the digraph mapping, the schedule, and the approved palette. |
-| `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
+| `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, **the idle and reading popups on the real clock**, **the whole call-back flow against a stub destination including what does NOT leave with it**, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
 
 `test/_server.mjs` mounts the real `api/uppi/*` handlers next to `public/`, so the
 browser suite exercises the deployed code rather than a mock.
@@ -261,7 +295,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 ## Verifying a change
 
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (285 assertions)
+2. `npm test` — must report `all suites passed` (326 assertions)
 3. `npm run build` — must report `prerendered 62/62 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:

@@ -29,7 +29,8 @@ export async function startServer(port) {
   const routes = {
     '/api/uppi/chat': (await import('../api/uppi/chat.js')).default,
     '/api/uppi/speak': (await import('../api/uppi/speak.js')).default,
-    '/api/uppi/transcribe': (await import('../api/uppi/transcribe.js')).default
+    '/api/uppi/transcribe': (await import('../api/uppi/transcribe.js')).default,
+    '/api/uppi/callback': (await import('../api/uppi/callback.js')).default
   };
 
   const server = http.createServer(async (req, res) => {

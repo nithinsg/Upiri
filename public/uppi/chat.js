@@ -19,7 +19,7 @@ import { Presence } from './presence.js';
 import { TextToSpeech, SpeechInput, SPEECH_ERRORS } from './speech.js';
 import { Conversation } from './conversation.js';
 import { GREETING } from './core/compose.js';
-import { CALL_CENTRE_DISPLAY, CALL_CENTRE_TEL, EMERGENCY_TEL, EMERGENCY_DISPLAY, BOOK_PATH, BOOK_LABEL } from './core/contact.js';
+import { CALL_CENTRE_DISPLAY, CALL_CENTRE_TEL, EMERGENCY_TEL, EMERGENCY_DISPLAY, BOOK_PATH, BOOK_LABEL, CALLBACK_LABEL, CALLBACK_PATH } from './core/contact.js';
 import { track } from './analytics.js';
 
 /* §4: conversation starters, not diagnosis buttons. */
@@ -215,6 +215,8 @@ export class UppiChat {
     this.motion = new Motion(this.avatar, this.stage);
     this.states = new UppiStateMachine(this.avatar, this.motion);
     this.presence = null;
+    this.callbackForm = null;
+    this.callbackReady = false;
 
     this.speech = new SpeechInput({
       onStart: () => { this.micOn = true; this.micBtn.setAttribute('aria-pressed', 'true'); this.micBtn.innerHTML = icon('stopMic', 18); this.setStatus('Listening', true); this.states.set('isListening', true); track('uppi_voice_started'); },
@@ -281,6 +283,18 @@ export class UppiChat {
       window.visualViewport.addEventListener('scroll', () => this.fitToViewport());
     }
     window.addEventListener('resize', () => this.fitToViewport());
+
+    /*
+     * The call-back offer is only drawn if there is somewhere for a phone
+     * number to go. Same rule as the microphone, and it matters more here: a
+     * form that takes a worried patient's number and drops it is worse than no
+     * form at all. Probed once, in the background, and remembered.
+     */
+    this.callbackReady = false;
+    fetch(CALLBACK_PATH, { method: 'GET' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { this.callbackReady = !!(d && d.configured); })
+      .catch(() => { this.callbackReady = false; });
 
     /* The microphone is only drawn if it can actually do something — and the
        line about what it does with your voice only appears alongside it (§26). */
@@ -362,6 +376,12 @@ export class UppiChat {
   startPresence() {
     if (this.presence) return;
     this.presence = new Presence(this.states, {
+      /*
+       * Overridable so the ladder can be tuned without a deploy, and so the
+       * tests can drive minute-long timers in seconds. Anything absent falls
+       * back to DEFAULT_TIMING in presence.js.
+       */
+      timing: (typeof window !== 'undefined' && window.__UPPI_PRESENCE_TIMING) || null,
       isOpen: () => this.open,
       isEngaged: () => this.conversation.messages.length > 0,
       anchor: () => this.stage,
@@ -588,6 +608,12 @@ export class UppiChat {
         node = button('uppi-act--book', 'calendar', BOOK_LABEL);
         node.href = BOOK_PATH;
         node.addEventListener('click', (e) => { track('appointment_clicked'); this.navigate(e, BOOK_PATH); });
+      } else if (act.kind === 'callback') {
+        /* dropped silently where no destination is configured */
+        if (!this.callbackReady) continue;
+        node = button('uppi-act--callback', 'phone', act.id === 'callback' && result.urgency === 'emergency' ? 'Also ask Yashoda to call me' : CALLBACK_LABEL);
+        node.href = '#';
+        node.addEventListener('click', (e) => { e.preventDefault(); this.openCallback(result); });
       } else if (act.kind === 'route' && typeof act.href === 'string' && /^\/[a-z0-9/-]*$/i.test(act.href)) {
         node = button('', 'arrow', String(act.label || 'Open'), true);
         node.href = act.href;
@@ -598,6 +624,119 @@ export class UppiChat {
       row.appendChild(node);
     }
     return row.children.length ? row : null;
+  }
+
+  /* ---------------- the call-back request (§15) ---------------- */
+
+  /**
+   * The form Uppi opens when someone takes him up on the offer.
+   *
+   * Two fields and a button. Anything longer is a barrier in front of someone
+   * who is already unwell, and every extra field is another piece of a person
+   * we would be storing for no reason.
+   */
+  openCallback(result) {
+    if (this.callbackForm) { this.callbackForm.remove(); this.callbackForm = null; }
+    track('callback_opened', { urgency: result && result.urgency });
+
+    const form = elem('form', 'uppi-callback');
+    this.callbackForm = form;
+
+    const title = elem('p', 'uppi-callback-title', 'Leave your name and number');
+    form.appendChild(title);
+
+    const field = (labelText, type, name, placeholder, autocomplete) => {
+      const wrap = elem('label', 'uppi-callback-field');
+      const span = elem('span', null, labelText);
+      const input = elem('input');
+      input.type = type;
+      input.name = name;
+      input.required = name !== 'preferredTime';
+      input.placeholder = placeholder;
+      input.autocomplete = autocomplete;
+      if (name === 'phone') { input.inputMode = 'tel'; input.maxLength = 20; }
+      if (name === 'name') input.maxLength = 80;
+      wrap.appendChild(span);
+      wrap.appendChild(input);
+      form.appendChild(wrap);
+      return input;
+    };
+
+    const nameInput = field('Your name', 'text', 'name', 'Name', 'name');
+    const phoneInput = field('Phone number', 'tel', 'phone', '10-digit mobile', 'tel');
+    const timeInput = field('Best time to call (optional)', 'text', 'preferredTime', 'e.g. after 6pm', 'off');
+
+    const status = elem('p', 'uppi-callback-status');
+    status.setAttribute('role', 'status');
+    status.hidden = true;
+
+    const row = elem('div', 'uppi-callback-row');
+    const submit = elem('button', 'uppi-act uppi-act--book');
+    submit.type = 'submit';
+    const submitLabel = document.createElement('span');
+    submitLabel.textContent = 'Send to Yashoda';
+    submit.appendChild(submitLabel);
+    const cancel = elem('button', 'uppi-callback-cancel', 'Not now');
+    cancel.type = 'button';
+    cancel.addEventListener('click', () => { form.remove(); this.callbackForm = null; });
+    row.appendChild(submit);
+    row.appendChild(cancel);
+    form.appendChild(row);
+
+    /* What is passed on, in plain words. Asking for a phone number without
+       saying where it goes is not a fair ask. */
+    const fine = elem('p', 'uppi-callback-fine',
+      'Your name and number go to the Yashoda call centre so they can ring you back, along with how soon Uppi thinks you should be seen. Nothing else from this conversation is sent.');
+    form.appendChild(fine);
+    form.appendChild(status);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (submit.disabled) return;
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+      const say = (text, kind) => {
+        status.hidden = false;
+        status.textContent = text;
+        status.className = 'uppi-callback-status' + (kind ? ' is-' + kind : '');
+      };
+      if (name.length < 2) { say('I just need a name to give them.', 'error'); nameInput.focus(); return; }
+      if (phone.replace(/\D/g, '').length < 10) { say('That number looks short — could you check it?', 'error'); phoneInput.focus(); return; }
+
+      submit.disabled = true;
+      submitLabel.textContent = 'Sending…';
+      try {
+        const res = await fetch(CALLBACK_PATH, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            phone,
+            preferredTime: timeInput.value.trim(),
+            urgency: result && result.urgency,
+            urgencyLabel: result && result.band ? result.band.label : null
+          })
+        });
+        if (!res.ok) throw new Error('http_' + res.status);
+        form.remove();
+        this.callbackForm = null;
+        /* Uppi says it back, rather than a toast — he made the offer, so he is
+           the one who confirms it. */
+        this.say('Done — I\'ve passed your details to the Yashoda team' + (timeInput.value.trim() ? ' with your preferred time' : '') +
+          '. Someone will call you on that number. If you\'d rather not wait, you can ring them yourself on ' + CALL_CENTRE_DISPLAY + '.', null, { speak: false });
+        track('callback_submitted', { urgency: result && result.urgency });
+        this.scroll();
+      } catch {
+        submit.disabled = false;
+        submitLabel.textContent = 'Send to Yashoda';
+        say('I couldn\'t get that through just now. Please call ' + CALL_CENTRE_DISPLAY + ' and they\'ll help straight away.', 'error');
+        track('uppi_error', { reason: 'callback_failed' });
+      }
+    });
+
+    this.log.appendChild(form);
+    this.scroll();
+    nameInput.focus({ preventScroll: true });
   }
 
   /* Routes inside the ŪPIRI app rather than reloading it, and falls back to a

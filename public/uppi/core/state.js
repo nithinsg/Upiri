@@ -263,6 +263,10 @@ export function buildState(messages) {
 
   const text = normalise(userTurns.map((m) => m.content).join(' | '));
 
+  /* Has Uppi already offered to have someone ring them? Offering again every
+     turn is pestering, and it pushes the actual advice down the screen. */
+  const callbackOffered = list.some((m) => m.role === 'assistant' && /ask the yashoda team to call you|ask yashoda to call me/i.test(m.content));
+
   return {
     /* §9 — the structured picture the model is given instead of raw text */
     symptoms: now.symptoms,
@@ -307,6 +311,7 @@ export function buildState(messages) {
     newComplaints,
     turnCount: userTurns.length,
     isFirstTurn: userTurns.length <= 1,
+    callbackOffered,
 
     /* carried through for the rules and the composer */
     extraction: now,
