@@ -754,9 +754,23 @@ export class UppiChat {
     }
   }
 
-  renderOpeners() {
+  /**
+   * The tappable replies under the conversation.
+   *
+   * They answer the question Uppi just asked. Before this they were a fixed
+   * list of openers, so "How long has this been going on?" was followed by
+   * "I'm having trouble breathing" — a suggestion that does not answer the
+   * question, sitting exactly where a thumb lands.
+   *
+   * The last chip is always a way to be seen, so every path through the
+   * conversation reaches an appointment rather than trailing off.
+   */
+  renderOpeners(result) {
     this.suggest.innerHTML = '';
-    const list = this.conversation.isEmpty ? OPENERS : OPENERS.slice(0, 3).concat(['I want to book an appointment']);
+    const offered = (result && result.reply_options) || [];
+    const list = offered.length
+      ? offered.concat(['Book an appointment'])
+      : (this.conversation.isEmpty ? OPENERS : OPENERS.slice(0, 3).concat(['Book an appointment']));
     for (const text of list) {
       const chip = elem('button', 'uppi-chip', '');
       chip.type = 'button';
@@ -819,7 +833,7 @@ export class UppiChat {
        coughing" underneath "go to A&E now" is exactly the burial the brief
        warns about, so the openers stay away until the visitor says something
        else. */
-    if (!result.emergency_recommended) { this.renderOpeners(); this.scroll(); }
+    if (!result.emergency_recommended) { this.renderOpeners(result); this.scroll(); }
   }
 
   /* ---------------- speech ---------------- */
@@ -842,14 +856,37 @@ export class UppiChat {
     this.states.setSpeechSource(source);
     this.states.set('isTalking', true);
     track('uppi_voice_started', { mode: 'tts' });
-    this.tts.speak(text, {
-      onEnd: () => {
-        this.stopBtn.hidden = true;
-        this.states.setSpeechSource(null);
-        this.states.set('isTalking', false);
-        track('uppi_voice_completed');
-      }
-    });
+
+    /*
+     * Three ways this can end, because one is not enough.
+     *
+     *   1. `onEnd` from the voice — the normal path.
+     *   2. the motion layer noticing the audio stopped without saying so, which
+     *      is a known Android Chrome behaviour.
+     *   3. a watchdog, for the case where speech never starts at all: a device
+     *      with the API but no installed voice never fires a single event, and
+     *      without this Uppi would sit with the Stop button showing forever.
+     *
+     * Whichever fires first wins; `finish` is idempotent.
+     */
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      if (watchdog) clearTimeout(watchdog);
+      this.motion.onSpeechEnded = null;
+      this.stopBtn.hidden = true;
+      this.states.setSpeechSource(null);
+      this.states.set('isTalking', false);
+      track('uppi_voice_completed');
+    };
+
+    /* an unhurried reading pace, plus a wide margin */
+    const words = text.split(/\s+/).filter(Boolean).length;
+    const watchdog = setTimeout(finish, Math.min(90_000, 4_000 + (words / 2.3) * 1000));
+
+    this.motion.onSpeechEnded = finish;
+    this.tts.speak(text, { onEnd: finish });
   }
 
   stopSpeaking() {

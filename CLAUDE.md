@@ -41,6 +41,8 @@ public/uppi/core/      SHARED with api/ — engine, triage, red flags, knowledge
 api/uppi/              four Vercel Node serverless functions
 test/                  the committed suite — `npm test`
 scripts/prerender.mjs  Playwright prerender of 62 routes into dist/
+scripts/artwork.mjs    the Knowledge Hub illustrations — `npm run artwork`
+public/kh/             25 generated .webp images, committed
 src/                   RETIRED React v2. Not built, not served. Leave it alone.
 ```
 
@@ -214,6 +216,22 @@ Three rules that must not be relaxed:
 
 In an **emergency** the ambulance is the first action and the call back is the
 last, never a substitute for going now — pinned by a test on the action order.
+
+### Knowledge Hub artwork
+
+`public/kh/*.webp` are generated from `scripts/artwork.mjs` by `npm run artwork`
+and committed, so a deploy never depends on the script having been run. Chromium
+does the encoding through a canvas — there is no image tool in this environment,
+and as 24-bit PNG the set came to 4.9 MB against 300 KB as WebP.
+
+`KH_ART` in `index.html` lists which subjects have artwork. A subject that is
+not listed keeps its old stroke icon (`sc-if` on `art` / `noArt`), so adding a
+topic can never render a broken image. **Keep `KH_ART` and the SCENES in
+`artwork.mjs` in step.**
+
+These are illustrations, not photographs and not diagnostic diagrams — subject
+markers, drawn to a house style documented at the top of `artwork.mjs`. Real
+clinical photography still has to come from Yashoda.
 
 ## Standing instructions from the product owner
 

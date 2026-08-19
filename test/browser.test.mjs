@@ -315,6 +315,83 @@ describe('With no destination configured, the offer does not exist');
   process.env.UPPI_CALLBACK_URL = saved;
 }
 
+/* ---------------- the mouth, and the chips ---------------- */
+
+describe('The mouth rests when Uppi is not speaking');
+{
+  const w = await open(1280, 860);
+  await w.page.evaluate(() => window.__uppi.dismissBubble());
+  await w.page.evaluate(() => window.__uppi.openPanel());
+  await w.page.waitForTimeout(700);
+  await w.page.fill('.uppi-field', 'I hear a wheeze');
+  await w.page.keyboard.press('Enter');
+  await w.page.waitForTimeout(3000);
+
+  /* sample the mouth over a second and a half — a running viseme interval
+     shows up as several different shapes */
+  const sample = async () => {
+    const seen = [];
+    for (let i = 0; i < 10; i++) {
+      seen.push(await w.page.evaluate(() => window.__uppi.avatar.mouth));
+      await w.page.waitForTimeout(140);
+    }
+    return new Set(seen).size;
+  };
+  eq(await sample(), 1, 'the mouth holds one shape once the reply is delivered');
+  await w.page.waitForTimeout(5000);
+  eq(await sample(), 1, 'and is still at rest five seconds later');
+  eq(await w.page.evaluate(() => window.__uppi.states.inputs.isTalking), false, 'and the machine knows he is not talking');
+  eq(w.errors.length, 0, 'with no errors');
+  await w.ctx.close();
+}
+
+describe('The tappable replies answer the question asked');
+{
+  const w = await open(1280, 860);
+  await w.page.evaluate(() => window.__uppi.dismissBubble());
+  await w.page.evaluate(() => window.__uppi.openPanel());
+  await w.page.waitForTimeout(700);
+  await w.page.fill('.uppi-field', 'I hear a wheeze');
+  await w.page.keyboard.press('Enter');
+  await w.page.waitForTimeout(3000);
+
+  const seen = await w.page.evaluate(() => ({
+    question: window.__uppi.conversation.lastResult.follow_up_question,
+    chips: [...document.querySelectorAll('.uppi-chip')].map((c) => c.textContent)
+  }));
+  includes(seen.question, 'How long', 'Uppi asks how long');
+  ok(seen.chips.some((c) => /week/i.test(c)), 'and the chips offer lengths of time (' + JSON.stringify(seen.chips) + ')');
+  ok(!seen.chips.some((c) => /trouble breathing/i.test(c)), 'not the generic openers that used to sit there');
+  ok(seen.chips.some((c) => /book/i.test(c)), 'and one of them is always a way to book');
+  await w.ctx.close();
+}
+
+/* ---------------- the Knowledge Hub artwork ---------------- */
+
+describe('The Knowledge Hub shows pictures, not repeated icons');
+for (const [route, least] of [['/knowledge-hub', 18], ['/tests-and-procedures', 9], ['/knowledge-hub/asthma', 1]]) {
+  const w = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const p = await w.newPage();
+  await p.goto(app.url + route, { waitUntil: 'load' });
+  await p.waitForTimeout(1400);
+  const m = await p.evaluate(() => {
+    const imgs = [...document.querySelectorAll('img[src^="/kh/"]')];
+    return {
+      count: imgs.length,
+      broken: imgs.filter((i) => !(i.complete && i.naturalWidth > 0)).map((i) => i.getAttribute('src')),
+      noAlt: imgs.filter((i) => !i.alt).length,
+      lazy: imgs.filter((i) => i.getAttribute('loading') !== 'lazy').length,
+      distinct: new Set(imgs.map((i) => i.getAttribute('src'))).size
+    };
+  });
+  ok(m.count >= least, route + ' shows at least ' + least + ' images (' + m.count + ')');
+  eq(m.broken.length, 0, route + ' — none of them fail to load' + (m.broken.length ? ': ' + m.broken.join(',') : ''));
+  eq(m.noAlt, 0, route + ' — every image has alt text');
+  eq(m.lazy, 0, route + ' — every image is lazy-loaded');
+  eq(m.distinct, m.count, route + ' — and they are all different from each other');
+  await w.close();
+}
+
 /* ---------------- widths ---------------- */
 
 describe('Every width in §27');
