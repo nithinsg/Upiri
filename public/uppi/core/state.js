@@ -69,37 +69,49 @@ export function filledSlots(extraction) {
  * an assistant turn. They exist because the model is allowed to rephrase the
  * question in Uppi's voice, and a ledger that only recognised its own exact
  * wording would let a rephrased question be asked twice.
+ *
+ * `replies` are the tappable answers to THAT question. They belong here, beside
+ * the question, because the alternative — a fixed list of openers shown under
+ * every question — puts "I'm having trouble breathing" under "how long has this
+ * been going on?", which is what a visitor actually saw. A suggestion that does
+ * not answer the question is worse than no suggestion: on a phone it is the
+ * fastest thing to tap, and tapping it throws the conversation sideways.
  */
 export const QUESTIONS = [
   {
     id: 'duration', slot: 'duration',
     when: (e) => e.symptoms.some((s) => ['cough', 'breathless', 'wheeze', 'tightness', 'sputum', 'hoarse'].includes(s)),
     q: (e) => 'How long has ' + (e.symptoms.includes('cough') ? 'the cough' : 'this') + ' been going on — days, weeks, or longer?',
-    echoes: [/how long/i, /when did (?:it|this) start/i, /since when/i]
+    echoes: [/how long/i, /when did (?:it|this) start/i, /since when/i],
+    replies: ['A few days', 'About two weeks', 'Three weeks or more', 'Several months']
   },
   {
     id: 'pattern', slot: 'pattern',
     when: (e) => e.symptoms.includes('breathless'),
     q: () => 'Does the breathlessness come on when you move around, or does it happen even when you are sitting still?',
-    echoes: [/sitting still/i, /at rest/i, /when you (?:move|walk|exert)/i]
+    echoes: [/sitting still/i, /at rest/i, /when you (?:move|walk|exert)/i],
+    replies: ['Only when I move around', 'Even when I sit still', 'Both']
   },
   {
     id: 'severity', slot: 'severity',
     when: (e) => e.symptoms.includes('breathless') && (e.atRest || e.context.includes('worsening')),
     q: () => 'When it is at its worst, can you still speak in full sentences and manage around the house?',
-    echoes: [/full sentences/i, /how bad/i, /at its worst/i]
+    echoes: [/full sentences/i, /how bad/i, /at its worst/i],
+    replies: ['I can talk normally', 'I get breathless talking', 'I struggle around the house']
   },
   {
     id: 'sputum', slot: 'sputum',
     when: (e) => e.symptoms.includes('cough'),
     q: () => 'Is the cough dry, or are you bringing up phlegm?',
-    echoes: [/\bdry\b/i, /bringing up/i, /come up with it/i, /phlegm/i]
+    echoes: [/\bdry\b/i, /bringing up/i, /come up with it/i, /phlegm/i],
+    replies: ['It\'s dry', 'I bring up phlegm', 'Sometimes']
   },
   {
     id: 'timing', slot: 'timing',
     when: (e) => e.symptoms.includes('cough') || e.symptoms.includes('wheeze') || e.symptoms.includes('tightness'),
     q: () => 'Is it worse at any particular time — at night, first thing in the morning, or after being around dust or smoke?',
-    echoes: [/at night/i, /particular time/i, /first thing in the morning/i]
+    echoes: [/at night/i, /particular time/i, /first thing in the morning/i],
+    replies: ['Worse at night', 'Worse in the morning', 'Around dust or smoke', 'No particular time']
   },
   {
     id: 'smoking', slot: 'smoking',
@@ -107,55 +119,64 @@ export const QUESTIONS = [
     q: (e) => (e.context.includes('child')
       ? 'Does anyone smoke at home, or is there much smoke or dust around — cooking fire, incense, traffic?'
       : 'Do you smoke, or did you at any point?'),
-    echoes: [/do you smoke/i, /smoked/i, /smoking history/i]
+    echoes: [/do you smoke/i, /smoked/i, /smoking history/i],
+    replies: ['I smoke', 'I used to smoke', 'I\'ve never smoked']
   },
   {
     id: 'relieverUse', slot: 'relieverUse',
     when: (e) => e.context.includes('knownAsthma') || e.context.includes('inhaler'),
     q: () => 'How often are you reaching for your reliever inhaler in a normal week?',
-    echoes: [/reliever/i, /how often.*inhaler/i, /inhaler.*how often/i]
+    echoes: [/reliever/i, /how often.*inhaler/i, /inhaler.*how often/i],
+    replies: ['Rarely', 'A few times a week', 'Every day', 'Several times a day']
   },
   {
     id: 'worsening', slot: 'worsening',
     when: (e) => e.durationDays != null && e.symptoms.length > 0,
     q: () => 'And is it getting worse, staying about the same, or slowly easing?',
-    echoes: [/getting worse/i, /staying (?:about )?the same/i, /easing/i]
+    echoes: [/getting worse/i, /staying (?:about )?the same/i, /easing/i],
+    replies: ['It\'s getting worse', 'About the same', 'It\'s slowly easing']
   },
   {
     id: 'triggers', slot: 'triggers',
     when: (e) => e.symptoms.length > 0,
     q: () => 'Is there anything that reliably sets it off — dust, smoke, cold air, exercise, a particular room?',
-    echoes: [/sets it off/i, /trigger/i, /brings it on/i]
+    echoes: [/sets it off/i, /trigger/i, /brings it on/i],
+    replies: ['Dust', 'Cold air', 'Exercise', 'Smoke', 'Nothing I can pin down']
   },
   {
     id: 'sleepWitness', slot: 'sleepWitness',
     when: (e) => e.symptoms.includes('snoring'),
     q: () => 'Has anyone told you that you stop breathing or gasp during sleep — and how do you feel through the day?',
-    echoes: [/stop breathing/i, /gasp/i, /through the day/i]
+    echoes: [/stop breathing/i, /gasp/i, /through the day/i],
+    replies: ['Yes, I\'ve been told', 'I feel tired all day', 'No, neither']
   },
   {
     id: 'fever', slot: 'fever',
     when: (e) => e.symptoms.includes('cough') && e.durationDays != null && e.durationDays <= 21,
     q: () => 'Has there been any fever with it?',
-    echoes: [/fever/i, /temperature/i]
+    echoes: [/fever/i, /temperature/i],
+    replies: ['Yes, there was a fever', 'No fever']
   },
   {
     id: 'onset', slot: 'onset',
     when: (e) => e.symptoms.includes('breathless') && e.durationDays != null,
     q: () => 'Did it come on over days, or has it built up gradually over months?',
-    echoes: [/come on over/i, /built up/i, /gradually/i]
+    echoes: [/come on over/i, /built up/i, /gradually/i],
+    replies: ['Over a few days', 'Gradually over months', 'It\'s always been there']
   },
   {
     id: 'previousEpisodes', slot: 'previousEpisodes',
     when: (e) => e.symptoms.includes('wheeze') || e.symptoms.includes('tightness') || e.context.includes('knownAsthma'),
     q: () => 'Has this happened before — a spell like this in a previous year or season?',
-    echoes: [/happened before/i, /previous (?:year|season)/i, /first time/i]
+    echoes: [/happened before/i, /previous (?:year|season)/i, /first time/i],
+    replies: ['Yes, this has happened before', 'It\'s the first time']
   },
   {
     id: 'childAge', slot: 'age',
     when: (e) => e.context.includes('child'),
     q: () => 'How old are they?',
-    echoes: [/how old/i]
+    echoes: [/how old/i],
+    replies: ['Under 5', '5 to 12', 'A teenager']
   },
   {
     /* Family history with no symptoms of their own yet. The useful question is
@@ -163,19 +184,22 @@ export const QUESTIONS = [
     id: 'ownSymptoms', slot: 'ownSymptoms',
     when: (e) => (e.familyHistory || []).length > 0,
     q: () => 'Is there anything you have noticed in yourself — a cough, breathlessness, anything that made you think about it now?',
-    echoes: [/noticed in yourself/i, /anything yourself/i, /your own/i]
+    echoes: [/noticed in yourself/i, /anything yourself/i, /your own/i],
+    replies: ['I have a cough', 'I\'m breathless', 'Nothing yet — just worried']
   },
   {
     id: 'scanReport', slot: 'scanReport',
     when: (e) => e.context.includes('scanResult'),
     q: () => 'Do you have the report with you — does it give a size, and was anything recommended?',
-    echoes: [/report/i, /give a size/i]
+    echoes: [/report/i, /give a size/i],
+    replies: ['I have the report', 'I don\'t have it with me']
   },
   {
     id: 'open', slot: null,
     when: (e) => e.symptoms.length === 0,
     q: () => 'Tell me a little more about what you are noticing, and when it happens.',
-    echoes: [/tell me a little more/i, /what have you been noticing/i]
+    echoes: [/tell me a little more/i, /what have you been noticing/i],
+    replies: ['I\'m having trouble breathing', 'I\'ve been coughing', 'I hear a wheeze', 'I have chest discomfort']
   }
 ];
 
@@ -195,7 +219,7 @@ export function nextQuestion(extraction, ledger) {
     let ok = false;
     try { ok = item.when(extraction); } catch { ok = false; }
     if (!ok) continue;
-    return { id: item.id, slot: item.slot, text: item.q(extraction) };
+    return { id: item.id, slot: item.slot, text: item.q(extraction), replies: item.replies || [] };
   }
   return null;
 }

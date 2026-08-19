@@ -240,6 +240,19 @@ function actionsFor(urgency, e) {
     acts.push({ id: 'callback', kind: 'callback', label: 'Ask Yashoda to call me' });
     acts.push({ id: 'book', kind: 'book', label: 'Book a Pulmonology Appointment' });
     acts.push({ id: 'call-centre', kind: 'call', label: 'Call the Yashoda Call Centre' });
+  } else {
+    /*
+     * Every conversation reaches a way to be seen — not only the ones the rules
+     * escalate.
+     *
+     * A cough that does not meet a threshold today, a family history with no
+     * symptoms yet, someone who only asked what spirometry is: all of them may
+     * still want an appointment, and making them hunt for the number is the one
+     * thing a companion should never do. Quieter than the bands above — offered
+     * rather than urged — but never absent.
+     */
+    acts.push({ id: 'book', kind: 'book', label: 'Book a Pulmonology Appointment' });
+    acts.push({ id: 'call-centre', kind: 'call', label: 'Call the Yashoda Call Centre' });
   }
   /* the site's own tools, offered only when they match what was said */
   if (e.context.includes('knownAsthma')) acts.push({ id: 'act', kind: 'route', label: 'Score your asthma control (ACT)', href: '/asthma-control-test' });
@@ -270,6 +283,7 @@ export function triage(extraction, redFlags, state) {
       reasons: redFlags.flags.map((f) => f.why),
       followUp: null,
       followUpId: null,
+      followUpReplies: [],
       appointmentRecommended: false,
       emergencyRecommended: true,
       crisis: !!redFlags.crisis,
@@ -309,6 +323,7 @@ export function triage(extraction, redFlags, state) {
     reasons,
     followUp: question ? question.text : null,
     followUpId: question ? question.id : null,
+    followUpReplies: question ? question.replies : [],
     appointmentRecommended: urgency === 'urgent' || urgency === 'doctor',
     emergencyRecommended: false,
     crisis: false,

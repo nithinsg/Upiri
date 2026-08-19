@@ -8,7 +8,8 @@
     "build": "node scripts/prerender.mjs dist",
     "build:vercel": "(dnf install -y nspr nss || true) && playwright install chromium && node scripts/prerender.mjs dist",
     "lint": "oxlint",
-    "test": "node test/run.mjs"
+    "test": "node test/run.mjs",
+    "artwork": "node scripts/make-artwork.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

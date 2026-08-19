@@ -249,7 +249,9 @@ export class TextToSpeech {
         }
         return Math.min(1, Math.sqrt(sum / this.buffer.length) * 3.4);
       },
-      getChar: () => this._char
+      getChar: () => this._char,
+      /* the mouth's own check that there is still something to move for */
+      isSpeaking: () => this.speaking
     };
   }
 }

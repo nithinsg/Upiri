@@ -156,6 +156,8 @@ export function payloadFrom(assessment, text, engine) {
     symptoms_detected: state.symptomLabels,
     intents,
     follow_up_question: decision.followUp,
+    /* the tappable answers to THAT question — see state.js */
+    reply_options: decision.followUpReplies || [],
     appointment_recommended: !!decision.appointmentRecommended,
     emergency_recommended: !!decision.emergencyRecommended,
     crisis: !!decision.crisis,

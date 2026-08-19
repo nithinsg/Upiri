@@ -124,6 +124,36 @@ const offered = buildState([
 ok(offered.callbackOffered, 'the offer is remembered, so it is not repeated every turn');
 ok(!buildState([{ role: 'user', content: 'I have a cough' }]).callbackOffered, 'and is not remembered before it was made');
 
+describe('Suggested replies answer the question that was asked');
+{
+  const { QUESTIONS } = await import('../public/uppi/core/state.js');
+  const noReplies = QUESTIONS.filter((q) => !q.replies || q.replies.length < 2).map((q) => q.id);
+  eq(noReplies.length, 0, 'every question offers at least two answers to itself' + (noReplies.length ? ': ' + noReplies.join(',') : ''));
+  const duration = QUESTIONS.find((q) => q.id === 'duration');
+  ok(duration.replies.some((r) => /week/i.test(r)), 'the "how long" question offers lengths of time, not symptoms');
+  ok(!duration.replies.some((r) => /breathing|coughing/i.test(r)), 'and does not offer openers under a specific question');
+  const smoking = QUESTIONS.find((q) => q.id === 'smoking');
+  ok(smoking.replies.some((r) => /never/i.test(r)), 'the smoking question offers a "never" answer, so a non-smoker can say so in one tap');
+}
+
+const withReplies = (turns) => {
+  const merged = mergeExtractions(turns.map(extractSymptoms));
+  return triage(merged, detectRedFlags(turns[turns.length - 1]), null);
+};
+const d1 = withReplies(['I hear a wheeze']);
+eq(d1.followUpId, 'duration', 'a wheeze is asked how long first');
+ok(d1.followUpReplies.length >= 3, 'and the answers travel with the question');
+
+describe('Every path reaches an appointment (§15)');
+for (const turns of [['hi'], ['what is spirometry?'], ['I have a cough'], ['thanks'],
+  ["I'm worried because my father had lung cancer"], ['I hear a wheeze'], ['I snore']]) {
+  const kinds = withReplies(turns).actions.map((a) => a.kind);
+  const reachable = ['book', 'call', 'callback', 'emergency'].some((k) => kinds.indexOf(k) !== -1);
+  ok(reachable, JSON.stringify(turns.join(' → ')) + ' offers a way to be seen (' + (kinds.join(',') || 'nothing') + ')');
+}
+const em = withReplies(["I've been coughing up blood"]).actions.map((a) => a.kind);
+eq(em[0], 'emergency', 'except an emergency, where the ambulance still comes first');
+
 describe('The safety gate');
 const urgentDecision = { urgency: 'emergency', emergencyRecommended: true };
 const routineDecision = { urgency: 'routine', emergencyRecommended: false };

@@ -24,6 +24,11 @@ export function prefersReducedMotion() {
   catch { return false; }
 }
 
+/* How long to let an utterance get going before believing `isSpeaking` — a
+   voice reports itself idle for a moment between `speak()` and the first sound,
+   and bailing in that window would stop the mouth before it started. */
+const GRACE_MS = 700;
+
 const EASE_RUN = 'cubic-bezier(.16,.62,.28,1)';
 const EASE_SETTLE = 'cubic-bezier(.34,1.4,.5,1)';
 const EASE_SOFT = 'cubic-bezier(.4,0,.2,1)';
@@ -50,6 +55,8 @@ export class Motion {
     this._speaking = null;
     this._blinkTimer = null;
     this._glanceTimer = null;
+    /* set by the chat layer, so a lost `onend` still clears the Stop button */
+    this.onSpeechEnded = null;
   }
 
   /* ---------------- lifecycle ---------------- */
@@ -57,6 +64,17 @@ export class Motion {
   track(anim) { if (anim) this.loops.push(anim); return anim; }
 
   clearLoops() {
+    /*
+     * The mouth stops here, with everything else.
+     *
+     * The viseme interval used to live outside `loops` and `timers`, so it was
+     * only ever cleared by `startSpeaking` and by `destroy` — which meant every
+     * state that followed SPEAKING (IDLE, LISTENING, CONCERNED, all of them)
+     * left Uppi silently mouthing words for the rest of the session. Clearing
+     * it here means no state entry can leave the mouth running, because every
+     * state entry comes through this function.
+     */
+    this.stopSpeaking();
     for (const a of this.loops) stop(a);
     this.loops = [];
     for (const t of this.timers) clearTimeout(t);
@@ -594,7 +612,19 @@ export class Motion {
     let i = 0;
 
     const step = () => {
+      /*
+       * Belt and braces for a well-known failure on Android Chrome: an
+       * utterance can finish without ever firing `onend`, so the layer above
+       * never learns that speech stopped. Asking the source whether it is still
+       * speaking means the mouth rests on its own even when the event is lost.
+       */
       const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - started;
+      if (now > GRACE_MS && source && typeof source.isSpeaking === 'function' && !source.isSpeaking()) {
+        this.stopSpeaking();
+        if (this.onSpeechEnded) this.onSpeechEnded();
+        return;
+      }
+
       let shape = null;
 
       if (source && typeof source.getVisemeAt === 'function') {
@@ -627,7 +657,11 @@ export class Motion {
   }
 
   stopSpeaking() {
-    if (this._speaking) clearInterval(this._speaking);
+    if (!this._speaking) return;
+    clearInterval(this._speaking);
     this._speaking = null;
+    /* and close it — otherwise the mouth freezes on whichever viseme the last
+       tick happened to land on, which reads as a grimace */
+    this.a.setViseme('soft');
   }
 }
