@@ -540,6 +540,79 @@
 }
 
 /* ---------------------------------------------------------------------------
+   The call-back request (§15)
+   ---------------------------------------------------------------------------
+   Sits inside the message log, indented like something Uppi handed over rather
+   than a modal dropped on top of the conversation. */
+
+.uppi-callback {
+  margin: 4px 0 6px;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--uppi-line);
+  border-radius: 16px;
+  background: var(--uppi-surface);
+  box-shadow: 0 6px 20px rgba(44, 42, 107, .07);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.uppi-callback-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--uppi-navy);
+}
+
+.uppi-callback-field { display: flex; flex-direction: column; gap: 5px; }
+.uppi-callback-field span { font-size: 12.5px; font-weight: 600; color: var(--uppi-muted); }
+
+.uppi-callback-field input {
+  font: inherit;
+  font-size: 15px;
+  color: var(--uppi-navy);
+  padding: 11px 13px;
+  border: 1.5px solid var(--uppi-line);
+  border-radius: 11px;
+  background: #FBFCFE;
+  /* 16px on iOS or the browser zooms the whole panel on focus */
+  min-height: 44px;
+}
+.uppi-callback-field input:focus-visible {
+  outline: 3px solid var(--uppi-marigold);
+  outline-offset: 2px;
+  border-color: var(--uppi-marigold);
+}
+
+.uppi-callback-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.uppi-callback-row .uppi-act { flex: 1 1 auto; justify-content: center; }
+
+.uppi-callback-cancel {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--uppi-muted);
+  background: none;
+  border: 0;
+  padding: 12px 10px;
+  min-height: 44px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.uppi-callback-cancel:hover { color: var(--uppi-navy); }
+.uppi-callback-cancel:focus-visible { outline: 3px solid var(--uppi-marigold); outline-offset: 2px; }
+
+.uppi-callback-fine { margin: 0; font-size: 12px; line-height: 1.5; color: var(--uppi-muted); }
+
+.uppi-callback-status { margin: 0; font-size: 13px; line-height: 1.5; color: var(--uppi-muted); }
+.uppi-callback-status.is-error { color: var(--uppi-urgent); font-weight: 600; }
+
+@media (max-width: 380px) {
+  .uppi-callback { padding: 14px; }
+  .uppi-callback-row .uppi-act { flex-basis: 100%; }
+}
+
+/* ---------------------------------------------------------------------------
    Reduced motion (§24)
    --------------------------------------------------------------------------- */
 

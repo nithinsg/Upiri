@@ -25,6 +25,18 @@ export const EMERGENCY_TEL = '108';
 export const BOOK_PATH = '/doctors';
 export const BOOK_LABEL = 'Book a Pulmonology Appointment';
 
+/*
+ * The call-back request. Uppi offers to have the Yashoda team ring the visitor
+ * rather than making them dial — which is the difference between a website that
+ * lists a number and one that takes the next step for you.
+ *
+ * Offered only when the assessment says someone should be seen, and only when
+ * `/api/uppi/callback` reports a destination is configured: a form that takes a
+ * worried patient's phone number and drops it is worse than no form.
+ */
+export const CALLBACK_LABEL = 'Ask Yashoda to call me';
+export const CALLBACK_PATH = '/api/uppi/callback';
+
 /* Where Uppi sends someone who wants to understand rather than book. */
 export const ROUTES = {
   doctors: '/doctors',

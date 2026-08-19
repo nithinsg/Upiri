@@ -64,7 +64,7 @@ export const EMOTION_INDEX = {
 };
 
 export const POSE_INDEX = {
-  rest: 0, hip: 1, wave: 2, point: 3, chin: 4
+  rest: 0, hip: 1, wave: 2, point: 3, chin: 4, phone: 5
 };
 
 /* Where the board is served from. Null until a real one is committed — and

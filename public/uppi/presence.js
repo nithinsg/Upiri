@@ -21,17 +21,40 @@
  * quietly dozing and waking for an hour.
  */
 
-/* How long the visitor has to be doing nothing before each stage (§8). */
-const GLANCE_AFTER = 24_000;    /* he looks up and around */
-const CURIOUS_AFTER = 52_000;   /* he wonders whether you need a hand */
-const TIRED_AFTER = 110_000;    /* heavy-lidded, the odd yawn */
-const SLEEP_AFTER = 180_000;    /* dozing off */
+/*
+ * Timings. Exposed as defaults rather than buried as constants so they can be
+ * tuned without reading the logic, and so the tests can drive the whole ladder
+ * in seconds instead of minutes.
+ */
+export const DEFAULT_TIMING = {
+  /* the inactivity ladder (§8) */
+  glanceAfter: 24_000,     /* he looks up and around */
+  curiousAfter: 46_000,    /* he wonders whether you need a hand, and says so */
+  tiredAfter: 110_000,     /* heavy-lidded, the odd yawn */
+  sleepAfter: 180_000,     /* dozing off */
 
-/* Nudges: rare, capped, and never during a conversation. */
-const NUDGE_COOLDOWN = 95_000;
-const MAX_NUDGES = 2;
-const SCROLL_NUDGE_AFTER = 5_200;   /* continuous scrolling, no interaction */
-const SCROLL_IDLE = 420;            /* how long after the last scroll event we call it stopped */
+  /* nudges: rare, capped, and never during a conversation */
+  nudgeCooldown: 95_000,
+  maxNudges: 2,
+
+  /*
+   * Reading, not scrolling.
+   *
+   * The first version asked for 5.2s of UNBROKEN scrolling, with the counter
+   * reset after 420ms of quiet. Nobody reads that way — a real visitor flicks,
+   * pauses to read, flicks again — so the counter reset on every pause and the
+   * offer of help never once appeared for a genuine reader. Measured: fourteen
+   * normal scroll bursts over thirteen seconds produced nothing.
+   *
+   * A reading SESSION instead: it survives pauses up to `readingGap`, and the
+   * offer comes when someone has been at it for `readingTime` AND has covered
+   * `readingDistance` screens. Both conditions, so a couple of idle flicks do
+   * not trigger it.
+   */
+  readingGap: 2_500,
+  readingTime: 7_000,
+  readingDistance: 1.6      /* in viewport heights */
+};
 
 /* How close the pointer has to come before Uppi reckons it is about him. */
 const NEAR = 260;
@@ -61,11 +84,14 @@ export class Presence {
   constructor(states, opts) {
     this.states = states;
     this.o = opts || {};
+    this.t = Object.assign({}, DEFAULT_TIMING, (opts && opts.timing) || {});
     this.timers = [];
     this.nudges = 0;
     this.lastNudge = 0;
-    this.scrollingSince = 0;
+    /* the current reading session */
+    this.reading = null;
     this._scrollEnd = null;
+    this._lastY = 0;
     this.destroyed = false;
     this._bound = [];
 
@@ -100,18 +126,18 @@ export class Presence {
     if (this.destroyed || document.hidden) return;
     const at = (ms, fn) => this.timers.push(setTimeout(fn, ms));
 
-    at(GLANCE_AFTER, () => {
+    at(this.t.glanceAfter, () => {
       /* looking up is not an interruption, so it needs no cooldown */
       this.states.setAll({ userInactive: true, attention: 0.3 });
     });
-    at(CURIOUS_AFTER, () => {
+    at(this.t.curiousAfter, () => {
       this.states.setAll({ userInactive: true, attention: 1 });
       this.nudge('idle');
     });
-    at(TIRED_AFTER, () => {
+    at(this.t.tiredAfter, () => {
       this.states.setAll({ energy: 0.2, attention: 0.2 });
     });
-    at(SLEEP_AFTER, () => {
+    at(this.t.sleepAfter, () => {
       this.states.setAll({ energy: 0, attention: 0 });
     });
   }
@@ -128,6 +154,8 @@ export class Presence {
   }
 
   wake() {
+    /* a deliberate interaction ends the reading session — they are here now */
+    this.reading = null;
     const wasAsleep = this.states.inputs.energy <= 0.25;
     /* The state resolves first so the idle loops are running again, and the
        startle plays over the top of them rather than instead of them. */
@@ -144,17 +172,33 @@ export class Presence {
    * no other interaction earns a single offer of help.
    */
   onScroll() {
-    if (!this.scrollingSince) this.scrollingSince = Date.now();
+    const now = Date.now();
+    const y = window.scrollY || window.pageYOffset || 0;
+    const screen = window.innerHeight || 800;
+
+    /* One reading session, which survives the pauses a person takes to actually
+       read. It only ends after `readingGap` of real quiet. */
+    if (!this.reading || now - this.reading.last > this.t.readingGap) {
+      this.reading = { started: now, last: now, distance: 0, nudged: false };
+    } else {
+      this.reading.distance += Math.abs(y - this._lastY);
+      this.reading.last = now;
+    }
+    this._lastY = y;
+
     this.states.set('scrolling', true);
     if (this.states.inputs.energy <= 0) this.wake();
 
+    /* `scrolling` describes the page moving right now, so it clears quickly —
+       the reading session above is the thing that persists. */
     if (this._scrollEnd) clearTimeout(this._scrollEnd);
-    this._scrollEnd = setTimeout(() => {
-      this.states.set('scrolling', false);
-      this.scrollingSince = 0;
-    }, SCROLL_IDLE);
+    this._scrollEnd = setTimeout(() => this.states.set('scrolling', false), 420);
 
-    if (Date.now() - this.scrollingSince > SCROLL_NUDGE_AFTER) this.nudge('scrolling');
+    const r = this.reading;
+    if (!r.nudged && now - r.started > this.t.readingTime && r.distance > screen * this.t.readingDistance) {
+      r.nudged = true;
+      this.nudge('scrolling');
+    }
   }
 
   /**
@@ -196,8 +240,8 @@ export class Presence {
   /** Says something, if all three restraints allow it. */
   nudge(kind) {
     if (this.destroyed) return false;
-    if (this.nudges >= MAX_NUDGES) return false;
-    if (Date.now() - this.lastNudge < NUDGE_COOLDOWN) return false;
+    if (this.nudges >= this.t.maxNudges) return false;
+    if (Date.now() - this.lastNudge < this.t.nudgeCooldown) return false;
     /* never over the top of the panel, and never once there is a real
        conversation happening — at that point he has been asked already */
     if (this.o.isOpen && this.o.isOpen()) return false;

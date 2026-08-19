@@ -15,6 +15,8 @@ import { triage } from '../public/uppi/core/triage.js';
 import { validate, present } from '../public/uppi/core/safety.js';
 import { retrieve } from '../public/uppi/core/knowledge.js';
 import { classifyIntents, primaryConcern } from '../public/uppi/core/intents.js';
+import { callbackOffer } from '../public/uppi/core/compose.js';
+import { buildState } from '../public/uppi/core/state.js';
 
 const flags = (t) => detectRedFlags(t);
 const band = (turns) => {
@@ -92,6 +94,35 @@ includes(intents, 'breathlessness', 'breathlessness is classified');
 includes(intents, 'exercise_breathlessness', 'exertional breathlessness is its own intent');
 eq(primaryConcern(['cough', 'smoking']), 'cough', 'the symptom, not the history, is what the conversation is about');
 includes(classifyIntents(mergeExtractions([extractSymptoms('I want to book an appointment')]), null, ''), 'appointment_request', 'a booking request is an intent');
+
+describe('The call-back request (§15)');
+const actionsFor = (turns) => {
+  const merged = mergeExtractions(turns.map(extractSymptoms));
+  return triage(merged, detectRedFlags(turns[turns.length - 1]), null).actions;
+};
+const kinds = (turns) => actionsFor(turns).map((a) => a.kind);
+
+includes(kinds(["I've been coughing", 'three weeks']), 'callback', 'a call back is offered when an appointment is advised');
+eq(kinds(["I've been coughing", 'three weeks'])[0], 'callback', 'and offered first — it is the least work for someone unwell');
+includes(kinds(['I am breathless even at rest']), 'callback', 'offered on the urgent band too');
+excludes(kinds(['I have a cough']), 'callback', 'not offered before anything has been established');
+excludes(kinds(['what is spirometry?']), 'callback', 'not offered to someone just reading');
+
+const emergency = kinds(["I've been coughing up blood"]);
+eq(emergency[0], 'emergency', 'in an emergency the ambulance is the FIRST action');
+eq(emergency[emergency.length - 1], 'callback', 'and a call back is the last — never a substitute for going now');
+ok(emergency.indexOf('emergency') < emergency.indexOf('callback'), 'ordering holds: 108 before any offer to ring back');
+
+ok(callbackOffer({ urgency: 'doctor' }).indexOf('name and number') !== -1, 'the offer asks for a name and a number');
+ok(callbackOffer({ urgency: 'doctor' }).indexOf('Nothing else') !== -1, 'and says what is NOT sent — asking for a number without saying where it goes is not a fair ask');
+
+const offered = buildState([
+  { role: 'user', content: "I've been coughing for three weeks" },
+  { role: 'assistant', content: 'If it is easier, I can ask the Yashoda team to call you.' },
+  { role: 'user', content: 'it is dry' }
+]);
+ok(offered.callbackOffered, 'the offer is remembered, so it is not repeated every turn');
+ok(!buildState([{ role: 'user', content: 'I have a cough' }]).callbackOffered, 'and is not remembered before it was made');
 
 describe('The safety gate');
 const urgentDecision = { urgency: 'emergency', emergencyRecommended: true };

@@ -506,6 +506,25 @@ function handHip(id) {
   return g;
 }
 
+/*
+ * The phone Uppi holds out when he offers to have someone ring you (§15).
+ *
+ * Drawn rather than mimed: an empty raised hand reads as a wave, and the whole
+ * point of the pose is that the offer is legible before the text is. Navy body,
+ * lit screen, in the ŪPIRI palette so it belongs to him rather than looking
+ * like a stock icon.
+ */
+function phone() {
+  const g = el('g', {});
+  g.appendChild(el('rect', { x: -17, y: -30, width: 34, height: 58, rx: 7, fill: SKIN.navyDeep }));
+  g.appendChild(el('rect', { x: -14, y: -26, width: 28, height: 46, rx: 4, fill: '#8FA6D8' }));
+  g.appendChild(el('rect', { x: -14, y: -26, width: 28, height: 20, rx: 4, fill: '#B9C9EC', opacity: 0.7 }));
+  /* a marigold call button, so the screen reads as a call rather than a slab */
+  g.appendChild(el('circle', { cx: 0, cy: 10, r: 6.4, fill: SKIN.marigold }));
+  g.appendChild(el('rect', { x: -5, y: 22, width: 10, height: 2.6, rx: 1.3, fill: '#8FA6D8' }));
+  return g;
+}
+
 function place(node, x, y, rot, scale) {
   return el('g', { transform: 'translate(' + x + ' ' + y + ') rotate(' + (rot || 0) + ') scale(' + (scale == null ? 1 : scale) + ')' }, [node]);
 }
@@ -538,6 +557,12 @@ function armPose(side, name, id) {
       g.appendChild(sleeve('M260 356 C288 378 292 418 262 444', 41));
       g.appendChild(cuff(266, 434, 26));
       g.appendChild(place(handHip(id), 258, 458, -20, -1));
+    } else if (name === 'phone') {
+      /* held up beside the shoulder, screen towards the visitor */
+      g.appendChild(sleeve('M262 356 C298 352 318 330 322 300', 42));
+      g.appendChild(cuff(323, 292, -12));
+      g.appendChild(place(handRelaxed(id), 325, 268, -8, 0.95));
+      g.appendChild(place(phone(), 330, 250, 8));
     } else if (name === 'point') {
       g.appendChild(sleeve('M262 356 C296 356 322 342 338 320', 41));
       g.appendChild(cuff(340, 315, -34));
@@ -758,7 +783,7 @@ export function build() {
      drawn behind the body, which meant the thinking pose — a hand raised to the
      chin — was completely hidden by the head it was supposed to be resting on. */
   svg.appendChild(arm(-1, ['hip', 'rest', 'chin'], id));
-  svg.appendChild(arm(1, ['rest', 'wave', 'hip', 'point'], id));
+  svg.appendChild(arm(1, ['rest', 'wave', 'hip', 'point', 'phone'], id));
 
   return svg;
 }

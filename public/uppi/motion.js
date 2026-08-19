@@ -404,7 +404,9 @@ export class Motion {
   /** Caring and slightly forward — the buttons matter more than he does here. */
   startAppointment() {
     this.clearLoops();
-    this.poses('hip', 'rest');
+    /* Phone in hand: the offer to ring the visitor back should be readable
+       before a word of it is (§15). */
+    this.poses('hip', 'phone');
     this.a.setExpression('caring');
     this.startBlinking(2600, 5200);
     this.startGlancing(4200);
