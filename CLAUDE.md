@@ -226,6 +226,37 @@ Three rules that must not be relaxed:
 In an **emergency** the ambulance is the first action and the call back is the
 last, never a substitute for going now — pinned by a test on the action order.
 
+### His voice, and the reader's language
+
+`chat.js` had no idea what language the page was in: he greeted a Telugu reader
+in English, in an English voice, every time. Three rules now hold.
+
+1. **The language channel is `<html lang>`.** The page already writes the
+   reader's choice there in `installTranslator`. Uppi reads it and watches it
+   with a `MutationObserver`, so a mid-session switch lands immediately. No new
+   global, and it survives a reload because the page restores the choice on boot.
+2. **His own lines come from the same dictionary as the page.** `support.js`
+   exposes `window.__dcTranslate`; `chat.js` calls it through `t()` and
+   `local()`. He renders his own DOM outside the dc runtime, so this is the only
+   way his wording and the page's wording cannot drift.
+3. **The voice follows the TEXT, never the site setting alone.** `speakAs`
+   resolves three cases: a translated line on a device with that voice is spoken
+   in that language; a line with no translation is spoken in English; and a
+   translated line on a device with *no* such voice is shown translated but
+   **spoken from the English original**, because pushing Telugu script through
+   an English voice produces syllable soup. `tts.canSpeak(code)` is the test.
+
+`VOICE_PREFS` is gone; `scoreVoice` ranks candidates per locale and **prefers a
+male voice by name** (the API exposes no gender), with `rate 0.98 / pitch 0.96`
+for a warm young man. Pitch was 1.04, which lifted every voice towards boyish
+and undid the point of picking a male one. `SpeechInput.setLanguage` moves the
+recogniser too, so a Telugu speaker can use the microphone in Telugu.
+
+**The Telugu for Uppi's lines is in `I18N.te`, flagged `TODO(yashoda)`: it has
+not been reviewed by a Telugu-speaking clinician.** Add a line he says and you
+must add its translation in the same edit, or he says that one line in English.
+ACT, CAT and mMRC stay in English — they are validated instruments.
+
 ### Knowledge Hub artwork
 
 `public/kh/*.webp` are generated from `scripts/artwork.mjs` by `npm run artwork`
@@ -326,7 +357,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 473 assertions across five suites (~12min)
+npm test              # 486 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -337,7 +368,7 @@ npm test conversation # one suite by name
 | `core.test.mjs` | Red flags with their negation and hypothetical guards, duration parsing, extraction including denials, every triage band, retrieval, the safety gate. |
 | `conversation.test.mjs` | The six conversations in §30 of the brief, plus the properties that must hold across all of them: no repeated question, no repeated paragraph, nothing forgotten, one question per reply. |
 | `rig.test.mjs` | The ten visemes, the digraph mapping, the schedule, and the approved palette. |
-| `pages.test.mjs` | Real Chromium: every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, the branch selector filters, every service chip resolves, and the whole airlift choreography. |
+| `pages.test.mjs` | Real Chromium: the voice is male and follows the reader's language in both directions, every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, the branch selector filters, every service chip resolves, and the whole airlift choreography. |
 | `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, **that his mouth is CLOSED at rest**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, **the idle and reading popups on the real clock**, **the whole call-back flow against a stub destination including what does NOT leave with it**, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
 
 `test/_server.mjs` mounts the real `api/uppi/*` handlers next to `public/`, so the
@@ -368,7 +399,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (473 assertions)
+2. `npm test` — must report `all suites passed` (486 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:

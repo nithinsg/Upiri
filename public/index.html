@@ -271,8 +271,15 @@ x-dc [data-r="heli-rotor"]{animation:heli-rotor .16s linear infinite}
   x-dc [data-r="heli"]{opacity:1 !important;transform:translateX(58vw) !important}
 }
 @media (max-width:560px){
-  /* the message must not sit on top of Uppi, who is bottom-right */
-  x-dc [data-r="heli-pop"]{left:12px !important;right:12px !important;max-width:none !important;bottom:100px !important}
+  /*
+   * The message sits at the TOP, under the header.
+   *
+   * At the bottom it covered the whole scene: on a phone the card is tall
+   * enough to sit over Uppi in his dock AND over the flight path, so the one
+   * moment the page exists to show was hidden behind the caption describing it.
+   * 96px is where the nav sheet opens, i.e. clear of the fixed header.
+   */
+  x-dc [data-r="heli-pop"]{left:12px !important;right:12px !important;max-width:none !important;top:96px !important;bottom:auto !important}
   x-dc [data-r="heli"]{width:118px !important}
 }
 
@@ -3241,7 +3248,7 @@ x-dc [data-rail-docs]>*{flex-basis:224px}
     </div>
 
     <sc-if value="{{ ecmoPop }}" hint-placeholder-val="{{ true }}">
-      <div role="status" data-r="heli-pop" style="position:fixed;left:16px;bottom:22px;z-index:8995;max-width:340px;display:flex;gap:13px;align-items:flex-start;padding:18px 20px;border-radius:22px;background:#1D1B4B;color:#fff;box-shadow:0 26px 60px -18px rgba(29,27,75,0.7);animation:popIn .42s cubic-bezier(.34,1.4,.5,1) both">
+      <div role="status" data-r="heli-pop" style="position:fixed;left:16px;top:96px;z-index:8995;max-width:340px;display:flex;gap:13px;align-items:flex-start;padding:18px 20px;border-radius:22px;background:#1D1B4B;color:#fff;box-shadow:0 26px 60px -18px rgba(29,27,75,0.7);animation:popIn .42s cubic-bezier(.34,1.4,.5,1) both">
         <span aria-hidden="true" style="flex:none;width:38px;height:38px;border-radius:12px;background:rgba(245,130,31,0.22);display:flex;align-items:center;justify-content:center;color:#FFB877">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="M4 8h16"></path><path d="M6 8v6a6 6 0 0 0 12 0V8"></path><path d="M9 20h6"></path></svg>
         </span>
@@ -4013,6 +4020,74 @@ class Component extends DCLogic {
 
   I18N = {
     te: {
+      /* ---------------------------------------------------------------------
+         Uppi's own lines (§16).
+         ---------------------------------------------------------------------
+         He renders his own DOM outside the dc runtime, so he is not patched
+         when the page is translated — `chat.js` looks these up through
+         `window.__dcTranslate` instead, and picks a Telugu voice to say them
+         with. Whatever is missing here he says in English, in an English
+         voice, rather than pushing Telugu script through a voice that cannot
+         pronounce it.
+
+         TODO(yashoda): these are working translations and have NOT been
+         reviewed by a Telugu-speaking clinician. The wording of the emergency
+         lines in particular should be signed off before this is called final.
+         The ACT, CAT and mMRC instruments are deliberately absent — they are
+         validated in English and must not be translated. */
+      "Hi, I'm Uppi, your lung partner. Tell me what's bothering you, and we'll figure out what to do next.":
+        'నమస్తే, నేను ఊపిరి — మీ ఊపిరితిత్తుల తోడు. మిమ్మల్ని ఏమి ఇబ్బంది పెడుతోందో చెప్పండి, తరువాత ఏమి చేయాలో కలిసి చూద్దాం.',
+      'Tell Uppi': 'ఊపిరితో చెప్పండి',
+      'Ask Uppi': 'ఊపిరిని అడగండి',
+      /* the offers of help (§7, §8) */
+      'Need a hand finding something?': 'ఏదైనా వెతుకుతున్నారా? సహాయం కావాలా?',
+      'Looking for something? I can help.': 'ఏదైనా వెతుకుతున్నారా? నేను సహాయం చేయగలను.',
+      'Need some help?': 'ఏమైనా సహాయం కావాలా?',
+      "I'm here if something's bothering you.": 'ఏదైనా ఇబ్బందిగా ఉంటే నేను ఇక్కడే ఉన్నాను.',
+      /* what he asks (§17: one question at a time) */
+      'How long has the cough been going on — days, weeks, or longer?':
+        'దగ్గు ఎంత కాలంగా ఉంది — రోజులా, వారాలా, ఇంకా ఎక్కువా?',
+      'How long has this been going on — days, weeks, or longer?':
+        'ఇది ఎంత కాలంగా ఉంది — రోజులా, వారాలా, ఇంకా ఎక్కువా?',
+      'Does the breathlessness come on when you move around, or does it happen even when you are sitting still?':
+        'కదిలినప్పుడు ఊపిరి ఆడకపోతుందా, లేక కూర్చున్నప్పుడు కూడా అలాగే ఉంటుందా?',
+      'When it is at its worst, can you still speak in full sentences and manage around the house?':
+        'ఎక్కువగా ఉన్నప్పుడు కూడా మీరు పూర్తి వాక్యాలు మాట్లాడగలరా, ఇంటి పనులు చేసుకోగలరా?',
+      'Is the cough dry, or are you bringing up phlegm?':
+        'దగ్గు పొడిగా ఉందా, లేక కఫం పడుతోందా?',
+      'Is it worse at any particular time — at night, first thing in the morning, or after being around dust or smoke?':
+        'ఏదైనా ఒక సమయంలో ఎక్కువవుతుందా — రాత్రి, తెల్లవారుజామున, లేదా దుమ్ము, పొగ తగిలిన తరువాత?',
+      'How often are you reaching for your reliever inhaler in a normal week?':
+        'సాధారణ వారంలో రిలీవర్ ఇన్‌హేలర్ ఎన్నిసార్లు వాడుతున్నారు?',
+      'And is it getting worse, staying about the same, or slowly easing?':
+        'ఇది ఎక్కువవుతోందా, అలాగే ఉందా, లేక నెమ్మదిగా తగ్గుతోందా?',
+      'Is there anything that reliably sets it off — dust, smoke, cold air, exercise, a particular room?':
+        'దీనిని ఖచ్చితంగా మొదలుపెట్టేది ఏదైనా ఉందా — దుమ్ము, పొగ, చల్లని గాలి, వ్యాయామం, ఏదైనా గది?',
+      'Has anyone told you that you stop breathing or gasp during sleep — and how do you feel through the day?':
+        'నిద్రలో మీరు ఊపిరి ఆపేస్తున్నారని ఎవరైనా చెప్పారా — పగలంతా ఎలా అనిపిస్తోంది?',
+      'Has there been any fever with it?': 'దీంతో పాటు జ్వరం ఏమైనా వచ్చిందా?',
+      'Did it come on over days, or has it built up gradually over months?':
+        'ఇది కొన్ని రోజుల్లో వచ్చిందా, లేక నెలల తరబడి నెమ్మదిగా పెరిగిందా?',
+      'Has this happened before — a spell like this in a previous year or season?':
+        'ఇంతకుముందు ఇలా జరిగిందా — గత సంవత్సరం లేదా ఏదైనా కాలంలో ఇలాంటిది?',
+      'How old are they?': 'వారి వయసు ఎంత?',
+      'Is there anything you have noticed in yourself — a cough, breathlessness, anything that made you think about it now?':
+        'మీలో మీరు గమనించినది ఏదైనా ఉందా — దగ్గు, ఊపిరి ఆడకపోవడం, ఇప్పుడు దీని గురించి ఆలోచించేలా చేసినది?',
+      'Do you have the report with you — does it give a size, and was anything recommended?':
+        'రిపోర్ట్ మీ దగ్గర ఉందా — అందులో కొలత ఇచ్చారా, ఏమైనా సూచించారా?',
+      'Tell me a little more about what you are noticing, and when it happens.':
+        'మీరు గమనిస్తున్నది, అది ఎప్పుడు వస్తుందో కొంచెం వివరంగా చెప్పండి.',
+      /* what he offers to do next */
+      'Call 108 — emergency ambulance': '108కి కాల్ చేయండి — అత్యవసర అంబులెన్స్',
+      'Call Yashoda': 'యశోదకు కాల్ చేయండి',
+      'Call the Yashoda Call Centre': 'యశోద కాల్ సెంటర్‌కు కాల్ చేయండి',
+      'Ask Yashoda to call me': 'నాకు కాల్ చేయమని యశోదను అడగండి',
+      'Also ask Yashoda to call me back': 'నాకు తిరిగి కాల్ చేయమని కూడా యశోదను అడగండి',
+      'Book a Pulmonology Appointment': 'పల్మనాలజీ అపాయింట్‌మెంట్ బుక్ చేయండి',
+      'Run the full Symptom Checker': 'పూర్తి లక్షణాల పరిశీలన చేయండి',
+      /* the two urgent headings */
+      'This needs urgent attention': 'దీనికి వెంటనే వైద్య సహాయం అవసరం',
+      'Please talk to someone now': 'దయచేసి ఇప్పుడే ఎవరితోనైనా మాట్లాడండి',
       /* navigation */
       'Doctors': 'వైద్యులు', 'Knowledge Hub': 'నాలెడ్జ్ హబ్',
       'Book': 'బుక్ చేయండి',

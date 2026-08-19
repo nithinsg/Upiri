@@ -22,18 +22,57 @@
    Text to speech
    --------------------------------------------------------------------------- */
 
-const VOICE_PREFS = [
-  /* An Indian-neutral English voice first, which is what §16 asks for, then the
-     nearest neighbours. Named voices that tend to be the calmer, less
-     sing-song option on each platform are preferred within a locale. */
-  (v) => /en[-_]IN/i.test(v.lang) && /neural|natural|google|premium|enhanced/i.test(v.name),
-  (v) => /en[-_]IN/i.test(v.lang),
-  (v) => /en[-_]GB/i.test(v.lang) && /neural|natural|google|premium|enhanced/i.test(v.name),
-  (v) => /en[-_]GB/i.test(v.lang),
-  (v) => /en[-_]AU/i.test(v.lang),
-  (v) => /^en/i.test(v.lang) && /neural|natural|google/i.test(v.name),
-  (v) => /^en/i.test(v.lang)
-];
+/*
+ * Uppi is a young man, and he should sound like one.
+ *
+ * The Web Speech API does not expose a voice's gender, so the only signal is
+ * the name — stable enough per platform to be worth matching. These are the
+ * male voices actually shipped for the locales this site serves:
+ *
+ *   Android / Chrome    the Google network and local voices
+ *   Windows             Ravi, Prabhat, Mark, Guy, George, Ryan, Brian
+ *   macOS / iOS         Rishi, Daniel, Alex, Aaron, Tom, Oliver, Arthur
+ *   Samsung and others  often literally "male" in the name
+ *
+ * It is a preference, never a requirement. A device that only ships a female
+ * voice for a language still gets a voice: the wrong timbre is far better than
+ * a silent Uppi.
+ */
+const MALE_NAME = /\b(male|man)\b|ravi|prabhat|rishi|daniel|alex|aaron|tom|oliver|arthur|mark|guy|george|ryan|brian|liam|nathan|kumar|hemant|madhur|niranjan|sandeep/i;
+const FEMALE_NAME = /\b(female|woman)\b|heera|kalpana|swara|veena|samantha|karen|moira|tessa|fiona|victoria|zira|hazel|susan|catherine|linda|aria|jenny|neerja|shruti|sapna|priya/i;
+const GOOD_ENGINE = /neural|natural|google|premium|enhanced|network|siri/i;
+
+/*
+ * Which locales to try for each site language, best first.
+ *
+ * Telugu falls back to Hindi before English on purpose: a device with no Telugu
+ * voice has to read Telugu script with something, and Hindi shares far more of
+ * the phoneme inventory than English does. Whether Telugu text is spoken at all
+ * is decided separately — the voice follows the TEXT, never the site setting on
+ * its own, because an English voice reading Telugu script is noise.
+ */
+const LOCALES = {
+  te: ['te-IN', 'hi-IN', 'en-IN'],
+  kn: ['kn-IN', 'hi-IN', 'en-IN'],
+  bn: ['bn-IN', 'bn-BD', 'hi-IN', 'en-IN'],
+  hi: ['hi-IN', 'en-IN'],
+  en: ['en-IN', 'en-GB', 'en-AU', 'en']
+};
+
+/** Ranks a voice for a wanted locale. Higher is better; -1 means unusable. */
+function scoreVoice(v, locale, wantMale) {
+  const lang = String(v.lang || '').replace('_', '-').toLowerCase();
+  const want = locale.toLowerCase();
+  if (!lang.startsWith(want.slice(0, 2))) return -1;
+  let s = 0;
+  if (lang === want) s += 40;              /* exact locale beats the same language elsewhere */
+  const name = String(v.name || '');
+  if (wantMale && MALE_NAME.test(name)) s += 30;
+  if (wantMale && FEMALE_NAME.test(name)) s -= 20;
+  if (GOOD_ENGINE.test(name)) s += 12;
+  if (v.localService) s += 3;              /* no network round trip on a slow line */
+  return s;
+}
 
 import { visemeFor } from './avatar.js';
 
@@ -41,6 +80,10 @@ export class TextToSpeech {
   constructor() {
     this.mode = 'browser';
     this.voice = null;
+    /* the language asked for, and the language the chosen voice actually
+       speaks — they differ on a device with no voice for the asked language */
+    this.lang = 'en';
+    this.spokenLang = 'en';
     this.utterance = null;
     this.audio = null;
     this.ctx = null;
@@ -63,18 +106,70 @@ export class TextToSpeech {
   }
 
   _loadVoices() {
-    const pick = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (!voices || !voices.length) return;
-      for (const test of VOICE_PREFS) {
-        const hit = voices.find(test);
-        if (hit) { this.voice = hit; return; }
-      }
-      this.voice = voices[0];
-    };
+    const pick = () => this._pickVoice();
     pick();
     /* Chrome populates the list asynchronously, once. */
     try { window.speechSynthesis.addEventListener('voiceschanged', pick, { once: false }); } catch { /* older API */ }
+  }
+
+  /**
+   * Chooses the best available voice for the current language.
+   *
+   * Sets `this.voice`, and `this.spokenLang` — the language the chosen voice
+   * actually speaks, which is NOT always the language that was asked for. A
+   * phone with no Telugu voice cannot read Telugu aloud, and the layer above
+   * needs to know that rather than sending Telugu text into an English voice.
+   */
+  _pickVoice() {
+    if (!this.supported) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || !voices.length) return;
+    const chain = LOCALES[this.lang] || LOCALES.en;
+    for (const locale of chain) {
+      let best = null;
+      let bestScore = -1;
+      for (const v of voices) {
+        const s = scoreVoice(v, locale, true);
+        if (s > bestScore) { bestScore = s; best = v; }
+      }
+      if (best && bestScore >= 0) {
+        this.voice = best;
+        this.spokenLang = locale.slice(0, 2);
+        return;
+      }
+    }
+    this.voice = voices[0];
+    this.spokenLang = String(voices[0].lang || 'en').slice(0, 2);
+  }
+
+  /**
+   * Switch Uppi's voice to the site's language (§16).
+   *
+   * Called whenever the reader changes language, so the change is immediate
+   * rather than waiting for a reload.
+   */
+  setLanguage(code) {
+    const next = String(code || 'en').slice(0, 2).toLowerCase();
+    if (next === this.lang) return this.spokenLang;
+    this.lang = next;
+    this._pickVoice();
+    return this.spokenLang;
+  }
+
+  /**
+   * Can this device actually say something in `code`?
+   *
+   * The honest question behind "make him speak Telugu": if the answer is no,
+   * the layer above should keep the English text rather than hand Telugu script
+   * to a voice that will mispronounce every word of it.
+   */
+  canSpeak(code) {
+    if (!this.supported) return false;
+    const want = String(code || 'en').slice(0, 2).toLowerCase();
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      return voices.some((v) => String(v.lang || '').slice(0, 2).toLowerCase() === want);
+    } catch { return false; }
   }
 
   /**
@@ -180,11 +275,18 @@ export class TextToSpeech {
     return new Promise((resolve) => {
       const u = new SpeechSynthesisUtterance(text);
       if (this.voice) { u.voice = this.voice; u.lang = this.voice.lang; }
-      else u.lang = 'en-IN';
-      /* §16: warm, calm, clear. Slightly under natural pace and barely above
-         default pitch reads as unhurried rather than as a children's cartoon. */
-      u.rate = 0.97;
-      u.pitch = 1.04;
+      else u.lang = this.lang === 'en' ? 'en-IN' : this.lang + '-IN';
+      /*
+       * §16: a warm young man, around twenty, not a cartoon and not a newsreader.
+       *
+       * Pitch was 1.04, which lifted every voice towards the bright, boyish end
+       * and undid the point of choosing a male voice in the first place. A
+       * shade UNDER default is what reads as a young adult with some chest in
+       * the voice; the unhurried rate is what reads as warmth, because hurry is
+       * the thing that makes a synthetic voice sound indifferent.
+       */
+      u.rate = 0.98;
+      u.pitch = 0.96;
       u.volume = 1;
       this.utterance = u;
       this._char = null;
@@ -312,6 +414,19 @@ export class SpeechInput {
     this.listening = false;
     this.mode = SR ? 'browser' : 'server';
     this._serverReady = null;
+    /* the locale the recogniser listens in — follows the site language, so a
+       Telugu reader can talk to Uppi in Telugu rather than being made to
+       switch language just to use the microphone */
+    this.locale = 'en-IN';
+  }
+
+  /** Point the recogniser at the reader's language. */
+  setLanguage(code) {
+    const map = { te: 'te-IN', kn: 'kn-IN', bn: 'bn-IN', hi: 'hi-IN', en: 'en-IN' };
+    this.locale = map[String(code || 'en').slice(0, 2).toLowerCase()] || 'en-IN';
+    /* a recogniser already running keeps the locale it started with; the next
+       one picks this up, which is the same behaviour the API itself has */
+    return this.locale;
   }
 
   /**
@@ -343,9 +458,10 @@ export class SpeechInput {
   _startBrowser() {
     const r = new SR();
     this.recognition = r;
-    /* Indian English first — it is what most visitors here will speak, and the
-       recogniser handles local place and medicine names far better for it. */
-    r.lang = 'en-IN';
+    /* Indian English by default — it is what most visitors here will speak, and
+       the recogniser handles local place and medicine names far better for it.
+       `setLanguage` moves it when the reader changes the site language. */
+    r.lang = this.locale || 'en-IN';
     r.interimResults = true;
     r.continuous = false;
     r.maxAlternatives = 1;
