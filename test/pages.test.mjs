@@ -452,6 +452,91 @@ describe('Reduced motion, and the console');
   await ctx.close();
 }
 
+/* ------------------------------------------------- Uppi's voice and language */
+
+describe('Uppi speaks the reader\'s language, in a young man\'s voice');
+
+{
+  /*
+   * A stubbed voice list, because the headless browser ships none at all and
+   * "no voices" would make every assertion below vacuously pass. The names are
+   * real ones from Windows and Android, including a female voice FIRST for the
+   * same locale — if the male preference is not working, Heera wins.
+   */
+  const withVoices = async () => {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await ctx.addInitScript(() => {
+      const V = [
+        { name: 'Microsoft Heera - English (India)', lang: 'en-IN', localService: true },
+        { name: 'Microsoft Ravi - English (India)', lang: 'en-IN', localService: true },
+        { name: 'Google UK English Female', lang: 'en-GB', localService: false },
+        { name: 'Telugu India', lang: 'te-IN', localService: true }
+      ];
+      window.speechSynthesis.getVoices = () => V;
+    });
+    const page = await ctx.newPage();
+    await page.route('**/*', (r) => (r.request().url().startsWith(base) ? r.continue() : r.abort()));
+    return { ctx, page };
+  };
+
+  const settle = async (page, url) => {
+    await page.goto(base + url, { waitUntil: 'load' });
+    await page.waitForFunction(() => !!window.__uppi, null, { timeout: 25000 });
+    await page.waitForTimeout(4200);
+    return page.evaluate(() => {
+      const u = window.__uppi;
+      u.tts._pickVoice();
+      const G = "Hi, I'm Uppi, your lung partner. Tell me what's bothering you, and we'll figure out what to do next.";
+      return {
+        lang: u.lang(), voice: u.tts.voice && u.tts.voice.name,
+        voiceLang: u.tts.voice && u.tts.voice.lang, stt: u.speech && u.speech.locale,
+        greeting: u.local(G), bubble: (document.querySelector('.uppi-bubble p') || {}).textContent || ''
+      };
+    });
+  };
+
+  const { ctx, page } = await withVoices();
+
+  const en = await settle(page, '/');
+  eq(en.voice, 'Microsoft Ravi - English (India)',
+    'in English he takes the male voice, not the female one listed before it');
+  eq(en.stt, 'en-IN', 'and listens in Indian English');
+
+  const te = await settle(page, '/?lang=te');
+  eq(te.lang, 'te', 'a Telugu reader is recognised as one');
+  eq(te.voiceLang, 'te-IN', 'and he switches to a Telugu voice');
+  eq(te.stt, 'te-IN', 'and listens in Telugu too');
+  ok(/[\u0C00-\u0C7F]/.test(te.greeting), 'his greeting is in Telugu script');
+  ok(/[\u0C00-\u0C7F]/.test(te.bubble), 'and that is what is actually on screen');
+
+  /* the lines he says most often must all be covered, not just the greeting */
+  const covered = await page.evaluate(() => {
+    const u = window.__uppi;
+    const lines = [
+      'Need a hand finding something?',
+      'Is the cough dry, or are you bringing up phlegm?',
+      'Book a Pulmonology Appointment',
+      'Call 108 — emergency ambulance',
+      'This needs urgent attention'
+    ];
+    return lines.filter((l) => /[\u0C00-\u0C7F]/.test(u.t(l))).length;
+  });
+  eq(covered, 5, 'his offers, questions, actions and the emergency line are all translated');
+
+  /* and a mid-session switch is picked up without a reload */
+  const back = await page.evaluate(async () => {
+    document.documentElement.lang = 'en';
+    window.__dcSetTranslator(null);
+    await new Promise((r) => setTimeout(r, 400));
+    const u = window.__uppi;
+    return { lang: u.lang(), stt: u.speech && u.speech.locale };
+  });
+  eq(back.lang, 'en', 'switching language mid-session is picked up live');
+  eq(back.stt, 'en-IN', 'and the microphone follows it back');
+
+  await ctx.close();
+}
+
 eq(errors.length, 0, 'no console or page errors anywhere' + (errors.length ? ': ' + errors.join(' | ') : ''));
 
 await browser.close();

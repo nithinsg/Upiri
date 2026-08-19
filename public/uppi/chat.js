@@ -60,7 +60,11 @@ function elem(tag, cls, html) {
 /* Uppi's replies are plain text with blank-line paragraphs and "• " bullets.
    Rendered as real elements rather than injected as markup, so nothing that
    comes back from the pipeline can ever be interpreted as HTML. */
-function renderText(host, text) {
+function renderText(host, text, tr) {
+  /* `tr` localises each line as it becomes a node, so a reply whose paragraphs
+     are individually translated still comes out in the reader's language even
+     when the whole string has no single dictionary entry. */
+  const t = typeof tr === 'function' ? tr : (x) => x;
   const blocks = String(text || '').split(/\n{2,}/);
   for (const block of blocks) {
     const lines = block.split('\n');
@@ -71,13 +75,13 @@ function renderText(host, text) {
       ul.style.paddingLeft = '20px';
       for (const b of bullets) {
         const li = document.createElement('li');
-        li.textContent = b.replace(/^\s*•\s*/, '');
+        li.textContent = t(b.replace(/^\s*•\s*/, ''));
         ul.appendChild(li);
       }
       host.appendChild(ul);
     } else {
       const p = document.createElement('p');
-      p.textContent = block.trim();
+      p.textContent = t(block.trim());
       host.appendChild(p);
     }
   }
@@ -340,9 +344,9 @@ export class UppiChat {
     this.bubble.hidden = false;
     this.bubble.innerHTML = '';
     const p = elem('p');
-    p.textContent = text;
+    p.textContent = this.t(text);
     this.bubble.appendChild(p);
-    const cta = elem('button', 'uppi-bubble-cta', (ctaLabel || 'Tell Uppi') + icon('arrow', 15));
+    const cta = elem('button', 'uppi-bubble-cta', this.t(ctaLabel || 'Tell Uppi') + icon('arrow', 15));
     cta.type = 'button';
     cta.addEventListener('click', () => this.openPanel());
     this.bubble.appendChild(cta);
@@ -375,6 +379,7 @@ export class UppiChat {
    */
   startPresence() {
     if (this.presence) return;
+    this.watchLanguage();
     this.presence = new Presence(this.states, {
       /*
        * Overridable so the ladder can be tuned without a deploy, and so the
@@ -541,10 +546,10 @@ export class UppiChat {
       const alert = elem('div', 'uppi-alert');
       const head = elem('div', 'uppi-alert-head', icon('alert', 17) + '<span>' + (result.crisis ? 'Please talk to someone now' : 'This needs urgent attention') + '</span>');
       alert.appendChild(head);
-      renderText(alert, text);
+      renderText(alert, text, (x) => this.t(x));
       wrap.appendChild(alert);
     } else {
-      renderText(wrap, text);
+      renderText(wrap, text, (x) => this.t(x));
     }
 
     if (result && result.band && result.band.label && result.urgency !== 'routine' && result.urgency !== 'insufficient' && !result.emergency_recommended) {
@@ -843,6 +848,74 @@ export class UppiChat {
    * SPEAKING so the rig animates; when the voice finishes it settles back into
    * whatever the triage result called for.
    */
+  /* ---------------- language (§16) ---------------- */
+
+  /*
+   * Uppi follows the reader's language.
+   *
+   * He renders his own DOM outside the dc runtime, so he is not patched when
+   * the page is translated and had no idea what language he was in: he greeted
+   * a Telugu reader in English, in an English voice, every time. The page
+   * already records the choice on <html lang>, so that is the channel — no new
+   * global, and it survives a reload because the page restores it on boot.
+   */
+
+  /** The reader's language, two letters. */
+  lang() {
+    try { return String(document.documentElement.lang || 'en').slice(0, 2).toLowerCase(); }
+    catch { return 'en'; }
+  }
+
+  /**
+   * One of Uppi's own lines, in the reader's language where a translation
+   * exists. This is the same dictionary the page uses, so his wording and the
+   * page's wording can never drift apart.
+   */
+  t(text) {
+    const s = String(text == null ? '' : text);
+    try {
+      const fn = window.__dcTranslate;
+      return typeof fn === 'function' ? fn(s) : s;
+    } catch { return s; }
+  }
+
+  /**
+   * A line in the reader's language, translated paragraph by paragraph so a
+   * partly-covered reply still lands rather than falling back wholesale.
+   *
+   * Named `local` and not `say`: `say` is already the method that renders a
+   * turn into the panel, and quietly shadowing it would have replaced the whole
+   * message renderer with a string function.
+   */
+  local(text) {
+    const whole = this.t(text);
+    if (whole !== text) return whole;
+    return String(text == null ? '' : text)
+      .split(/\n{2,}/).map((b) => this.t(b)).join('\n\n');
+  }
+
+  /**
+   * Keeps the voice and the recogniser on the reader's language, live.
+   *
+   * Watching the attribute rather than being told means a mid-session language
+   * switch is picked up immediately — which is exactly when someone tries it.
+   */
+  watchLanguage() {
+    const apply = () => {
+      const code = this.lang();
+      if (code === this._lang) return;
+      this._lang = code;
+      try { this.tts.setLanguage(code); } catch { /* no synthesis */ }
+      try { if (this.speech && this.speech.setLanguage) this.speech.setLanguage(code); }
+      catch { /* no recogniser */ }
+    };
+    apply();
+    try {
+      this._langWatch = new MutationObserver(apply);
+      this._langWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    } catch { /* no MutationObserver: the boot-time language still applies */ }
+  }
+
   speakAs(text) {
     if (!this.tts.supported) {
       /* §27: no voice available — the text is already on screen, so nothing is
@@ -850,6 +923,31 @@ export class UppiChat {
       this.states.resolve();
       return;
     }
+    /*
+     * Speak what is written, in a voice that can pronounce it.
+     *
+     * Three cases, and the third is the one that matters. A line with a Telugu
+     * translation is spoken in Telugu, by a Telugu voice. A line without one is
+     * spoken in English. And a line that IS translated on a device with no
+     * Telugu voice installed is READ in Telugu on screen but SPOKEN from the
+     * English original — because handing Telugu script to an English voice
+     * produces syllable soup, which is worse than an honest accent mismatch.
+     */
+    const code = this.lang();
+    const shown = this.local(text);
+    const translated = shown !== text;
+    let spoken = shown;
+    if (translated && !this.tts.canSpeak(code)) {
+      spoken = text;
+      try { this.tts.setLanguage('en'); } catch { /* no synthesis */ }
+    } else if (translated) {
+      try { this.tts.setLanguage(code); } catch { /* no synthesis */ }
+    } else {
+      /* untranslated English text always gets the English voice, whatever the
+         page language is set to */
+      try { this.tts.setLanguage('en'); } catch { /* no synthesis */ }
+    }
+    text = spoken;
     this.stopBtn.hidden = false;
     const source = this.tts.source();
     if (source) source.text = text;
@@ -970,6 +1068,7 @@ export class UppiChat {
   }
 
   destroy() {
+    if (this._langWatch) { this._langWatch.disconnect(); this._langWatch = null; }
     if (this.presence) { this.presence.destroy(); this.presence = null; }
     this.states.destroy();
     this.tts.stop();

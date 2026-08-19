@@ -52,6 +52,10 @@
   }
 
   window.__dcSetTranslator = setTranslator;
+  /* Uppi renders his own DOM outside this runtime, so he cannot pick up
+     translations by being patched like the rest of the page. Exposing the same
+     lookup means his lines and the page's lines can never disagree. */
+  window.__dcTranslate = tx;
 
   /* ---------------- style objects ---------------- */
 
