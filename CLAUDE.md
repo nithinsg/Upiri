@@ -93,7 +93,7 @@ Consequences you must preserve:
 | File | Role |
 |---|---|
 | `boot.js` | Lazy entry. Bails on `window.__UPIRI_NO_UPPI` (set by the prerenderer). |
-| `avatar.js` | Runtime-generated SVG rig, viewBox `0 0 372 572`. No image file exists. |
+| `avatar.js` | Runtime-generated SVG rig, viewBox `0 0 372 660`. No image file exists. |
 | `motion.js` | WAAPI: run-in, land, wave, idle, curious, tired, sleeping, visemes. |
 | `states.js` | **18 states driven by runtime inputs**, not by direct calls. See below. |
 | `presence.js` | Scroll, pointer, inactivity, doze and wake. Sets inputs only. |
@@ -155,7 +155,12 @@ there ships to both. That is deliberate — the triage rules must exist exactly 
 ### The character asset
 
 There is **no PNG, SVG file or Rive board**. `build()` in `avatar.js` generates the rig
-at runtime. Everything above it talks only through `setMouth` / `setViseme` / `setEyes` /
+at runtime, built to the approved reference render in a viewBox of `0 0 372 660` — the
+reference's own proportions. The landmarks are listed in a comment above the geometry
+(trachea, lung mass, eyes, mouth, shoulders, hem, hips, ground); keep a change in
+register with them. He is **taller than he is wide**, so `.uppi-stage` is sized by a
+width chosen to land his HEIGHT where the page was designed for him — sizing him by
+width alone had him rising a third of the way up the hero. Everything above it talks only through `setMouth` / `setViseme` / `setEyes` /
 `setLids` / `blink` / `look` / `setBrows` / `setExpression` / `setPose` and the `parts`
 map, so replacing `build()` swaps in a real rigged asset without touching another file.
 Keep that boundary intact.
