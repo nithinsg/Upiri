@@ -155,12 +155,32 @@ export const MOUTHS = {
 
   /* ---- expressions ---- */
 
-  /* the default face: the broad warm open smile from the reference */
+  /*
+   * The broad open smile from the reference render.
+   *
+   * This is NOT the resting face, and reaching for it as one was a real bug: it
+   * is drawn open, with teeth and tongue, so a character sitting in it looks
+   * like he is permanently mid-word. A mouth hanging open while nobody is
+   * speaking reads as vacant, not as friendly. It is kept for the moments a
+   * mouth genuinely should be open, and `grin` carries the warmth the rest of
+   * the time.
+   */
   smile: {
     open: 0.8, lipRound: 1, lipWide: 1.04,
     mouth: 'M126 250 Q160 262 194 250 Q192 297 160 302 Q128 297 126 250 Z',
     teeth: 'M128 251 Q160 263 192 251 Q160 274 128 251 Z',
     tongue: 'M139 282 Q160 272 181 282 Q180 298 160 301 Q140 298 139 282 Z'
+  },
+  /*
+   * The resting face: a closed, warm, wide smile.
+   *
+   * Wider and more curved than `soft`, so greeting and delight still read
+   * clearly — the happiness comes from the width of the curve and from the eyes
+   * and brows above it, which is where it comes from on a real face too.
+   */
+  grin: {
+    open: 0.18, lipRound: 1, lipWide: 1.04,
+    mouth: 'M128 253 Q160 276 192 253 Q189 277 160 284 Q131 277 128 253 Z', teeth: '', tongue: ''
   },
   /* closed-lip smile — listening, and the settled idle */
   soft: {
@@ -821,11 +841,12 @@ export class UppiAvatar {
       teeth: q('mouth-teeth')
     };
 
-    this._mouth = 'smile';
+    this._mouth = 'grin';
     this._blinking = false;
     this._lid = 0;
     this._pose = { left: 'hip', right: 'rest' };
-    this.setMouth('smile');
+    /* built closed. The rig is mounted long before anyone speaks to it. */
+    this.setMouth('grin');
   }
 
   /* ---------------- mouth ---------------- */
@@ -937,7 +958,7 @@ export class UppiAvatar {
   setExpression(name) {
     switch (name) {
       case 'happy':
-        this.setMouth('smile'); this.setEyes('wide'); this.setBrows(-4, -2); this.setLids(0, 180); this.look(0, 0); break;
+        this.setMouth('grin'); this.setEyes('wide'); this.setBrows(-4, -2); this.setLids(0, 180); this.look(0, 0); break;
       case 'listening':
         this.setMouth('soft'); this.setEyes('wide'); this.setBrows(-2, -1); this.setLids(0, 180); break;
       case 'thinking':
@@ -957,7 +978,10 @@ export class UppiAvatar {
       case 'neutral':
         this.setMouth('soft'); this.setEyes('normal'); this.setBrows(0, 0); this.setLids(0, 180); this.look(0, 0); break;
       default:
-        this.setMouth('smile'); this.setEyes('normal'); this.setBrows(-2, 0); this.setLids(0, 180); this.look(0, 0);
+        /* The resting face. This branch is what IDLE lands on, so it must be a
+           CLOSED mouth: it used to be `smile`, which is drawn open, and the
+           result was a character whose mouth hung open for the entire session. */
+        this.setMouth('grin'); this.setEyes('normal'); this.setBrows(-2, 0); this.setLids(0, 180); this.look(0, 0);
     }
   }
 

@@ -14,7 +14,7 @@ read it. Live at <https://upiri.vercel.app>.
    `states.set('isListening', true)`, not `motion.startListening()`. The machine is
    the only thing that talks to the rig, and that is what keeps his face from
    contradicting his advice.
-1. **This is not React.** The site is one 5,955-line `public/index.html` rendered by a
+1. **This is not React.** The site is one 7,300-line `public/index.html` rendered by a
    custom runtime in `public/support.js`. `react`/`vite`/`tailwind` in `package.json`
    belong to the retired `src/` app. Do not import them, do not "modernise" the site.
 2. **`public/index.html` is a single file with no build step.** A careless line-range
@@ -40,7 +40,8 @@ public/uppi/           Uppi, the lung companion (browser)
 public/uppi/core/      SHARED with api/ — engine, triage, red flags, knowledge, safety
 api/uppi/              four Vercel Node serverless functions
 test/                  the committed suite — `npm test`
-scripts/prerender.mjs  Playwright prerender of 62 routes into dist/
+scripts/prerender.mjs  Playwright prerender of 89 routes into dist/ — also WRITES sitemap.xml
+scripts/check-html.mjs Structural check of index.html — run this FIRST, it is two seconds
 scripts/artwork.mjs    the Knowledge Hub illustrations — `npm run artwork`
 public/kh/             25 generated .webp images, committed
 src/                   RETIRED React v2. Not built, not served. Leave it alone.
@@ -173,6 +174,14 @@ The default idle is `left: hip, right: rest`. The old rig drew the right arm per
 raised, which is why Uppi appeared to wave forever — it was the geometry, not the
 animation. Do not reintroduce a raised default.
 
+**His mouth is CLOSED unless he is speaking.** The resting face is `grin`, a
+closed warm smile; `soft`, `neutral`, `small` and `concerned` are the other
+closed shapes. `smile` is drawn OPEN, with teeth and a tongue, and it was the
+default for a while — the result was a character whose mouth hung open for the
+entire session, which reads as vacant rather than friendly. Open shapes belong
+to the visemes, which are driven by speech, and to the yawn. `browser.test.mjs`
+asserts the resting shape is closed and that no tongue shows while he is silent.
+
 Two SVG traps this rig has already hit:
 
 - **`hidden` does nothing on SVG elements** — it is an HTML global attribute. Use
@@ -233,6 +242,50 @@ These are illustrations, not photographs and not diagnostic diagrams — subject
 markers, drawn to a house style documented at the top of `artwork.mjs`. Real
 clinical photography still has to come from Yashoda.
 
+### The Knowledge Hub reads, and the rails
+
+Three things were added on top of the eighteen condition pages, and they share
+one rule: **a card that opens nothing is worse than no card.**
+
+- **`KH_ARTICLES` (20) and `KH_CASES` (6) carry their own `body`.** Each has an
+  `id` that is its URL — `/knowledge-hub/guide/<id>` and
+  `/knowledge-hub/case/<id>` — and an `src` array printed at the foot of the
+  page. Nothing is `placeholder: true` any more, and `pages.test.mjs` fails the
+  build if anything becomes one again.
+- **Teaching cases say what they are.** Every case page carries, above the fold,
+  that it is an illustrative scenario built on published guidance and not a
+  record of a real patient. Writing a case that reads as a Yashoda patient would
+  be an invented clinical claim. Do not remove that line.
+- **`SERVICE_LINKS` maps every "Relevant Yashoda services" chip to a real
+  destination** — a club, a route, a procedure, a topic or a guide. The chips
+  used to be inert `<li>` pills. If you add a service name to a topic's `svc`,
+  add its link here in the same edit; the suite fails on an unlinked chip.
+- **`[data-rail]` is the horizontal carousel**, used by the videos, the
+  specialists and the ECMO page. One timer in `startRails()` walks every rail on
+  the page rather than each rail owning a timer, because the dc runtime replaces
+  these elements on re-render. It advances every `RAIL_MS` (2s) and holds when
+  the rail `:hover`s, contains focus, contains a playing `iframe`, or was
+  touched in the last few seconds. **Hover is asked at tick time, never
+  remembered:** `pointermove` stops firing when a pointer stops, so an
+  event-driven hold lapsed and scrolled the card away from the person reading
+  it. Under `prefers-reduced-motion` it does not self-advance at all.
+- **Videos carry `also`**, the other topics a video belongs on, so one video
+  serves two subjects without appearing twice in the hub's own list.
+
+### ECMO & the air ambulance (`/ecmo-and-air-ambulance`)
+
+Written only from Yashoda's published pages, listed in `ECMO_SRC`. The 24×7
+cover, the national and international transfers, the transfer types, the terrace
+evacuation at Hitec City, the Awake ECMO series and the Advanced Lung Failure
+Unit are all sourced there; the explanation of what ECMO does is ELSO-level
+general education. **No volume, first or outcome may be added here that is not
+on one of those pages.**
+
+The airlift scene is choreographed in `runAirlift()` and reaches Uppi through
+exactly one seam, `__uppi.airlift(phase)` in `chat.js`, which sets the
+`isAppointment` INPUT rather than touching `motion` or the rig. The page owns the
+helicopter; Uppi owns Uppi. Keep it that way.
+
 ## Standing instructions from the product owner
 
 These override your own judgement about what would be nice to write.
@@ -268,12 +321,12 @@ These override your own judgement about what would be nice to write.
 
 ```bash
 npm run dev     # vite --root public → http://localhost:5173
-npm run build   # prerender 62 routes into dist/ (~30s)
+npm run build   # prerender 89 routes into dist/ (~60s), and rewrite sitemap.xml
 npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 326 assertions across four suites (~2min)
+npm test              # 473 assertions across five suites (~12min)
 npm test conversation # one suite by name
 ```
 
@@ -284,7 +337,8 @@ npm test conversation # one suite by name
 | `core.test.mjs` | Red flags with their negation and hypothetical guards, duration parsing, extraction including denials, every triage band, retrieval, the safety gate. |
 | `conversation.test.mjs` | The six conversations in §30 of the brief, plus the properties that must hold across all of them: no repeated question, no repeated paragraph, nothing forgotten, one question per reply. |
 | `rig.test.mjs` | The ten visemes, the digraph mapping, the schedule, and the approved palette. |
-| `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, **the idle and reading popups on the real clock**, **the whole call-back flow against a stub destination including what does NOT leave with it**, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
+| `pages.test.mjs` | Real Chromium: every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, the branch selector filters, every service chip resolves, and the whole airlift choreography. |
+| `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, **that his mouth is CLOSED at rest**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, **the idle and reading popups on the real clock**, **the whole call-back flow against a stub destination including what does NOT leave with it**, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
 
 `test/_server.mjs` mounts the real `api/uppi/*` handlers next to `public/`, so the
 browser suite exercises the deployed code rather than a mock.
@@ -312,9 +366,10 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 ## Verifying a change
 
+0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (326 assertions)
-3. `npm run build` — must report `prerendered 62/62 routes`
+2. `npm test` — must report `all suites passed` (473 assertions)
+3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:
    `grep -c "uppi-root" dist/index.html` → `0`
