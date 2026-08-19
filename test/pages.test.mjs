@@ -302,7 +302,37 @@ describe('Meet the specialists: every consultant, filtered by branch');
 
 /* ------------------------------------------------------------- the airlift */
 
-describe('ECMO and the air ambulance: the page, and the airlift');
+describe('ECMO and the air ambulance: findable, then the page and the airlift');
+
+/*
+ * Reachability first.
+ *
+ * The page shipped correct and unfindable: it sat below all nine procedure
+ * cards at the bottom of Tests & Procedures, with no link anywhere else, and
+ * the only way to it was the URL. A page nobody can navigate to is not a page.
+ */
+{
+  const { ctx, page } = await open(1280, 900);
+  await page.addInitScript(() => { window.__UPIRI_NO_UPPI = 1; });
+  await page.goto(base + '/tests-and-procedures', { waitUntil: 'load' });
+  await page.waitForSelector('a[href="/ecmo-and-air-ambulance"]', { timeout: 20000 });
+
+  const link = page.locator('a[href="/ecmo-and-air-ambulance"]').first();
+  const box = await link.boundingBox();
+  const firstCard = await page.locator('article').first().boundingBox();
+  ok(box.y < firstCard.y, 'the ECMO card leads the page rather than trailing the nine procedures');
+
+  await link.click();
+  await page.waitForTimeout(700);
+  eq(new URL(page.url()).pathname, '/ecmo-and-air-ambulance', 'and clicking it goes there');
+
+  /* and it is reachable from anywhere, not only from that one page */
+  await page.goto(base + '/knowledge-hub', { waitUntil: 'load' });
+  await page.waitForTimeout(500);
+  eq(await page.locator('a[href="/ecmo-and-air-ambulance"]').count() > 0, true,
+    'the footer links to it from every page');
+  await ctx.close();
+}
 
 {
   const { ctx, page } = await open(1280, 900);
