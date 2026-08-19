@@ -47,8 +47,12 @@
 
 .uppi-dock[hidden] { display: none; }
 
+/* Widths are chosen so Uppi's HEIGHT stays where the page was designed for
+   him. The rig follows the reference's proportions, which are taller than wide
+   (372 × 660), so the same width now buys a noticeably taller character — and
+   sizing him by width alone had him rising a third of the way up the hero. */
 .uppi-stage {
-  width: 176px;
+  width: 152px;
   flex: none;
   pointer-events: auto;
   transform-origin: 100% 100%;
@@ -481,7 +485,7 @@
 
 @media (max-width: 760px) {
   .uppi-dock { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)) }
-  .uppi-stage { width: 128px }
+  .uppi-stage { width: 112px }
   .uppi-bubble { max-width: min(280px, calc(100vw - 168px)); margin-bottom: 26px; font-size: 14px }
 
   .uppi-panel {
@@ -529,7 +533,7 @@
 }
 
 @media (max-width: 380px) {
-  .uppi-stage { width: 108px }
+  .uppi-stage { width: 94px }
   .uppi-bubble { max-width: calc(100vw - 148px); padding: 14px 15px }
   .uppi-slot, .uppi-slot .uppi-stage { width: 96px; max-width: 96px }
   .uppi-col { height: 116px; gap: 10px; padding: 0 14px }

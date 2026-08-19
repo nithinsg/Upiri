@@ -252,7 +252,24 @@ export function visemeSchedule(text) {
 
 /* ---------------------------------------------------------------------------
    Markup
-   --------------------------------------------------------------------------- */
+   ---------------------------------------------------------------------------
+   Coordinates are taken from the approved reference render, in a viewBox of
+   0 0 372 660 — the reference's own proportions. The character is 3.2 heads
+   tall with the lung mass filling the top third, which is what makes him read
+   as Uppi rather than as a generic mascot: get the head-to-body ratio wrong and
+   nothing else rescues it.
+
+   Landmarks, so a later change can stay in register:
+
+     trachea      x 186, y 22 → 132, ten rings
+     lung mass    x 72 → 300, y 105 → 314 (wider than tall, as in the reference)
+     eyes         centres (146, 214) and (226, 214)
+     mouth        anchor (186, 264)
+     shoulders    (110, 356) and (262, 356)
+     hoodie hem   y 496
+     hips         (149, 496) and (223, 496)
+     ground       y 648
+*/
 
 const NS = 'http://www.w3.org/2000/svg';
 
@@ -267,33 +284,45 @@ function path(d, attrs) {
   return el('path', Object.assign({ d }, attrs || {}));
 }
 
-/* The lung-pair head: two rounded lobes meeting in a cleft where the trachea
-   enters. Reused for the silhouette, the clip path and the shading overlays so
-   they can never drift apart. */
-const HEAD_D = 'M160 128 C150 88 124 54 94 57 C56 63 38 106 38 168 C38 222 53 270 84 298 C108 318 134 324 160 324 C186 324 212 318 236 298 C267 270 282 222 282 168 C282 102 266 57 226 57 C196 54 170 88 160 128 Z';
+/*
+ * The two lobes are separate shapes meeting at the centre line. Drawn apart
+ * rather than as one silhouette because each needs its own radial gradient to
+ * bulge — a single gradient across the pair flattens the middle, which is the
+ * first thing that makes a character look printed rather than modelled.
+ */
+const LOBE_LEFT = 'M186 148 C184 122 172 104 148 101 C110 98 74 134 72 184 C70 226 82 262 104 284 C126 304 156 312 186 312 Z';
+const LOBE_RIGHT = 'M186 148 C188 122 200 104 224 101 C262 98 298 134 300 184 C302 226 290 262 268 284 C246 304 216 312 186 312 Z';
+/* the pair, for clipping and for the contact shadow under the chin */
+const HEAD_D = 'M186 148 C184 122 172 104 148 101 C110 98 74 134 72 184 C70 226 82 262 104 284 C126 304 156 312 186 312 C216 312 246 304 268 284 C290 262 302 226 300 184 C298 134 262 98 224 101 C200 104 188 122 186 148 Z';
 
-/* The bronchial tree. Two symmetric halves branching down and outward from the
-   carina, routed around where the eyes sit so the face stays clean. Written out
-   rather than generated so it renders identically every time and matches the
-   branching in the reference. */
+/*
+ * The bronchial tree. Two mirrored halves branching down and outward from the
+ * carina, routed clear of the eyes and the mouth so the face stays readable.
+ * Written out rather than generated so it renders identically every time and
+ * matches the branching in the reference.
+ */
 const VEINS_TRUNK = [
-  'M160 132 L160 162',
-  'M160 158 C138 162 118 170 102 184',
-  'M160 158 C182 162 202 170 218 184'
+  'M186 134 L186 160',
+  'M186 158 C166 168 146 178 128 192',
+  'M186 158 C206 168 226 178 244 192'
 ];
 const VEINS_TWIG = [
-  'M102 184 C88 196 78 210 74 228',
-  'M102 184 C96 170 88 160 76 154',
-  'M218 184 C232 196 242 210 246 228',
-  'M218 184 C224 170 232 160 244 154',
-  'M74 228 C70 242 68 256 70 272',
-  'M74 228 C82 240 86 252 86 266',
-  'M246 228 C250 242 252 256 250 272',
-  'M246 228 C238 240 234 252 234 266',
-  'M120 168 C116 156 110 146 100 138',
-  'M200 168 C204 156 210 146 220 138',
-  'M70 272 C68 282 68 290 70 296',
-  'M250 272 C252 282 252 290 250 296'
+  /* left lobe */
+  'M128 192 C112 176 100 160 92 144',
+  'M128 192 C118 212 110 234 106 254',
+  'M106 254 C100 268 96 280 96 292',
+  'M106 254 C112 268 116 280 118 290',
+  'M92 144 C86 134 82 126 80 118',
+  'M92 144 C86 150 80 158 78 166',
+  'M118 192 C108 182 98 174 86 168',
+  /* right lobe */
+  'M244 192 C260 176 272 160 280 144',
+  'M244 192 C254 212 262 234 266 254',
+  'M266 254 C272 268 276 280 276 292',
+  'M266 254 C260 268 256 280 254 290',
+  'M280 144 C286 134 290 126 292 118',
+  'M280 144 C286 150 292 158 294 166',
+  'M254 192 C264 182 274 174 286 168'
 ];
 
 let uid = 0;
@@ -308,50 +337,67 @@ let uid = 0;
  * second instance paint with the first one's definitions.
  */
 function defs(id) {
-  const g = (suffix, stops, attrs) => el('linearGradient', Object.assign({ id: id + '-' + suffix }, attrs || { x1: '0', y1: '0', x2: '0', y2: '1' }),
+  const lin = (suffix, stops, attrs) => el('linearGradient', Object.assign({ id: id + '-' + suffix }, attrs || { x1: '0', y1: '0', x2: '0', y2: '1' }),
     stops.map(([offset, color, opacity]) => el('stop', { offset, 'stop-color': color, 'stop-opacity': opacity == null ? 1 : opacity })));
-  const r = (suffix, stops, attrs) => el('radialGradient', Object.assign({ id: id + '-' + suffix }, attrs),
+  const rad = (suffix, stops, attrs) => el('radialGradient', Object.assign({ id: id + '-' + suffix }, attrs),
     stops.map(([offset, color, opacity]) => el('stop', { offset, 'stop-color': color, 'stop-opacity': opacity == null ? 1 : opacity })));
 
   return el('defs', {}, [
-    /* the head: light falls from the upper left, as it does in the reference */
-    r('head', [[0, SKIN.lungLight], [0.5, SKIN.lung], [1, SKIN.lungDark]], { cx: '0.36', cy: '0.26', r: '0.9' }),
-    g('hood', [[0, SKIN.navyLight], [0.55, SKIN.navy], [1, SKIN.navyDark]]),
-    g('sleeve', [[0, SKIN.navyLight], [1, SKIN.navyDark]], { x1: '0', y1: '0', x2: '1', y2: '1' }),
-    g('trouser', [[0, SKIN.khakiLight], [0.45, SKIN.khaki], [1, SKIN.khakiDark]]),
-    g('shoe', [[0, SKIN.navyLight], [1, SKIN.navyDeep]]),
-    r('iris', [[0, SKIN.irisLight], [1, SKIN.iris]], { cx: '0.4', cy: '0.35', r: '0.75' }),
-    r('blush', [[0, SKIN.blush, 0.5], [1, SKIN.blush, 0]], { cx: '0.5', cy: '0.5', r: '0.5' }),
-    r('shadow', [[0, '#1D1B4B', 0.32], [0.65, '#1D1B4B', 0.14], [1, '#1D1B4B', 0]], { cx: '0.5', cy: '0.5', r: '0.5' }),
-    r('mouthDepth', [[0, SKIN.mouthDeep], [1, SKIN.mouth]], { cx: '0.5', cy: '0.28', r: '0.8' }),
+    /* Each lobe lit from the upper left, with a deeper falloff towards the
+       centre line than towards the rim — which is what reads as two rounded
+       masses meeting rather than one flat blob. */
+    rad('lobeL', [[0, '#F8C7B9'], [0.3, SKIN.lungLight], [0.66, SKIN.lung], [1, SKIN.lungDeep]], { cx: '0.34', cy: '0.3', r: '0.84' }),
+    rad('lobeR', [[0, '#F8C6B9'], [0.36, SKIN.lungLight], [0.74, SKIN.lung], [1, SKIN.lungDeep]], { cx: '0.44', cy: '0.28', r: '0.88' }),
+    lin('trachea', [[0, SKIN.lungPale], [0.28, SKIN.trachea], [1, SKIN.tracheaDark]], { x1: '0', y1: '0', x2: '1', y2: '0' }),
+    lin('hood', [[0, SKIN.navyLight], [0.42, SKIN.navy], [1, SKIN.navyDark]]),
+    lin('sleeve', [[0, SKIN.navyLight], [0.55, SKIN.navy], [1, SKIN.navyDeep]], { x1: '0', y1: '0', x2: '1', y2: '1' }),
+    lin('trouser', [[0, SKIN.khakiLight], [0.4, SKIN.khaki], [1, SKIN.khakiDark]]),
+    lin('shoe', [[0, SKIN.navyLight], [1, SKIN.navyDeep]]),
+    lin('sole', [[0, '#FFFAF2'], [1, '#DCCBB4']]),
+    rad('hand', [[0, SKIN.lungLight], [0.6, SKIN.lung], [1, SKIN.lungDark]], { cx: '0.36', cy: '0.3', r: '0.85' }),
+    rad('iris', [[0, SKIN.irisLight], [0.55, SKIN.iris], [1, '#4A2510']], { cx: '0.38', cy: '0.32', r: '0.78' }),
+    rad('blush', [[0, SKIN.blush, 0.55], [1, SKIN.blush, 0]], { cx: '0.5', cy: '0.5', r: '0.5' }),
+    rad('shadow', [[0, '#1D1B4B', 0.34], [0.6, '#1D1B4B', 0.15], [1, '#1D1B4B', 0]], { cx: '0.5', cy: '0.5', r: '0.5' }),
+    rad('mouthDepth', [[0, SKIN.mouthDeep], [1, SKIN.mouth]], { cx: '0.5', cy: '0.26', r: '0.82' }),
+    el('clipPath', { id: id + '-lobeL' }, [path(LOBE_LEFT)]),
+    el('clipPath', { id: id + '-lobeR' }, [path(LOBE_RIGHT)]),
     el('clipPath', { id: id + '-head' }, [path(HEAD_D)]),
-    el('clipPath', { id: id + '-torso' }, [path('M160 312 C198 312 230 326 238 352 C244 372 244 414 240 440 C238 450 230 456 220 456 H100 C90 456 82 450 80 440 C76 414 76 372 82 352 C90 326 122 312 160 312 Z')])
+    el('clipPath', { id: id + '-torso' }, [path(TORSO_D)])
   ]);
 }
 
+/* The hoodie body. Square shoulders softened at the corners, straight sides,
+   a hem that sits just below the hips. */
+const TORSO_D = 'M186 330 C224 330 254 340 264 358 C272 374 274 420 272 466 C271 484 264 494 250 494 H122 C108 494 101 484 100 466 C98 420 100 374 108 358 C118 340 148 330 186 330 Z';
+
 function tracheaRings() {
-  /* Ten cartilage rings, tapering very slightly towards the top, seated so the
-     lowest ring meets the cleft between the lobes rather than floating above it. */
-  const rings = [];
-  for (let i = 0; i < 10; i++) {
-    const y = 32 + i * 9.6;
-    const inset = (9 - i) * 0.5;
-    rings.push(el('rect', {
-      x: 144 + inset, y, width: 32 - inset * 2, height: 7.4, rx: 3.7,
-      fill: SKIN.trachea, stroke: SKIN.tracheaDark, 'stroke-width': 1.5
-    }));
-    /* a highlight down the left of each ring gives the tube a cylinder's
-       roundness instead of reading as a stack of flat bars */
-    rings.push(el('rect', { x: 146 + inset, y: y + 1.4, width: 5, height: 4.6, rx: 2.3, fill: SKIN.lungPale, opacity: 0.55 }));
+  /* Ten cartilage rings, tapering slightly towards the top, seated so the
+     lowest ring is swallowed by the cleft between the lobes rather than
+     floating above it. A highlight down the left of each gives the tube a
+     cylinder's roundness instead of a stack of flat bars. */
+  const g = el('g', {});
+  for (let i = 0; i < 9; i++) {
+    const y = 40 + i * 12.4;
+    const inset = (7 - i) * 0.7;
+    const x = 162 + inset;
+    const w = 48 - inset * 2;
+    g.appendChild(el('rect', { x, y, width: w, height: 9.6, rx: 4.8, fill: 'url(#' + TRACHEA_ID.id + '-trachea)' }));
+    g.appendChild(el('rect', { x: x + 4, y: y + 1.8, width: 7.5, height: 6, rx: 3, fill: SKIN.lungPale, opacity: 0.6 }));
+    g.appendChild(el('rect', { x, y: y + 8.8, width: w, height: 2.4, rx: 1.2, fill: SKIN.lungDeep, opacity: 0.26 }));
   }
-  return rings;
+  return g;
 }
+
+/* `tracheaRings` needs the instance id for its gradient; passing it through
+   every call site would be noise, so the builder sets it for the duration of
+   one build. Builds are synchronous, so there is nothing to race with. */
+const TRACHEA_ID = { id: '' };
 
 function petals(cx, cy, r, fill) {
   /* The Yashoda marigold: eight petals, the same mark the site's brand logo
      uses. Drawn rather than imported so it scales with the character. */
   const g = el('g', { fill });
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 9; i++) {
     const a = (i * 45 * Math.PI) / 180;
     const px = cx + Math.cos(a) * r * 0.52;
     const py = cy + Math.sin(a) * r * 0.52;
@@ -360,24 +406,26 @@ function petals(cx, cy, r, fill) {
       transform: 'rotate(' + i * 45 + ' ' + px + ' ' + py + ')'
     }));
   }
-  g.appendChild(el('circle', { cx, cy, r: r * 0.19, fill: '#fff', opacity: 0.9 }));
+  g.appendChild(el('circle', { cx, cy, r: r * 0.19, fill: '#fff', opacity: 0.92 }));
   return g;
 }
 
-function eye(cx, id) {
-  /*
-   * One eye, in four layers: sclera, iris group that translates to look around,
-   * a lid that lowers over the top, and the highlights.
-   *
-   * The lid is the addition that makes tired, sleepy and concerned readable.
-   * Blinking used to squash the whole eye vertically, which at small sizes read
-   * as the eye shrinking rather than closing.
-   */
+/*
+ * One eye, drawn around its own origin and then placed.
+ *
+ * Four layers: sclera, an iris group that translates to look around, a lid that
+ * lowers over the top, and the highlights. The placement transform lives on an
+ * outer group because the animated groups drive `style.transform`, and a CSS
+ * transform replaces the presentation attribute rather than composing with it —
+ * so placing and animating on the same element would make the eye jump to the
+ * origin the moment it blinked.
+ */
+function eye(cx, cy, id) {
   const look = el('g', { 'data-part': 'look' }, [
-    el('circle', { cx, cy: 212, r: 16.5, fill: 'url(#' + id + '-iris)' }),
-    el('circle', { cx, cy: 212, r: 8.6, fill: SKIN.pupil }),
-    el('circle', { cx: cx - 5.5, cy: 204, r: 5.8, fill: '#fff' }),
-    el('circle', { cx: cx + 6, cy: 219, r: 2.6, fill: '#fff', opacity: 0.75 })
+    el('circle', { cx: 0, cy: 2, r: 21.5, fill: 'url(#' + id + '-iris)' }),
+    el('circle', { cx: 0, cy: 3, r: 10.5, fill: SKIN.pupil }),
+    el('circle', { cx: -8, cy: -9, r: 8, fill: '#fff' }),
+    el('circle', { cx: 9, cy: 11, r: 3.8, fill: '#fff', opacity: 0.8 })
   ]);
 
   const lid = el('g', {
@@ -386,22 +434,24 @@ function eye(cx, id) {
   }, [
     /* drawn full height and scaled down to nothing when the eye is open, so one
        scaleY drives blink, droop and sleep from the same part */
-    el('ellipse', { cx, cy: 207, rx: 26.6, ry: 32.4, fill: SKIN.lung }),
-    el('ellipse', { cx, cy: 200, rx: 26.6, ry: 24, fill: SKIN.lungDark, opacity: 0.35 }),
-    path('M' + (cx - 21) + ' 233 q21 11 42 0', { fill: 'none', stroke: SKIN.brow, 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.85 })
+    el('ellipse', { cx: 0, cy: 0, rx: 31.4, ry: 34.4, fill: SKIN.lung }),
+    el('ellipse', { cx: 0, cy: -7, rx: 31.4, ry: 26, fill: SKIN.lungDark, opacity: 0.32 }),
+    path('M-22 25 q22 12 44 0', { fill: 'none', stroke: SKIN.brow, 'stroke-width': 3.2, 'stroke-linecap': 'round', opacity: 0.85 })
   ]);
 
-  return el('g', {
+  const eyeball = el('g', {
     'data-part': 'eye',
     style: 'transform-box:fill-box;transform-origin:center;will-change:transform'
   }, [
-    el('ellipse', { cx, cy: 207, rx: 26, ry: 32, fill: SKIN.eyeWhite }),
+    el('ellipse', { cx: 0, cy: 0, rx: 30.5, ry: 33.5, fill: SKIN.eyeWhite }),
     /* contact shadow where the lid meets the sclera — stops the eye reading as
        a flat white hole */
-    el('ellipse', { cx, cy: 188, rx: 24, ry: 12, fill: SKIN.eyeShade, opacity: 0.45 }),
+    el('ellipse', { cx: 0, cy: -19, rx: 28, ry: 13, fill: SKIN.eyeShade, opacity: 0.5 }),
     look,
     lid
   ]);
+
+  return el('g', { transform: 'translate(' + cx + ' ' + cy + ')' }, [eyeball]);
 }
 
 /* ---------------------------------------------------------------------------
@@ -413,42 +463,46 @@ function eye(cx, id) {
  * through its face. Each is drawn around its own origin and then placed, so the
  * same generator serves either arm at any angle.
  */
-function handOpen() {
-  /* the waving palm: four fingers, a thumb, and creases */
+function handOpen(id) {
+  /* the waving palm of the reference: four fingers spread, thumb out, creases */
   const g = el('g', {});
-  const fingers = [[-20, -30, 12.5, 38, -14], [-6.5, -40, 12.5, 48, -5], [7, -37, 12.5, 45, 4], [19.5, -25, 11.5, 35, 13]];
+  const fill = 'url(#' + id + '-hand)';
+  const fingers = [[-23, -36, 14, 42, -15], [-7, -47, 14, 53, -4], [8, -44, 14, 50, 6], [22, -30, 13, 40, 15]];
   for (const [x, y, w, h, rot] of fingers) {
     g.appendChild(el('rect', {
-      x, y, width: w, height: h, rx: w / 2, fill: SKIN.lung,
+      x, y, width: w, height: h, rx: w / 2, fill,
       transform: 'rotate(' + rot + ' ' + (x + w / 2) + ' ' + (y + h) + ')'
     }));
   }
-  g.appendChild(path('M-24 24 C-35 21 -44 29 -43 40 C-42 51 -32 57 -23 52 Z', { fill: SKIN.lungDark }));
-  g.appendChild(path('M-25 36 C-27 21 -23 6 -16 0 L18 0 C25 6 28 21 26 36 C23 55 12 65 0 65 C-12 65 -22 55 -25 36 Z', { fill: SKIN.lung }));
-  g.appendChild(path('M-14 3 v11 M-0.5 -1 v13 M13 2 v12', {
-    fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.7, 'stroke-linecap': 'round', opacity: 0.4
+  /* thumb */
+  g.appendChild(path('M-27 22 C-40 18 -50 27 -49 40 C-48 53 -36 60 -26 54 Z', { fill }));
+  /* palm */
+  g.appendChild(path('M-28 34 C-30 17 -25 1 -17 -6 L20 -6 C29 1 32 17 30 34 C27 55 15 66 1 66 C-13 66 -25 55 -28 34 Z', { fill }));
+  g.appendChild(path('M-15 -2 v12 M0 -6 v14 M15 -3 v13', {
+    fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.9, 'stroke-linecap': 'round', opacity: 0.38
   }));
+  g.appendChild(el('ellipse', { cx: -4, cy: 22, rx: 16, ry: 12, fill: SKIN.lungLight, opacity: 0.3 }));
   return g;
 }
 
-function handRelaxed() {
+function handRelaxed(id) {
   /* hanging at the side: a soft, slightly curled fist */
   const g = el('g', {});
-  g.appendChild(path('M-17 -12 C-6 -20 8 -20 17 -12 C24 -6 25 10 20 20 C14 31 -12 31 -18 20 C-23 10 -23 -6 -17 -12 Z', { fill: SKIN.lung }));
-  g.appendChild(path('M-14 -4 C-4 -9 6 -9 15 -4', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.8, 'stroke-linecap': 'round', opacity: 0.45 }));
-  g.appendChild(path('M-12 6 h24 M-10 15 h20', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.6, 'stroke-linecap': 'round', opacity: 0.32 }));
-  g.appendChild(el('ellipse', { cx: -4, cy: -8, rx: 10, ry: 6, fill: SKIN.lungLight, opacity: 0.4 }));
+  const fill = 'url(#' + id + '-hand)';
+  g.appendChild(path('M-19 -14 C-7 -23 9 -23 19 -14 C27 -7 28 11 22 22 C16 34 -13 34 -20 22 C-26 11 -26 -7 -19 -14 Z', { fill }));
+  g.appendChild(path('M-16 -5 C-4 -10 7 -10 17 -5', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.42 }));
+  g.appendChild(path('M-13 7 h26 M-11 17 h22', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.7, 'stroke-linecap': 'round', opacity: 0.3 }));
   return g;
 }
 
-function handHip() {
-  /* on the hip: the thumb forward, fingers wrapping back — the pose that turns
-     a standing figure into a relaxed one (§6) */
+function handHip(id) {
+  /* on the hip: thumb forward, fingers wrapping back — the pose that turns a
+     standing figure into a relaxed one (§6) */
   const g = el('g', {});
-  g.appendChild(path('M-18 -14 C-4 -22 12 -20 20 -10 C26 -2 25 12 18 19 C8 29 -12 28 -18 18 C-24 8 -24 -6 -18 -14 Z', { fill: SKIN.lung }));
-  g.appendChild(path('M-14 -12 C-18 -2 -18 10 -13 19', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.5 }));
-  g.appendChild(path('M-2 -18 C6 -12 9 -2 7 8', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.7, 'stroke-linecap': 'round', opacity: 0.35 }));
-  g.appendChild(el('ellipse', { cx: 0, cy: -10, rx: 11, ry: 6, fill: SKIN.lungLight, opacity: 0.38 }));
+  const fill = 'url(#' + id + '-hand)';
+  g.appendChild(path('M-20 -16 C-5 -25 13 -22 22 -11 C29 -2 28 13 20 21 C9 32 -13 31 -20 20 C-27 9 -27 -7 -20 -16 Z', { fill }));
+  g.appendChild(path('M-15 -13 C-20 -2 -20 11 -14 21', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: 0.45 }));
+  g.appendChild(path('M-2 -20 C7 -13 10 -2 8 9', { fill: 'none', stroke: SKIN.lungDark, 'stroke-width': 1.8, 'stroke-linecap': 'round', opacity: 0.32 }));
   return g;
 }
 
@@ -467,45 +521,48 @@ function place(node, x, y, rot, scale) {
  * open. Now `rest` and `hip` are the defaults and `wave` is a pose he enters and
  * leaves.
  *
- * Sleeve is a thick round-capped stroke; the cuff and the hand ride at its end.
+ * The sleeve is a thick round-capped stroke; the cuff and the hand ride at its
+ * end.
  */
 function armPose(side, name, id) {
   const g = el('g', { 'data-pose': name, style: 'will-change:transform' });
   const sleeve = (d, w) => path(d, { fill: 'none', stroke: 'url(#' + id + '-sleeve)', 'stroke-width': w, 'stroke-linecap': 'round' });
+  const cuff = (x, y, rot) => el('rect', { x: x - 19, y: y - 8, width: 38, height: 16, rx: 8, fill: SKIN.navyLight, transform: rot ? 'rotate(' + rot + ' ' + x + ' ' + y + ')' : null });
 
   if (side > 0) {
     if (name === 'wave') {
-      g.appendChild(sleeve('M232 348 C266 340 292 312 302 268', 37));
-      g.appendChild(el('rect', { x: 295, y: 236, width: 37, height: 15, rx: 7.5, fill: SKIN.navyLight, transform: 'rotate(-14 313.5 243)' }));
-      g.appendChild(place(handOpen(), 313, 196, 6));
+      g.appendChild(sleeve('M262 356 C302 350 324 320 328 276', 42));
+      g.appendChild(cuff(329, 266, -6));
+      g.appendChild(place(handOpen(id), 331, 214, 8, 0.95));
     } else if (name === 'hip') {
-      g.appendChild(sleeve('M230 348 C254 368 258 400 232 424', 36));
-      g.appendChild(el('rect', { x: 216, y: 408, width: 34, height: 14, rx: 7, fill: SKIN.navyLight, transform: 'rotate(24 233 415)' }));
-      g.appendChild(place(handHip(), 230, 432, -18, -1));
+      g.appendChild(sleeve('M260 356 C288 378 292 418 262 444', 41));
+      g.appendChild(cuff(266, 434, 26));
+      g.appendChild(place(handHip(id), 258, 458, -20, -1));
     } else if (name === 'point') {
-      g.appendChild(sleeve('M232 348 C262 348 286 336 300 318', 36));
-      g.appendChild(el('rect', { x: 288, y: 306, width: 34, height: 14, rx: 7, fill: SKIN.navyLight, transform: 'rotate(-32 305 313)' }));
-      g.appendChild(place(handOpen(), 310, 296, 38, 0.94));
+      g.appendChild(sleeve('M262 356 C296 356 322 342 338 320', 41));
+      g.appendChild(cuff(340, 315, -34));
+      g.appendChild(place(handOpen(id), 352, 296, 40, 0.95));
     } else {
       /* rest: hanging naturally, elbow very slightly out */
-      g.appendChild(sleeve('M232 348 C244 374 248 404 244 430', 36));
-      g.appendChild(el('rect', { x: 227, y: 424, width: 34, height: 14, rx: 7, fill: SKIN.navyLight }));
-      g.appendChild(place(handRelaxed(), 244, 452, 4));
+      g.appendChild(sleeve('M262 356 C278 388 282 424 278 456', 41));
+      g.appendChild(cuff(278, 452, 4));
+      g.appendChild(place(handRelaxed(id), 279, 480, 4));
     }
   } else if (name === 'hip') {
-    g.appendChild(sleeve('M90 346 C66 366 62 400 88 424', 36));
-    g.appendChild(el('rect', { x: 71, y: 408, width: 34, height: 14, rx: 7, fill: SKIN.navyLight, transform: 'rotate(-24 88 415)' }));
-    g.appendChild(place(handHip(), 90, 432, 18));
+    g.appendChild(sleeve('M112 356 C90 380 86 420 104 446', 41));
+    g.appendChild(cuff(104, 442, -16));
+    g.appendChild(place(handHip(id), 100, 464, 16, 0.84));
   } else if (name === 'chin') {
-    /* the thinking pose — hand up under the chin */
-    /* elbow tucked in, hand under the chin rather than across the face */
-    g.appendChild(sleeve('M90 346 C84 332 100 320 124 318', 34));
-    g.appendChild(el('rect', { x: 112, y: 311, width: 30, height: 13, rx: 6.5, fill: SKIN.navyLight, transform: 'rotate(-4 127 317)' }));
-    g.appendChild(place(handRelaxed(), 140, 316, -14, 0.9));
+    /* The thinking pose — hand up against the cheek. Under the chin it was
+       swallowed by the head, which on a character this top-heavy is most of the
+       silhouette; against the cheek it reads at dock size (§20). */
+    g.appendChild(sleeve('M112 356 C96 332 90 298 98 274', 40));
+    g.appendChild(cuff(99, 270, 8));
+    g.appendChild(place(handRelaxed(id), 101, 250, -12, 0.9));
   } else {
-    g.appendChild(sleeve('M90 346 C78 374 76 404 80 430', 35));
-    g.appendChild(el('rect', { x: 63, y: 424, width: 34, height: 14, rx: 7, fill: SKIN.navyLight }));
-    g.appendChild(place(handRelaxed(), 80, 452, -4));
+    g.appendChild(sleeve('M112 356 C96 388 92 424 96 456', 40));
+    g.appendChild(cuff(96, 452, -4));
+    g.appendChild(place(handRelaxed(id), 95, 480, -4));
   }
   return g;
 }
@@ -514,7 +571,7 @@ function arm(side, poses, id) {
   const g = el('g', {
     'data-part': side > 0 ? 'arm-right' : 'arm-left',
     /* pivot at the shoulder, in viewBox user units */
-    style: 'transform-origin:' + (side > 0 ? '232px 348px' : '94px 346px') + ';will-change:transform'
+    style: 'transform-origin:' + (side > 0 ? '262px 356px' : '112px 356px') + ';will-change:transform'
   });
   for (const p of poses) {
     const pose = armPose(side, p, id);
@@ -528,25 +585,30 @@ function arm(side, poses, id) {
 }
 
 function leg(side, id) {
-  const x = side > 0 ? 172 : 102;
-  const cx = x + 23;
+  const cx = side > 0 ? 224 : 148;
+  const x = cx - 34;
   const g = el('g', {
     'data-part': side > 0 ? 'leg-right' : 'leg-left',
     /* pivot at the hip */
-    style: 'transform-origin:' + cx + 'px 428px;will-change:transform'
+    style: 'transform-origin:' + cx + 'px 490px;will-change:transform'
   });
   /* cargo trouser leg */
-  g.appendChild(path('M' + x + ' 428 h46 v92 a9 9 0 0 1 -9 9 h-28 a9 9 0 0 1 -9 -9 Z', { fill: 'url(#' + id + '-trouser)' }));
-  g.appendChild(el('rect', { x: x + 6, y: 458, width: 34, height: 30, rx: 5, fill: SKIN.khakiDark, opacity: 0.5 }));
-  g.appendChild(el('rect', { x: x + 6, y: 456, width: 34, height: 8, rx: 4, fill: SKIN.khakiDark }));
-  /* a fold at the knee, so the leg has a front and a side */
-  g.appendChild(path('M' + (x + 3) + ' 500 q23 6 40 0', { fill: 'none', stroke: SKIN.khakiDark, 'stroke-width': 2, opacity: 0.35, 'stroke-linecap': 'round' }));
-  /* sneaker: navy upper, cream sole, marigold flash */
-  g.appendChild(path('M' + (cx - 29) + ' 517 h50 c10 0 17 8 17 17 v8 h-72 v-8 c0 -9 3 -17 5 -17 Z', { fill: 'url(#' + id + '-shoe)' }));
-  g.appendChild(el('rect', { x: cx - 34, y: 538, width: 68, height: 23, rx: 11, fill: SKIN.sole }));
-  g.appendChild(el('rect', { x: cx - 34, y: 546, width: 68, height: 8, rx: 4, fill: '#DFCFB8', opacity: 0.55 }));
-  g.appendChild(el('rect', { x: cx - 22, y: 523, width: 32, height: 5.5, rx: 2.75, fill: SKIN.marigold }));
-  g.appendChild(path('M' + (cx - 18) + ' 531 h22 M' + (cx - 15) + ' 536 h17', { stroke: SKIN.sole, 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: 0.75 }));
+  g.appendChild(path('M' + x + ' 486 h68 v106 a12 12 0 0 1 -12 12 h-44 a12 12 0 0 1 -12 -12 Z', { fill: 'url(#' + id + '-trouser)' }));
+  /* the cargo pocket of the reference: a flap on the outer thigh */
+  const px = side > 0 ? cx + 3 : cx - 31;
+  g.appendChild(el('rect', { x: px, y: 524, width: 30, height: 34, rx: 5, fill: SKIN.khakiDark, opacity: 0.42 }));
+  g.appendChild(el('rect', { x: px - 1, y: 520, width: 32, height: 10, rx: 4, fill: SKIN.khakiDark, opacity: 0.85 }));
+  /* folds, so the leg has a front and a side */
+  g.appendChild(path('M' + (x + 4) + ' 572 q29 7 58 0', { fill: 'none', stroke: SKIN.khakiDark, 'stroke-width': 2.2, opacity: 0.3, 'stroke-linecap': 'round' }));
+  g.appendChild(path('M' + (x + 6) + ' 500 q27 6 54 0', { fill: 'none', stroke: SKIN.khakiDark, 'stroke-width': 2, opacity: 0.22, 'stroke-linecap': 'round' }));
+
+  /* sneaker: navy upper, cream toe cap and sole, marigold flash */
+  g.appendChild(path('M' + (cx - 30) + ' 596 h44 c12 0 20 9 20 19 v7 h-70 v-8 c0 -10 2 -18 6 -18 Z', { fill: 'url(#' + id + '-shoe)' }));
+  /* cream toe cap */
+  g.appendChild(path('M' + (cx + 18) + ' 600 c12 2 18 10 18 16 v6 h-22 Z', { fill: SKIN.sole, opacity: 0.95 }));
+  g.appendChild(el('rect', { x: cx - 34, y: 620, width: 68, height: 24, rx: 12, fill: 'url(#' + id + '-sole)' }));
+  g.appendChild(el('rect', { x: cx - 26, y: 602, width: 34, height: 6, rx: 3, fill: SKIN.marigold }));
+  g.appendChild(path('M' + (cx - 22) + ' 611 h26 M' + (cx - 18) + ' 617 h20', { stroke: SKIN.sole, 'stroke-width': 2.4, 'stroke-linecap': 'round', opacity: 0.8 }));
   return g;
 }
 
@@ -556,8 +618,10 @@ function leg(side, id) {
 
 export function build() {
   const id = 'uppi-' + (++uid);
+  TRACHEA_ID.id = id;
+
   const svg = el('svg', {
-    viewBox: '0 0 372 572',
+    viewBox: '0 0 372 660',
     xmlns: NS,
     'data-uppi': 'avatar',
     role: 'img',
@@ -571,72 +635,85 @@ export function build() {
   svg.appendChild(defs(id));
 
   /* soft contact shadow, so he stands on something rather than floating */
-  svg.appendChild(el('ellipse', { 'data-part': 'shadow', cx: 160, cy: 562, rx: 104, ry: 15, fill: 'url(#' + id + '-shadow)' }));
+  svg.appendChild(el('ellipse', { 'data-part': 'shadow', cx: 186, cy: 648, rx: 112, ry: 16, fill: 'url(#' + id + '-shadow)' }));
 
   /* legs sit behind the body, so the hoodie hem overlaps the waistband */
   svg.appendChild(el('g', { 'data-part': 'legs' }, [leg(-1, id), leg(1, id)]));
 
-  const body = el('g', { 'data-part': 'body', style: 'transform-origin:160px 456px;will-change:transform' });
+  const body = el('g', { 'data-part': 'body', style: 'transform-origin:186px 494px;will-change:transform' });
   /* hood, bunched behind the neck */
-  body.appendChild(path('M106 330 C110 306 134 296 160 296 C186 296 210 306 214 330 C198 342 122 342 106 330 Z', { fill: SKIN.navyDeep }));
+  body.appendChild(path('M126 350 C130 322 156 310 186 310 C216 310 242 322 246 350 C228 364 144 364 126 350 Z', { fill: SKIN.navyDeep }));
   /* torso */
-  body.appendChild(path('M160 312 C198 312 230 326 238 352 C244 372 244 414 240 440 C238 450 230 456 220 456 H100 C90 456 82 450 80 440 C76 414 76 372 82 352 C90 326 122 312 160 312 Z', { fill: 'url(#' + id + '-hood)' }));
+  body.appendChild(path(TORSO_D, { fill: 'url(#' + id + '-hood)' }));
 
   /* everything below is clipped to the torso, so no shading can spill */
   const shade = el('g', { 'clip-path': 'url(#' + id + '-torso)' });
   /* the shadow the head casts on the chest — the single biggest depth cue */
-  shade.appendChild(el('ellipse', { cx: 160, cy: 318, rx: 84, ry: 30, fill: SKIN.navyDeep, opacity: 0.55 }));
+  shade.appendChild(el('ellipse', { cx: 186, cy: 336, rx: 96, ry: 34, fill: SKIN.navyDeep, opacity: 0.6 }));
   /* light down the left edge, shadow down the right */
-  shade.appendChild(path('M80 352 C88 326 118 312 160 312 L160 456 H100 C90 456 82 450 80 440 Z', { fill: SKIN.navyLight, opacity: 0.18 }));
-  shade.appendChild(path('M238 352 C230 326 200 312 160 312 L160 456 H220 C230 456 238 450 240 440 Z', { fill: SKIN.navyDeep, opacity: 0.22 }));
+  shade.appendChild(path('M100 358 C110 340 148 330 186 330 L186 494 H122 C108 494 101 484 100 466 Z', { fill: SKIN.navyLight, opacity: 0.16 }));
+  shade.appendChild(path('M272 358 C262 340 224 330 186 330 L186 494 H250 C264 494 271 484 272 466 Z', { fill: SKIN.navyDeep, opacity: 0.24 }));
   /* hem */
-  shade.appendChild(el('rect', { x: 76, y: 442, width: 168, height: 16, fill: SKIN.navyDeep, opacity: 0.4 }));
+  shade.appendChild(el('rect', { x: 96, y: 478, width: 180, height: 18, fill: SKIN.navyDeep, opacity: 0.42 }));
   body.appendChild(shade);
 
   /* collar */
-  body.appendChild(path('M131 312 C140 330 180 330 189 312 C180 305 140 305 131 312 Z', { fill: SKIN.navyLight }));
+  body.appendChild(path('M154 330 C164 350 208 350 218 330 C208 322 164 322 154 330 Z', { fill: SKIN.navyLight }));
   /* drawstrings */
-  body.appendChild(path('M142 320 C140 338 139 354 140 368 M178 320 C180 338 181 354 180 368', {
-    fill: 'none', stroke: SKIN.marigold, 'stroke-width': 4.2, 'stroke-linecap': 'round'
+  /* short, and stopping well clear of the petal mark — run them down to it and
+     the two read as one pendant rather than as drawstrings and a badge */
+  body.appendChild(path('M168 338 C166 352 165 364 166 376 M204 338 C206 352 207 364 206 376', {
+    fill: 'none', stroke: SKIN.marigold, 'stroke-width': 4.6, 'stroke-linecap': 'round'
   }));
-  body.appendChild(el('circle', { cx: 140, cy: 372, r: 3.8, fill: SKIN.marigoldDark }));
-  body.appendChild(el('circle', { cx: 180, cy: 372, r: 3.8, fill: SKIN.marigoldDark }));
+  body.appendChild(el('circle', { cx: 166, cy: 380, r: 4.2, fill: SKIN.marigoldDark }));
+  body.appendChild(el('circle', { cx: 206, cy: 380, r: 4.2, fill: SKIN.marigoldDark }));
   /* kangaroo pocket */
-  body.appendChild(path('M96 414 C118 408 202 408 224 414 L219 450 H101 Z', { fill: SKIN.navyLight, opacity: 0.45 }));
-  body.appendChild(path('M96 414 C118 408 202 408 224 414', { fill: 'none', stroke: SKIN.navyDeep, 'stroke-width': 2.2, opacity: 0.5 }));
+  body.appendChild(path('M114 444 C140 438 232 438 258 444 L252 488 H120 Z', { fill: SKIN.navyLight, opacity: 0.42 }));
+  body.appendChild(path('M114 444 C140 438 232 438 258 444', { fill: 'none', stroke: SKIN.navyDeep, 'stroke-width': 2.4, opacity: 0.5 }));
   /* the Yashoda marigold on the chest */
-  body.appendChild(petals(160, 388, 22, SKIN.marigold));
+  body.appendChild(petals(186, 420, 27, SKIN.marigold));
   svg.appendChild(body);
 
   /* neck, tucked under the collar */
-  svg.appendChild(el('rect', { x: 140, y: 292, width: 40, height: 28, rx: 13, fill: SKIN.lungDark }));
+  svg.appendChild(el('rect', { x: 168, y: 300, width: 36, height: 26, rx: 13, fill: SKIN.lungDark }));
 
   /* ---- head ---- */
-  const head = el('g', { 'data-part': 'head', style: 'transform-origin:160px 322px;will-change:transform' });
+  const head = el('g', { 'data-part': 'head', style: 'transform-origin:186px 320px;will-change:transform' });
 
-  head.appendChild(el('g', {}, tracheaRings()));
+  /* the trachea goes in first: its base belongs behind the cleft */
+  head.appendChild(tracheaRings());
 
-  head.appendChild(path(HEAD_D, { fill: 'url(#' + id + '-head)' }));
+  /*
+   * ONE mass, not two balloons. Drawing the lobes as separate filled shapes put
+   * a hard gradient seam straight down the middle of the face, which read as a
+   * peanut rather than as a pair of lungs. The reference has a cleft in the top
+   * third only: below that the lobes are one form, and the separation is
+   * carried by shading rather than by an edge.
+   */
+  head.appendChild(path(HEAD_D, { fill: 'url(#' + id + '-lobeL)' }));
 
   const face = el('g', { 'clip-path': 'url(#' + id + '-head)' });
-  /* rim light down the left, shadow down the right and along the lower edge */
-  face.appendChild(path('M94 57 C56 63 38 106 38 168 C38 210 46 252 64 280 C56 244 54 202 60 164 C68 120 80 84 96 60 Z', { fill: SKIN.lungLight, opacity: 0.55 }));
-  face.appendChild(path('M226 57 C266 57 282 102 282 168 C282 214 271 258 249 288 C263 252 268 208 263 168 C257 122 244 84 224 60 Z', { fill: SKIN.lungDark, opacity: 0.3 }));
-  face.appendChild(el('ellipse', { cx: 160, cy: 332, rx: 120, ry: 30, fill: SKIN.lungDark, opacity: 0.22 }));
-  /* the cleft between the lobes, visible only in the upper third as in the
-     reference — lower down the two lobes read as one mass */
-  face.appendChild(path('M160 130 C158 146 158 158 159 170', {
-    fill: 'none', stroke: SKIN.lungDeep, 'stroke-width': 2.6, 'stroke-linecap': 'round', opacity: 0.4
+  /* each lobe gets its own soft highlight, so the pair still bulges */
+  face.appendChild(el('ellipse', { cx: 118, cy: 158, rx: 44, ry: 30, fill: '#FFF3ED', opacity: 0.3, transform: 'rotate(-24 118 158)' }));
+  face.appendChild(el('ellipse', { cx: 252, cy: 156, rx: 40, ry: 26, fill: '#FFF3ED', opacity: 0.22, transform: 'rotate(20 252 156)' }));
+  /* and its own falloff towards the rim */
+  face.appendChild(path('M72 184 C70 226 82 262 104 284 C92 244 88 208 92 170 Z', { fill: SKIN.lungDeep, opacity: 0.16 }));
+  face.appendChild(path('M300 184 C302 226 290 262 268 284 C280 244 284 208 280 170 Z', { fill: SKIN.lungDeep, opacity: 0.2 }));
+  /* the cleft — top third only */
+  face.appendChild(path('M186 150 C184 164 183 176 184 190', {
+    fill: 'none', stroke: SKIN.lungDeep, 'stroke-width': 3.4, 'stroke-linecap': 'round', opacity: 0.3
   }));
-  face.appendChild(path('M160 128 C152 140 150 156 151 172', {
-    fill: 'none', stroke: SKIN.lungLight, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.5
+  face.appendChild(path('M187 148 C190 162 191 174 190 188', {
+    fill: 'none', stroke: '#FFEDE5', 'stroke-width': 2.6, 'stroke-linecap': 'round', opacity: 0.5
   }));
+  /* the shadow the chin casts down onto the hoodie */
+  face.appendChild(el('ellipse', { cx: 186, cy: 324, rx: 116, ry: 24, fill: SKIN.lungDeep, opacity: 0.22 }));
 
   /* bronchial tree, clipped to the head so it cannot spill past the edge */
   const tree = el('g', { fill: 'none', stroke: SKIN.vein, 'stroke-linecap': 'round', opacity: 0.62 });
   const trunk = el('g', { 'stroke-width': 4.6 });
   for (const v of VEINS_TRUNK) trunk.appendChild(path(v));
-  const twig = el('g', { 'stroke-width': 2.5 });
+  const twig = el('g', { 'stroke-width': 2.4 });
   for (const v of VEINS_TWIG) twig.appendChild(path(v));
   tree.appendChild(trunk);
   tree.appendChild(twig);
@@ -644,23 +721,28 @@ export function build() {
   head.appendChild(face);
 
   /* cheeks */
-  head.appendChild(el('ellipse', { cx: 90, cy: 252, rx: 22, ry: 14, fill: 'url(#' + id + '-blush)' }));
-  head.appendChild(el('ellipse', { cx: 230, cy: 252, rx: 22, ry: 14, fill: 'url(#' + id + '-blush)' }));
+  head.appendChild(el('ellipse', { cx: 108, cy: 258, rx: 26, ry: 16, fill: 'url(#' + id + '-blush)' }));
+  head.appendChild(el('ellipse', { cx: 264, cy: 258, rx: 26, ry: 16, fill: 'url(#' + id + '-blush)' }));
 
-  /* brows */
+  /* brows — thick, dark and arched, as in the reference */
   head.appendChild(el('g', { 'data-part': 'brow-left', style: 'transform-box:fill-box;transform-origin:center;will-change:transform' }, [
-    path('M99 168 C109 156 130 154 143 161 C131 161 113 165 102 174 Z', { fill: SKIN.brow })
+    path('M114 166 C122 146 148 138 174 148 C177 149 178 153 175 155 C170 152 158 150 147 152 C133 155 123 162 118 172 C116 176 112 173 114 166 Z', { fill: SKIN.brow })
   ]));
   head.appendChild(el('g', { 'data-part': 'brow-right', style: 'transform-box:fill-box;transform-origin:center;will-change:transform' }, [
-    path('M221 168 C211 156 190 154 177 161 C189 161 207 165 218 174 Z', { fill: SKIN.brow })
+    path('M258 166 C250 146 224 138 198 148 C195 149 194 153 197 155 C202 152 214 150 225 152 C239 155 249 162 254 172 C256 176 260 173 258 166 Z', { fill: SKIN.brow })
   ]));
 
   /* eyes */
-  head.appendChild(eye(123, id));
-  head.appendChild(eye(197, id));
+  head.appendChild(eye(146, 214, id));
+  head.appendChild(eye(226, 214, id));
 
-  /* mouth: dark interior, tongue, teeth. The group scales to round or widen the
-     lips without redrawing the shape. */
+  /*
+   * The mouth shapes are all drawn around (160, 256) — the anchor every viseme
+   * in MOUTHS shares. Placing the group rather than redrawing fifteen paths is
+   * what keeps the viseme set and its tests intact while the face moves and
+   * grows: translate so that anchor lands at (186, 264), scaled up 1.18 to the
+   * reference's mouth size.
+   */
   const mouth = el('g', {
     'data-part': 'mouth',
     style: 'transform-box:fill-box;transform-origin:center;will-change:transform'
@@ -668,7 +750,7 @@ export function build() {
   mouth.appendChild(path(MOUTHS.smile.mouth, { 'data-part': 'mouth-shape', fill: 'url(#' + id + '-mouthDepth)' }));
   mouth.appendChild(path(MOUTHS.smile.tongue, { 'data-part': 'mouth-tongue', fill: SKIN.tongue }));
   mouth.appendChild(path(MOUTHS.smile.teeth, { 'data-part': 'mouth-teeth', fill: SKIN.teeth }));
-  head.appendChild(mouth);
+  head.appendChild(el('g', { transform: 'translate(-2.8 -38.1) scale(1.18)' }, [mouth]));
 
   svg.appendChild(head);
 
@@ -680,7 +762,6 @@ export function build() {
 
   return svg;
 }
-
 /* ---------------------------------------------------------------------------
    The interface everything above this file uses
    ---------------------------------------------------------------------------
