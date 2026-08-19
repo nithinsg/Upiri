@@ -9,7 +9,7 @@
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const SUITES = ['core.test.mjs', 'conversation.test.mjs', 'rig.test.mjs', 'browser.test.mjs'];
+const SUITES = ['core.test.mjs', 'conversation.test.mjs', 'rig.test.mjs', 'browser.test.mjs', 'pages.test.mjs'];
 const only = process.argv[2];
 const dir = fileURLToPath(new URL('.', import.meta.url));
 

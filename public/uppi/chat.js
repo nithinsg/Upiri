@@ -932,6 +932,43 @@ export class UppiChat {
     track('uppi_conversation_cleared');
   }
 
+  /**
+   * The airlift scene on the ECMO & air ambulance page (§15).
+   *
+   * The page owns the helicopter; Uppi owns Uppi. This is the whole seam
+   * between them, so the scene never reaches for `motion` or for the rig — it
+   * asks for a phase and this decides what that means for the character.
+   *
+   *   'call'   he takes out his phone and makes the call
+   *   'board'  the helicopter has reached him: the dock steps aside so the
+   *            passenger under the rotor reads as him rather than as a second
+   *            character standing next to him
+   *   'land'   he is back, and back to whatever the machine says he should be
+   *
+   * Note what is NOT here: no `motion.setPose('right','phone')`. The phone is a
+   * consequence of `isAppointment`, which is an input on the state machine, so
+   * his face and his posture cannot end up disagreeing with each other.
+   *
+   * @param {'call'|'board'|'land'} phase
+   */
+  airlift(phase) {
+    if (phase === 'call') {
+      this.states.set('isAppointment', true);
+      return;
+    }
+    if (phase === 'board') {
+      /* opacity rather than `hidden`, so his footprint stays and the page does
+         not reflow around him mid-flight */
+      this.dock.style.transition = 'opacity .32s ease, transform .32s ease';
+      this.dock.style.opacity = '0';
+      this.dock.style.transform = 'translateY(-14px) scale(.94)';
+      return;
+    }
+    this.dock.style.opacity = '';
+    this.dock.style.transform = '';
+    this.states.set('isAppointment', false);
+  }
+
   destroy() {
     if (this.presence) { this.presence.destroy(); this.presence = null; }
     this.states.destroy();

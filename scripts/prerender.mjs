@@ -65,6 +65,8 @@ const routes = await probe.evaluate(() => {
   return [
     ...base,
     ...app.KH_TOPICS.map((t) => '/knowledge-hub/' + t.id),
+    ...app.KH_ARTICLES.map((a) => '/knowledge-hub/guide/' + a.id),
+    ...app.KH_CASES.map((c) => '/knowledge-hub/case/' + c.id),
     ...app.DOCTORS.map((d) => '/doctors/' + d.id),
     ...app.PROCEDURES.map((p) => '/tests-and-procedures/' + p.id),
   ];
@@ -116,6 +118,33 @@ server.close();
 
 await writeFile(join(OUT, 'prerender-manifest.json'),
   JSON.stringify({ generated: new Date().toISOString(), routes: routes.length, written }, null, 2));
+
+/*
+ * The sitemap, from the same list that was just rendered.
+ *
+ * It used to be maintained by hand and had fallen 29 routes behind — every
+ * guide, every teaching case and the air ambulance page were missing, which
+ * means the pages nobody had linked to yet were also the pages nobody could
+ * find. Writing it here makes drift impossible: a route that is not prerendered
+ * is not in the sitemap, and a route that is, is.
+ */
+const ORIGIN = 'https://upiri.vercel.app';
+const today = new Date().toISOString().slice(0, 10);
+const priority = (r) =>
+  r === '/' ? '1.0'
+    : /^\/(knowledge-hub|doctors|tests-and-procedures|symptom-checker|ecmo-and-air-ambulance)$/.test(r) ? '0.9'
+      : r.split('/').length > 2 ? '0.6' : '0.7';
+await writeFile(join(OUT, 'sitemap.xml'),
+  '<?xml version="1.0" encoding="UTF-8"?>\n'
+  + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+  + [...new Set(routes)].map((r) =>
+    '  <url>\n'
+    + `    <loc>${ORIGIN}${r === '/' ? '/' : r}</loc>\n`
+    + `    <lastmod>${today}</lastmod>\n`
+    + `    <changefreq>${r === '/' ? 'weekly' : 'monthly'}</changefreq>\n`
+    + `    <priority>${priority(r)}</priority>\n`
+    + '  </url>').join('\n')
+  + '\n</urlset>\n', 'utf8');
 
 console.log(`prerendered ${written}/${routes.length} routes into ${OUT}`);
 if (problems.length) {

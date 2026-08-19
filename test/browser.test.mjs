@@ -319,6 +319,24 @@ describe('With no destination configured, the offer does not exist');
 
 describe('The mouth rests when Uppi is not speaking');
 {
+  /*
+   * A mouth that is merely STILL is not the same as a mouth that is CLOSED.
+   * The rig used to rest on `smile`, which is drawn open with teeth and a
+   * tongue, so Uppi sat with his mouth hanging open for the whole session and
+   * every test here still passed — it only ever asked whether the shape was
+   * changing. So ask what the shape actually is, before anyone has spoken.
+   */
+  const q = await open(1280, 860);
+  await q.page.waitForTimeout(4200);           /* entrance, land, wave, settle */
+  const restShape = await q.page.evaluate(() => window.__uppi.avatar.mouth);
+  const restOpen = await q.page.evaluate(
+    () => window.__uppi.avatar.parts.tongue.getAttribute('d') || ''
+  );
+  ok(['grin', 'soft', 'neutral', 'small', 'concerned'].includes(restShape),
+    'at rest the mouth is a closed shape, not an open one (' + restShape + ')');
+  eq(restOpen, '', 'and no tongue is showing while he is silent');
+  await q.ctx.close();
+
   const w = await open(1280, 860);
   await w.page.evaluate(() => window.__uppi.dismissBubble());
   await w.page.evaluate(() => window.__uppi.openPanel());

@@ -260,6 +260,47 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
   x-dc [data-r="nav-pill"] [data-r="nav-word"]{font-size:21px !important}
   x-dc [data-r="nav-pill"]>[data-r="nav-home"] svg{width:34px !important;height:34px !important}
 }
+
+/* The rotor reads as spinning by squashing the blade disc rather than rotating
+   it — a rotating blade at this size just strobes. Paused entirely for anyone
+   who has asked for reduced motion. */
+@keyframes heli-rotor{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.12)}}
+x-dc [data-r="heli-rotor"]{animation:heli-rotor .16s linear infinite}
+@media (prefers-reduced-motion:reduce){
+  x-dc [data-r="heli-rotor"]{animation:none}
+  x-dc [data-r="heli"]{opacity:1 !important;transform:translateX(58vw) !important}
+}
+@media (max-width:560px){
+  /* the message must not sit on top of Uppi, who is bottom-right */
+  x-dc [data-r="heli-pop"]{left:12px !important;right:12px !important;max-width:none !important;bottom:100px !important}
+  x-dc [data-r="heli"]{width:118px !important}
+}
+
+/* ---------------------------------------------------------------------------
+   Horizontal rails (videos, specialists).
+
+   The layout is here rather than inline for two reasons: the small-screen block
+   above rewrites multi-column grids by matching on inline style text, and a rail
+   must NOT collapse to one column on a phone — sideways is the whole point. It
+   also keeps `data-rail` as the single hook the auto-advance timer looks for.
+
+   Scroll-snap does the positioning, so a nudge from the arrow, a swipe and the
+   2s timer all land a card in the same place.
+   --------------------------------------------------------------------------- */
+x-dc [data-rail]{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  padding:2px 2px 6px;margin:0 -2px;scroll-padding-left:2px}
+x-dc [data-rail]::-webkit-scrollbar{display:none}
+x-dc [data-rail]>*{flex:0 0 306px;scroll-snap-align:start;min-width:0}
+x-dc [data-rail-docs]>*{flex-basis:224px}
+@media (max-width:560px){
+  x-dc [data-rail]>*{flex-basis:80vw}
+  x-dc [data-rail-docs]>*{flex-basis:64vw}
+}
+/* The arrows are a convenience on a pointer device; a touch screen already has
+   the gesture, and two buttons floating over a swipeable rail only get in the
+   way of it. */
+@media (hover:none){ x-dc [data-rail-arrows]{display:none !important} }
 </style>
 </helmet>
 <template data-dc-template>
@@ -2201,6 +2242,24 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           </article>
         </sc-for>
       </div>
+
+      <!-- Not one of the nine procedures: this is the service that reaches a
+           patient who cannot get to any of them. It sits here because this is
+           where someone looks for it. -->
+      <button onClick="{{ goEcmo }}" style="width:100%;text-align:left;margin-top:22px;padding:30px 32px;border-radius:28px;border:1px solid rgba(206,68,56,0.28);background:linear-gradient(135deg,#FBE7E5,#FDF1EC);cursor:pointer;display:flex;gap:22px;align-items:center;flex-wrap:wrap" style-hover="transform:translateY(-2px)">
+        <span aria-hidden="true" style="flex:none;width:56px;height:56px;border-radius:18px;background:#BE3A2F;color:#fff;display:flex;align-items:center;justify-content:center">
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="M4 8h16"></path><path d="M6 8v6a6 6 0 0 0 12 0V8"></path><path d="M9 20h6"></path></svg>
+        </span>
+        <span style="flex:1;min-width:220px">
+          <span style="display:block;font-size:11.5px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:#A6362C">Advanced lung failure · 24&times;7</span>
+          <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;line-height:1.25;color:#1D1B4B;margin:7px 0 6px">ECMO &amp; the Air Ambulance</span>
+          <span style="display:block;font-size:14px;line-height:1.6;color:#8A2E26">When the lungs fail faster than a patient can travel — ECMO, Awake ECMO, and an air ambulance that can cannulate where they are and fly them in.</span>
+        </span>
+        <span aria-hidden="true" style="flex:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:#BE3A2F">
+          Read more
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+        </span>
+      </button>
     </div>
   </div>
   </sc-if>
@@ -2808,7 +2867,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
                 <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.35;color:#2C2A6B;margin:0 0 10px">{{ a.t }}</h3>
                 <p style="font-size:12.5px;color:#6966A4;margin:0 0 14px">{{ a.read }} read</p>
                 <div style="display:flex;align-items:center;gap:10px;margin-top:auto">
-                  <button onClick="{{ a.open }}" style="padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">Read the topic</button>
+                  <a href="{{ a.href }}" onClick="{{ a.open }}" style="padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px);color:#2C2A6B">Read the guide</a>
                   <sc-if value="{{ a.placeholder }}" hint-placeholder-val="{{ true }}">
                     <span style="font-size:11px;font-weight:700;color:#6A6799">In preparation</span>
                   </sc-if>
@@ -2888,7 +2947,7 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
                 <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;line-height:1.35;color:#2C2A6B;margin:0 0 8px">{{ c.t }}</h3>
                 <p style="font-size:13px;line-height:1.55;color:#4A4880;margin:0 0 14px;flex:1">{{ c.d }}</p>
                 <div style="display:flex;align-items:center;gap:10px">
-                  <button onClick="{{ c.open }}" style="padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px)">Explore case</button>
+                  <a href="{{ c.href }}" onClick="{{ c.open }}" style="padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#fff;background:#2C2A6B;border:none;cursor:pointer;transition:transform .15s ease" style-hover="transform:translateY(-1px);color:#fff">Explore case</a>
                   <sc-if value="{{ c.placeholder }}" hint-placeholder-val="{{ true }}">
                     <span style="font-size:11px;font-weight:700;color:#6A6799">In preparation</span>
                   </sc-if>
@@ -2979,7 +3038,17 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#2C2A6B;margin:30px 0 10px">Relevant Yashoda services</h2>
         <ul style="list-style:none;padding:0;margin:0;display:flex;gap:10px;flex-wrap:wrap">
           <sc-for list="{{ tpSvc }}" as="x" hint-placeholder-count="3">
-            <li style="font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ x.t }}</li>
+            <li>
+              <sc-if value="{{ x.hasLink }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ x.open }}" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;padding:9px 16px 9px 18px;border-radius:999px;background:#E7E7F4;color:#2C2A6B;border:1px solid rgba(44,42,107,0.12);cursor:pointer" style-hover="background:#DADAEE;color:#2C2A6B">
+                  {{ x.t }}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </sc-if>
+              <sc-if value="{{ x.noLink }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-block;font-size:13px;font-weight:700;padding:9px 18px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ x.t }}</span>
+              </sc-if>
+            </li>
           </sc-for>
         </ul>
       </article>
@@ -2994,11 +3063,11 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related articles</h2>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <sc-for list="{{ tpArticles }}" as="a" hint-placeholder-count="2">
-              <article style="padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
-                <span style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#A95508">{{ a.cat }}</span>
-                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ a.t }}</h3>
-                <p style="font-size:12px;color:#6966A4;margin:0">{{ a.read }} read</p>
-              </article>
+              <a href="{{ a.href }}" onClick="{{ a.open }}" style="display:block;text-align:left;padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1);cursor:pointer" style-hover="border-color:rgba(44,42,107,0.3)">
+                <span style="display:block;font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#A95508">{{ a.cat }}</span>
+                <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ a.t }}</span>
+                <span style="display:block;font-size:12px;color:#6966A4">{{ a.read }} read</span>
+              </a>
             </sc-for>
           </div>
         </section>
@@ -3006,8 +3075,23 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
 
       <sc-if value="{{ tpHasVideos }}" hint-placeholder-val="{{ true }}">
         <section style="margin-top:34px">
-          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related videos</h2>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px">
+            <div>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0">Related videos</h2>
+              <p style="font-size:12.5px;color:#69679C;margin:5px 0 0">{{ tpVideoCount }} · swipe, or use the arrows</p>
+            </div>
+            <div data-rail-arrows style="display:flex;gap:8px;flex:none">
+              <button onClick="{{ tpVidPrev }}" aria-label="Previous videos" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);color:#2C2A6B;cursor:pointer" style-hover="background:#E7E7F4;color:#2C2A6B">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+              </button>
+              <button onClick="{{ tpVidNext }}" aria-label="More videos" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);color:#2C2A6B;cursor:pointer" style-hover="background:#E7E7F4;color:#2C2A6B">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+              </button>
+            </div>
+          </div>
+          <!-- A rail, not a grid: it advances itself every 2s and stops the moment
+               anyone touches it, focuses inside it, or plays something in it. -->
+          <div data-rail="topic-videos" role="region" aria-label="Related videos, horizontally scrollable">
             <sc-for list="{{ tpVideos }}" as="v" hint-placeholder-count="2">
               <article style="border-radius:20px;overflow:hidden;background:#fff;border:1px solid rgba(44,42,107,0.1)">
                 <sc-if value="{{ v.idle }}" hint-placeholder-val="{{ true }}">
@@ -3051,11 +3135,11 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
           <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Related clinical cases</h2>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <sc-for list="{{ tpCases }}" as="c" hint-placeholder-count="2">
-              <article style="padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
-                <span style="font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#A95508">{{ c.lvl }}</span>
-                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ c.t }}</h3>
-                <p style="font-size:12.5px;line-height:1.5;color:#4A4880;margin:0">{{ c.d }}</p>
-              </article>
+              <a href="{{ c.href }}" onClick="{{ c.open }}" style="display:block;text-align:left;padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1);cursor:pointer" style-hover="border-color:rgba(44,42,107,0.3)">
+                <span style="display:block;font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#A95508">{{ c.lvl }}</span>
+                <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ c.t }}</span>
+                <span style="display:block;font-size:12.5px;line-height:1.5;color:#4A4880">{{ c.d }}</span>
+              </a>
             </sc-for>
           </div>
         </section>
@@ -3063,8 +3147,29 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
 
       <sc-if value="{{ tpHasDocs }}" hint-placeholder-val="{{ true }}">
         <section style="margin-top:34px">
-          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Meet the specialists</h2>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 16px">
+            <div>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0">Meet the specialists</h2>
+              <p style="font-size:12.5px;color:#69679C;margin:5px 0 0">{{ tpDocCount }}</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <!-- Which branch is the first thing a visitor in Hyderabad decides,
+                   so it is a control rather than a line of text on a card. -->
+              <label for="tp-branch" style="font-size:12.5px;font-weight:700;color:#4A4880">Branch</label>
+              <select id="tp-branch" onChange="{{ onBranch }}" value="{{ tpBranch }}" style="appearance:none;padding:9px 34px 9px 14px;border-radius:999px;font-size:13px;font-weight:700;color:#2C2A6B;background-color:rgba(255,255,255,0.95);background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2214%22 height=%2214%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%232C2A6B%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>');background-repeat:no-repeat;background-position:right 13px center;border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">
+                <sc-for list="{{ tpBranches }}" as="b" hint-placeholder-count="5"><option value="{{ b.v }}">{{ b.label }}</option></sc-for>
+              </select>
+              <div data-rail-arrows style="display:flex;gap:8px;flex:none">
+                <button onClick="{{ tpDocPrev }}" aria-label="Previous specialists" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);color:#2C2A6B;cursor:pointer" style-hover="background:#E7E7F4;color:#2C2A6B">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                </button>
+                <button onClick="{{ tpDocNext }}" aria-label="More specialists" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);color:#2C2A6B;cursor:pointer" style-hover="background:#E7E7F4;color:#2C2A6B">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div data-rail="topic-docs" data-rail-docs role="region" aria-label="Specialists, horizontally scrollable">
             <sc-for list="{{ tpDocs }}" as="d" hint-placeholder-count="3">
               <article style="display:flex;flex-direction:column;padding:20px;border-radius:22px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
                 <span aria-hidden="true" style="position:relative;width:56px;height:56px;border-radius:16px;overflow:hidden;background:#E7E7F4;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#2C2A6B;margin-bottom:12px">
@@ -3073,11 +3178,14 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
                 </span>
                 <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.3;color:#2C2A6B;margin:0">{{ d.name }}</h3>
                 <p style="font-size:11.5px;line-height:1.45;color:#69679C;margin:5px 0 0;flex:1">{{ d.desig }}</p>
-                <p style="font-size:11px;color:#6966A4;margin:6px 0 12px">{{ d.unit }}</p>
+                <p style="font-size:11px;color:#6966A4;margin:6px 0 12px">{{ d.unit }} · {{ d.exp }}</p>
                 <button onClick="{{ d.open }}" style="align-self:flex-start;padding:8px 15px;border-radius:999px;font-size:12px;font-weight:700;color:#2C2A6B;background:rgba(44,42,107,0.06);border:1px solid rgba(44,42,107,0.12);cursor:pointer">View profile</button>
               </article>
             </sc-for>
           </div>
+          <sc-if value="{{ tpDocNone }}" hint-placeholder-val="{{ false }}">
+            <p style="font-size:14px;color:#4A4880;margin:14px 0 0">No consultant for this condition lists that branch. Choose “All branches” to see everyone, or <button onClick="{{ wrFindDoc }}" style="padding:0;border:0;background:none;font-size:14px;font-weight:700;color:#2C2A6B;text-decoration:underline;cursor:pointer">search the full directory</button>.</p>
+          </sc-if>
         </section>
       </sc-if>
 
@@ -3086,6 +3194,315 @@ x-dc [data-r="nav-links"]>button{flex:0 0 auto}
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 12px 30px -10px rgba(245,130,31,0.65)" style-hover="transform:translateY(-2px);color:#fff">Book a consult</a>
           <button onClick="{{ backToHub }}" style="padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">All topics</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ THE AIRLIFT: HELICOPTER + THE 24x7 MESSAGE ============ -->
+  <!-- Fixed to the viewport rather than to the scene, because the flight path is
+       the width of the screen and it has to reach the corner Uppi stands in.
+       Inert to the pointer throughout: it must never intercept a tap meant for
+       the page, and least of all one meant for the emergency number. -->
+  <sc-if value="{{ isEcmo }}" hint-placeholder-val="{{ false }}">
+    <div aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:8990;overflow:hidden">
+      <div data-r="heli" style="position:absolute;right:auto;left:0;bottom:96px;width:170px;opacity:0;transform:translateX(-38vw);will-change:transform">
+        <svg viewBox="0 0 170 96" width="170" height="96" fill="none" aria-hidden="true">
+          <!-- tail boom -->
+          <path d="M96 44 L152 39 L152 47 L96 52 Z" fill="#2C2A6B"></path>
+          <path d="M148 26 L158 26 L158 44 L150 44 Z" fill="#2C2A6B"></path>
+          <circle cx="153" cy="33" r="7" fill="#F5821F"></circle>
+          <!-- cabin -->
+          <ellipse cx="66" cy="48" rx="42" ry="25" fill="#2C2A6B"></ellipse>
+          <path d="M40 38 q12 -12 30 -11 l0 22 l-30 0 Z" fill="#BBD3F0"></path>
+          <rect x="76" y="34" width="22" height="16" rx="5" fill="#4E4B96"></rect>
+          <!-- the orange stripe and the cross: it reads as a medical aircraft -->
+          <path d="M28 54 q38 12 78 3 l0 7 q-40 9 -78 -3 Z" fill="#F5821F"></path>
+          <path d="M60 60 h14 M67 53 v14" stroke="#fff" stroke-width="4" stroke-linecap="round"></path>
+          <!-- skids -->
+          <path d="M40 74 h56 M46 68 l-4 6 M92 68 l4 6" stroke="#1D1B4B" stroke-width="4" stroke-linecap="round"></path>
+          <!-- rotor: a mast, and a blade disc that scales rather than rotates -->
+          <path d="M66 22 v6" stroke="#1D1B4B" stroke-width="5" stroke-linecap="round"></path>
+          <g data-r="heli-rotor" style="transform-origin:66px 20px;transform-box:fill-box">
+            <ellipse cx="66" cy="20" rx="62" ry="3.2" fill="#1D1B4B" opacity="0.85"></ellipse>
+          </g>
+          <!-- the passenger, on a line under the cabin -->
+          <g data-r="heli-rider" style="opacity:0;transition:opacity .3s ease">
+            <path d="M66 72 v9" stroke="#1D1B4B" stroke-width="2.5" stroke-linecap="round"></path>
+            <ellipse cx="66" cy="88" rx="9" ry="8" fill="#F2989F"></ellipse>
+            <path d="M66 80 v-3" stroke="#F2989F" stroke-width="3" stroke-linecap="round"></path>
+            <circle cx="63" cy="87" r="1.8" fill="#1D1B4B"></circle>
+            <circle cx="69" cy="87" r="1.8" fill="#1D1B4B"></circle>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <sc-if value="{{ ecmoPop }}" hint-placeholder-val="{{ true }}">
+      <div role="status" data-r="heli-pop" style="position:fixed;left:16px;bottom:22px;z-index:8995;max-width:340px;display:flex;gap:13px;align-items:flex-start;padding:18px 20px;border-radius:22px;background:#1D1B4B;color:#fff;box-shadow:0 26px 60px -18px rgba(29,27,75,0.7);animation:popIn .42s cubic-bezier(.34,1.4,.5,1) both">
+        <span aria-hidden="true" style="flex:none;width:38px;height:38px;border-radius:12px;background:rgba(245,130,31,0.22);display:flex;align-items:center;justify-content:center;color:#FFB877">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="M4 8h16"></path><path d="M6 8v6a6 6 0 0 0 12 0V8"></path><path d="M9 20h6"></path></svg>
+        </span>
+        <span style="flex:1">
+          <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;line-height:1.3">In an emergency we provide 24&times;7 Air Ambulance Support</span>
+          <span style="display:block;font-size:12.5px;line-height:1.55;color:#C9D2E6;margin-top:5px">Nationally and internationally, with ECMO transfer where it is needed.</span>
+          <a href="tel:105910" style="display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:9px 17px;border-radius:999px;font-size:13.5px;font-weight:800;color:#1D1B4B;background:#F5821F" style-hover="color:#1D1B4B;background:#FFA452">Call 105910</a>
+        </span>
+        <button onClick="{{ closeEcmoPop }}" aria-label="Dismiss" style="flex:none;width:26px;height:26px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:#C9D2E6;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <!-- ============ ECMO & THE 24x7 AIR AMBULANCE ============ -->
+  <sc-if value="{{ isEcmo }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="ECMO and air ambulance" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:900px;margin:0 auto">
+
+      <nav aria-label="Breadcrumb" style="margin-bottom:16px">
+        <ol style="list-style:none;display:flex;gap:8px;flex-wrap:wrap;padding:0;margin:0;font-size:12.5px;color:#6966A4">
+          <li><button onClick="{{ goHome }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#69679C;text-decoration:underline">Home</button></li>
+          <li aria-hidden="true">&rsaquo;</li>
+          <li><button onClick="{{ goProcs }}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12.5px;color:#69679C;text-decoration:underline">Tests &amp; Procedures</button></li>
+          <li aria-hidden="true">&rsaquo;</li>
+          <li aria-current="page" style="font-weight:700;color:#2C2A6B">ECMO &amp; Air Ambulance</li>
+        </ol>
+      </nav>
+
+      <span style="display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:#FBE7E5;color:#A6362C">Advanced lung failure · 24&times;7</span>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px,4vw,44px);line-height:1.12;letter-spacing:-0.025em;color:#1D1B4B;margin:14px 0 0">ECMO, and the air ambulance that brings you to it</h1>
+      <p style="font-size:17.5px;line-height:1.6;color:#4A4880;margin:14px 0 0;max-width:660px">When a lung fails faster than a patient can be moved, the answer is not a faster ambulance. It is a team that can take over the work of the lungs where the patient already is — and then fly them in.</p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px">
+        <a href="tel:105910" style="display:inline-flex;align-items:center;gap:10px;padding:15px 28px;border-radius:999px;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(135deg,#BE3A2F,#E4737E);box-shadow:0 16px 38px -12px rgba(206,68,56,0.6)" style-hover="transform:translateY(-2px);color:#fff">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          Emergency &amp; air support: 105910
+        </a>
+        <button onClick="{{ goFind }}" style="padding:15px 28px;border-radius:999px;font-size:15px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.16);cursor:pointer">Talk to a pulmonologist</button>
+      </div>
+
+      <!-- The scene. Everything in it is decoration; the helicopter is drawn by
+           the page and the character is Uppi's own, reached only through his
+           documented airlift() seam. -->
+      <div data-r="heli-scene" aria-hidden="true" style="position:relative;height:190px;margin:34px 0 6px;border-radius:26px;overflow:hidden;background:linear-gradient(180deg,#EDF2F8 0%,#DDE6F3 62%,#CBD8EB 100%);border:1px solid rgba(44,42,107,0.1)">
+        <span style="position:absolute;left:0;right:0;bottom:0;height:44px;background:linear-gradient(180deg,rgba(44,42,107,0.05),rgba(44,42,107,0.14))"></span>
+        <span style="position:absolute;left:6%;bottom:44px;width:34px;height:52px;background:rgba(44,42,107,0.16);border-radius:4px 4px 0 0"></span>
+        <span style="position:absolute;left:12%;bottom:44px;width:22px;height:78px;background:rgba(44,42,107,0.12);border-radius:4px 4px 0 0"></span>
+        <span style="position:absolute;left:17%;bottom:44px;width:40px;height:38px;background:rgba(44,42,107,0.14);border-radius:4px 4px 0 0"></span>
+        <span style="position:absolute;right:9%;bottom:44px;width:28px;height:64px;background:rgba(44,42,107,0.13);border-radius:4px 4px 0 0"></span>
+        <span style="position:absolute;left:50%;top:26px;transform:translateX(-50%);font-size:11.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:rgba(44,42,107,0.34)">Hitec City · rooftop evacuation</span>
+      </div>
+      <p style="font-size:12px;color:#6966A4;margin:0 0 10px">Illustration. Yashoda&rsquo;s Hitec City facility provides air ambulance and medical evacuation from the terrace.</p>
+
+      <section style="margin-top:30px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;color:#1D1B4B;margin:0 0 8px">What ECMO actually is</h2>
+        <p style="font-size:15.5px;line-height:1.75;color:#3D3B72;margin:0 0 18px">Extracorporeal membrane oxygenation is a way of taking over gas exchange from outside the body, so that lungs which cannot keep up are allowed to stop trying for a while.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ ecmoWhat }}" as="x" hint-placeholder-count="4">
+            <article style="padding:22px 24px;border-radius:22px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;line-height:1.3;color:#2C2A6B;margin:0 0 8px">{{ x.t }}</h3>
+              <p style="font-size:13.5px;line-height:1.65;color:#4A4880;margin:0">{{ x.d }}</p>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="margin-top:34px;padding:28px 30px;border-radius:26px;background:#E7E7F4;border:1px solid rgba(44,42,107,0.14)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;color:#1D1B4B;margin:0 0 8px">Awake ECMO</h2>
+        <p style="font-size:15.5px;line-height:1.75;color:#3D3B72;margin:0 0 14px">Most people picture ECMO as a patient asleep on a ventilator. It does not have to be. Yashoda reports one of the highest series of Awake ECMO cases anywhere, with more than a hundred since the COVID pandemic, and describes it as the standard of care for its sickest patients.</p>
+        <ul style="margin:0;padding-left:20px;font-size:15px;line-height:1.75;color:#3D3B72">
+          <sc-for list="{{ ecmoAwake }}" as="x" hint-placeholder-count="5"><li style="margin-bottom:7px">{{ x.t }}</li></sc-for>
+        </ul>
+        <p style="font-size:14px;line-height:1.7;color:#4A4880;margin:16px 0 0">This runs out of a dedicated Advanced Lung Failure Unit, with daily rounds by intensivists, specialty doctors, perfusionists, respiratory therapists, physiotherapists, dietitians and specialist nursing staff.</p>
+      </section>
+
+      <section style="margin-top:34px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;color:#1D1B4B;margin:0 0 8px">The air lift</h2>
+        <p style="font-size:15.5px;line-height:1.75;color:#3D3B72;margin:0 0 18px">Yashoda operates air ambulance services 24&times;7, nationally and internationally, staffed by doctors, nurses and paramedics equipped for the patient they are going to collect. What it is used for:</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ ecmoAir }}" as="x" hint-placeholder-count="7">
+            <article style="padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.3;color:#2C2A6B;margin:0 0 7px">{{ x.t }}</h3>
+              <p style="font-size:13px;line-height:1.6;color:#4A4880;margin:0">{{ x.d }}</p>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- the point at which the visitor is reading rather than arriving -->
+      <span data-r="heli-mark" aria-hidden="true" style="display:block;height:1px"></span>
+
+      <section style="margin-top:34px">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;color:#1D1B4B;margin:0 0 12px">What happens when you call</h2>
+        <ol style="margin:0;padding-left:22px;font-size:15px;line-height:1.75;color:#3D3B72">
+          <sc-for list="{{ ecmoCall }}" as="x" hint-placeholder-count="5"><li style="margin-bottom:8px">{{ x.t }}</li></sc-for>
+        </ol>
+      </section>
+
+      <section style="margin-top:34px;padding:26px 28px;border-radius:26px;background:#FBE7E5;border:1px solid rgba(206,68,56,0.25)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#A6362C;margin:0 0 10px">Do not wait for an appointment</h2>
+        <ul style="margin:0 0 16px;padding-left:20px;font-size:14.5px;line-height:1.7;color:#8A2E26">
+          <sc-for list="{{ ecmoNow }}" as="x" hint-placeholder-count="5"><li style="margin-bottom:5px">{{ x.t }}</li></sc-for>
+        </ul>
+        <a href="tel:105910" style="display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:999px;font-size:15px;font-weight:800;color:#fff;background:#BE3A2F" style-hover="color:#fff;transform:translateY(-1px)">Call 105910 now</a>
+      </section>
+
+      <sc-if value="{{ ecmoHasVideos }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:36px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0">From the Yashoda team</h2>
+            <div data-rail-arrows style="display:flex;gap:8px;flex:none">
+              <button onClick="{{ ecmoVidPrev }}" aria-label="Previous videos" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);color:#2C2A6B;cursor:pointer" style-hover="background:#E7E7F4;color:#2C2A6B">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+              </button>
+              <button onClick="{{ ecmoVidNext }}" aria-label="More videos" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);color:#2C2A6B;cursor:pointer" style-hover="background:#E7E7F4;color:#2C2A6B">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div data-rail="ecmo-videos" role="region" aria-label="Videos, horizontally scrollable">
+            <sc-for list="{{ ecmoVideos }}" as="v" hint-placeholder-count="4">
+              <article style="border-radius:20px;overflow:hidden;background:#fff;border:1px solid rgba(44,42,107,0.1)">
+                <sc-if value="{{ v.idle }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ v.play }}" aria-label="{{ v.aria }}" style="{{ v.thumbSt }}" style-hover="filter:brightness(1.06)">
+                    <span aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(29,27,75,0.05),rgba(29,27,75,0.45))"></span>
+                    <span aria-hidden="true" style="position:relative;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(0,0,0,0.35)">
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="#2C2A6B" stroke="none"><path d="M8 5v14l11-7z"></path></svg>
+                    </span>
+                  </button>
+                </sc-if>
+                <sc-if value="{{ v.isPlaying }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:relative;aspect-ratio:16/9;background:#000">
+                    <iframe src="{{ v.embed }}" title="{{ v.frameTitle }}" loading="lazy" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block"></iframe>
+                  </div>
+                </sc-if>
+                <div style="padding:14px 18px 16px">
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.35;color:#2C2A6B;margin:0">{{ v.t }}</h3>
+                  <p style="font-size:11.5px;color:#6966A4;margin:5px 0 0">{{ v.channel }} &middot; YouTube</p>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <section style="margin-top:34px;padding-top:22px;border-top:1px solid rgba(44,42,107,0.12)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#2C2A6B;margin:0 0 10px">Drawn from</h2>
+        <ul style="list-style:none;margin:0;padding:0;font-size:12.5px;line-height:1.65;color:#69679C">
+          <sc-for list="{{ ecmoSrc }}" as="x" hint-placeholder-count="4"><li style="margin-bottom:6px">{{ x.t }}</li></sc-for>
+        </ul>
+        <p style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:#69679C;margin:16px 0 0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+          {{ revText }}
+        </p>
+      </section>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ THE LONG-FORM READS: A GUIDE, OR A TEACHING CASE ============ -->
+  <!-- One template serves both. A guide leads with its standfirst; a case leads
+       with the presentation and closes with the teaching points, and says on its
+       face that it is an illustrative scenario rather than a patient record. -->
+  <sc-if value="{{ isRead }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Knowledge Hub article" style="min-height:100vh;padding:120px 24px 90px">
+    <div style="max-width:760px;margin:0 auto">
+
+      <nav aria-label="Breadcrumb" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:#69679C;margin:0 0 18px">
+        <button onClick="{{ backToHub }}" style="padding:0;border:0;background:none;font-size:12.5px;color:#69679C;cursor:pointer;text-decoration:underline">Knowledge Hub</button>
+        <sc-if value="{{ wrHasTopic }}" hint-placeholder-val="{{ true }}">
+          <span aria-hidden="true">›</span>
+          <button onClick="{{ wrToTopic }}" style="padding:0;border:0;background:none;font-size:12.5px;color:#69679C;cursor:pointer;text-decoration:underline">{{ wrTopicName }}</button>
+        </sc-if>
+      </nav>
+
+      <span style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;background:#E7E7F4;color:#2C2A6B">{{ wrCat }}</span>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px,4vw,38px);line-height:1.18;letter-spacing:-0.02em;color:#1D1B4B;margin:14px 0 0">{{ wrName }}</h1>
+      <p style="font-size:17px;line-height:1.6;color:#4A4880;margin:14px 0 0">{{ wrLead }}</p>
+      <sc-if value="{{ wrHasRead }}" hint-placeholder-val="{{ true }}">
+        <p style="font-size:12.5px;color:#6966A4;margin:10px 0 0">{{ wrRead }} read</p>
+      </sc-if>
+
+      <sc-if value="{{ wrHasArt }}" hint-placeholder-val="{{ true }}">
+        <img src="{{ wrArt }}" alt="{{ wrArtAlt }}" loading="lazy" decoding="async" width="960" height="540" style="display:block;width:100%;height:auto;margin:26px 0 0;border-radius:24px;border:1px solid rgba(44,42,107,0.1)">
+      </sc-if>
+
+      <!-- a teaching case is not a patient record, and says so before it is read -->
+      <sc-if value="{{ isReadCase }}" hint-placeholder-val="{{ false }}">
+        <p style="display:flex;align-items:flex-start;gap:9px;font-size:12.5px;line-height:1.6;color:#8A6300;margin:22px 0 0;padding:14px 18px;border-radius:18px;background:#FBF1DC;border:1px solid rgba(201,138,0,0.25)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+          <span>Written for clinicians. This is an illustrative teaching scenario built around published guidance — not a record of a real patient, at Yashoda or anywhere else.</span>
+        </p>
+        <section style="margin-top:26px;padding:24px 26px;border-radius:24px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1)">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16.5px;color:#2C2A6B;margin:0 0 10px">Presentation</h2>
+          <p style="font-size:15px;line-height:1.7;color:#3D3B72;margin:0">{{ wrPresent }}</p>
+        </section>
+      </sc-if>
+
+      <article>
+        <sc-for list="{{ wrSections }}" as="sec" hint-placeholder-count="4">
+          <section style="margin-top:32px">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;line-height:1.3;color:#1D1B4B;margin:0 0 12px">{{ sec.h }}</h2>
+            <sc-if value="{{ sec.hasP }}" hint-placeholder-val="{{ true }}">
+              <sc-for list="{{ sec.p }}" as="par" hint-placeholder-count="2">
+                <p style="font-size:15.5px;line-height:1.78;color:#3D3B72;margin:0 0 12px">{{ par.t }}</p>
+              </sc-for>
+            </sc-if>
+            <sc-if value="{{ sec.hasList }}" hint-placeholder-val="{{ false }}">
+              <ul style="margin:4px 0 0;padding-left:20px;font-size:15px;line-height:1.75;color:#3D3B72">
+                <sc-for list="{{ sec.list }}" as="li" hint-placeholder-count="3"><li style="margin-bottom:7px">{{ li.t }}</li></sc-for>
+              </ul>
+            </sc-if>
+          </section>
+        </sc-for>
+      </article>
+
+      <sc-if value="{{ isReadCase }}" hint-placeholder-val="{{ false }}">
+        <section style="margin-top:34px;padding:26px 28px;border-radius:24px;background:#E7E7F4;border:1px solid rgba(44,42,107,0.14)">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#2C2A6B;margin:0 0 12px">Teaching points</h2>
+          <ul style="margin:0;padding-left:20px;font-size:15px;line-height:1.75;color:#3D3B72">
+            <sc-for list="{{ wrPoints }}" as="pt" hint-placeholder-count="4"><li style="margin-bottom:7px">{{ pt.t }}</li></sc-for>
+          </ul>
+        </section>
+      </sc-if>
+
+      <!-- where the material came from, in the open -->
+      <section style="margin-top:32px;padding-top:22px;border-top:1px solid rgba(44,42,107,0.12)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;letter-spacing:0.02em;color:#2C2A6B;margin:0 0 10px">Drawn from</h2>
+        <ul style="list-style:none;margin:0;padding:0;font-size:12.5px;line-height:1.65;color:#69679C">
+          <sc-for list="{{ wrSrc }}" as="sr" hint-placeholder-count="2"><li style="margin-bottom:6px">{{ sr.t }}</li></sc-for>
+        </ul>
+        <p style="display:flex;align-items:center;gap:9px;font-size:12.5px;color:#69679C;margin:16px 0 0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+          {{ revText }}
+        </p>
+      </section>
+
+      <sc-if value="{{ wrHasMore }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:36px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#1D1B4B;margin:0 0 16px">Read next</h2>
+          <div class="upi-read-next" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            <sc-for list="{{ wrMore }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.open }}" style="text-align:left;padding:20px 22px;border-radius:20px;background:#fff;border:1px solid rgba(44,42,107,0.1);cursor:pointer" style-hover="border-color:rgba(44,42,107,0.3)">
+                <span style="display:block;font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:#A95508">{{ m.cat }}</span>
+                <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;line-height:1.35;color:#2C2A6B;margin:8px 0 6px">{{ m.t }}</span>
+                <span style="display:block;font-size:12px;color:#6966A4">{{ m.read }} read</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <section style="margin-top:34px;padding:28px 32px;border-radius:26px;background:rgba(44,42,107,0.05);border:1px solid rgba(44,42,107,0.1);display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <p style="font-size:14.5px;line-height:1.6;color:#4A4880;margin:0;max-width:480px">This is general education, not a diagnosis. If something here matches what you are experiencing, speak to a doctor.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="{{ wa.book }}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#F5821F,#FFA452);box-shadow:0 12px 30px -10px rgba(245,130,31,0.65)" style-hover="transform:translateY(-2px);color:#fff">Book a consult</a>
+          <button onClick="{{ wrFindDoc }}" style="padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">Find a specialist</button>
+          <button onClick="{{ backToTopic }}" style="padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;color:#2C2A6B;background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14);cursor:pointer">Back to {{ wrTopicName }}</button>
         </div>
       </section>
 
@@ -3326,6 +3743,8 @@ class Component extends DCLogic {
     },
     alSel: new Date().getMonth(),
     khTopic: null, khQuery: '', khTab: 'All', khTopicFilter: 'All topics', khPlaying: null,
+    /* the long-form reads: a guide/article slug, or a teaching-case slug */
+    khGuide: null, khCase: null, tpBranch: 'All branches', ecmoPop: false,
     brandLogo: null,
     docId: null, docQuery: '', docLoc: 'All locations', docCond: 'All conditions', docLang: 'All languages', docPaed: false,
     menu: null, mobileNav: false, procId: null,
@@ -3620,7 +4039,7 @@ class Component extends DCLogic {
       'Lung cancer & nodules': 'ఊపిరితిత్తుల క్యాన్సర్ & నాడ్యూల్స్', 'Lung circulation': 'ఊపిరితిత్తుల రక్తప్రసరణ',
       'Sleep & allergy': 'నిద్ర & అలర్జీ', 'Infections & prevention': 'ఇన్ఫెక్షన్లు & నివారణ',
       'Diagnostics & procedures': 'నిర్ధారణ పరీక్షలు & ప్రక్రియలు',
-      'Open topic': 'అంశాన్ని తెరవండి', 'Open': 'తెరవండి', 'Explore': 'చూడండి', 'Read the topic': 'అంశాన్ని చదవండి',
+      'Open topic': 'అంశాన్ని తెరవండి', 'Open': 'తెరవండి', 'Explore': 'చూడండి', 'Read the guide': 'చదవండి',
       /* condition names in common use */
       'Asthma': 'ఉబ్బసం', 'Severe Asthma': 'తీవ్రమైన ఉబ్బసం', 'Lung Cancer': 'ఊపిరితిత్తుల క్యాన్సర్',
       'Lung Nodules': 'ఊపిరితిత్తుల నాడ్యూల్స్', 'Pulmonary Fibrosis': 'పల్మనరీ ఫైబ్రోసిస్',
@@ -3746,7 +4165,7 @@ class Component extends DCLogic {
       'Lung cancer & nodules': 'ಶ್ವಾಸಕೋಶದ ಕ್ಯಾನ್ಸರ್ & ನಾಡ್ಯೂಲ್‌ಗಳು', 'Lung circulation': 'ಶ್ವಾಸಕೋಶದ ರಕ್ತಪರಿಚಲನೆ',
       'Sleep & allergy': 'ನಿದ್ರೆ & ಅಲರ್ಜಿ', 'Infections & prevention': 'ಸೋಂಕುಗಳು & ತಡೆಗಟ್ಟುವಿಕೆ',
       'Diagnostics & procedures': 'ರೋಗನಿರ್ಣಯ & ಪ್ರಕ್ರಿಯೆಗಳು',
-      'Open topic': 'ವಿಷಯ ತೆರೆಯಿರಿ', 'Open': 'ತೆರೆಯಿರಿ', 'Explore': 'ನೋಡಿ', 'Read the topic': 'ವಿಷಯ ಓದಿ',
+      'Open topic': 'ವಿಷಯ ತೆರೆಯಿರಿ', 'Open': 'ತೆರೆಯಿರಿ', 'Explore': 'ನೋಡಿ', 'Read the guide': 'ಓದಿ',
       'Asthma': 'ಅಸ್ತಮಾ', 'Severe Asthma': 'ತೀವ್ರ ಅಸ್ತಮಾ', 'Lung Cancer': 'ಶ್ವಾಸಕೋಶದ ಕ್ಯಾನ್ಸರ್',
       'Lung Nodules': 'ಶ್ವಾಸಕೋಶದ ನಾಡ್ಯೂಲ್‌ಗಳು', 'Pulmonary Fibrosis': 'ಪಲ್ಮನರಿ ಫೈಬ್ರೋಸಿಸ್',
       'Pulmonary Hypertension': 'ಪಲ್ಮನರಿ ಹೈಪರ್‌ಟೆನ್ಷನ್', 'Sleep Medicine': 'ನಿದ್ರಾ ವೈದ್ಯಕೀಯ',
@@ -3865,7 +4284,7 @@ class Component extends DCLogic {
       'Lung cancer & nodules': 'ফুসফুসের ক্যান্সার ও নডিউল', 'Lung circulation': 'ফুসফুসের রক্তসঞ্চালন',
       'Sleep & allergy': 'ঘুম ও অ্যালার্জি', 'Infections & prevention': 'সংক্রমণ ও প্রতিরোধ',
       'Diagnostics & procedures': 'রোগনির্ণয় ও প্রক্রিয়া',
-      'Open topic': 'বিষয় খুলুন', 'Open': 'খুলুন', 'Explore': 'দেখুন', 'Read the topic': 'বিষয়টি পড়ুন',
+      'Open topic': 'বিষয় খুলুন', 'Open': 'খুলুন', 'Explore': 'দেখুন', 'Read the guide': 'পড়ুন',
       'Asthma': 'অ্যাজমা', 'Severe Asthma': 'তীব্র অ্যাজমা', 'Lung Cancer': 'ফুসফুসের ক্যান্সার',
       'Lung Nodules': 'ফুসফুসের নডিউল', 'Pulmonary Fibrosis': 'পালমোনারি ফাইব্রোসিস',
       'Pulmonary Hypertension': 'পালমোনারি হাইপারটেনশন', 'Sleep Medicine': 'ঘুমের চিকিৎসা',
@@ -4529,74 +4948,499 @@ class Component extends DCLogic {
       svc: ['ŪPIRI@Work occupational screening', 'Pulmonary function testing']
     }
   ];
-  /* Entries flagged `placeholder: true` have a title but no written body yet; the UI
-     shows a quiet "In preparation" badge rather than exposing development wording. */
+  /*
+   * Long-form Knowledge Hub content.
+   *
+   * Each entry carries its own body, so "Related articles" opens a real page
+   * rather than a title with nothing behind it. `src` lists the guideline each
+   * piece is drawn from and is printed at the foot of the page — general
+   * education traceable to a named source, never a claim about Yashoda's own
+   * volumes or outcomes, which may come only from Yashoda's published material.
+   */
   KH_ARTICLES = [
-    { t: 'Using your inhaler correctly: the mistakes we see every week', topic: 'asthma', cat: 'Patient Guides', read: '5 min', placeholder: true },
-    { t: 'Understanding your spirometry report', topic: 'pulmonary-function-testing', cat: 'Patient Guides', read: '6 min', placeholder: true },
-    { t: 'A lung nodule was found. What happens next?', topic: 'lung-nodules', cat: 'Patient Guides', read: '7 min', placeholder: true },
-    { t: 'Antifibrotics in progressive fibrosing ILD: practical prescribing', topic: 'pulmonary-fibrosis', cat: 'Expert Insights', read: '9 min', placeholder: true },
-    { t: 'When breathlessness is not the lungs', topic: 'pulmonary-hypertension', cat: 'Expert Insights', read: '8 min', placeholder: true },
-    { t: 'Pulmonary rehabilitation: what it is and who it helps', topic: 'copd', cat: 'Articles', read: '6 min', placeholder: true },
-    { t: 'Silica exposure in stone and construction work', topic: 'occupational-lung-disease', cat: 'Articles', read: '7 min', placeholder: true },
-    { t: 'Sleep apnoea and the heart', topic: 'sleep-medicine', cat: 'Articles', read: '5 min', placeholder: true },
-    { t: 'Quitting: what actually works', topic: 'smoking-cessation', cat: 'Patient Guides', read: '6 min', placeholder: true },
-    { t: 'Biologics in severe asthma: who qualifies', topic: 'severe-asthma', cat: 'Expert Insights', read: '10 min', placeholder: true },
-    { t: 'Allergic rhinitis and asthma: one airway', topic: 'allergy', cat: 'Articles', read: '5 min', placeholder: true },
-    { t: 'Staging lung cancer: why it decides everything', topic: 'lung-cancer', cat: 'Expert Insights', read: '9 min', placeholder: true }
+    {
+      id: "inhaler-technique", t: "Using your inhaler correctly: the mistakes we see every week",
+      topic: "asthma", cat: "Patient Guides", read: "5 min",
+      lead: "Most people who are still symptomatic on treatment are not on the wrong drug. They are getting less of the right one than the label says.",
+      body: [
+        { h: "Why technique decides whether the medicine works", p: ["An inhaler only helps if the drug reaches the small airways. Studies of real patients consistently find that a large proportion make at least one error that materially reduces the delivered dose — and the person almost never knows. From the outside, a badly used inhaler and a well used one look identical.", "This is why a review of technique comes before any step up in treatment. Escalating the dose of a medicine that is landing on the back of the throat does not fix the problem; it just adds side effects."] },
+        { h: "The errors that matter most", p: ["Not every mistake changes the dose. These are the ones that do:"], list: ["Not breathing out fully first. There is no room for the dose if the lungs are already full.", "Firing the canister before the breath in has started, or after it has finished. With a pressurised inhaler, press and breathe must begin together.", "Breathing in fast and sharp from a pressurised inhaler. It needs a slow, deep breath — about four to five seconds. A dry-powder device is the opposite: it needs a quick, forceful one.", "Not holding the breath afterwards. Ten seconds, or as long as is comfortable, lets the particles settle instead of being breathed straight back out.", "Sealing the lips poorly, so the dose escapes at the corners of the mouth.", "Not shaking a pressurised inhaler that needs shaking, and not priming a new or long-unused device."] },
+        { h: "Use a spacer with a pressurised inhaler", p: ["A spacer slows the aerosol down and lets the propellant evaporate, so more drug reaches the lungs and less hits the throat. It also removes the hardest part of the technique — the need to co-ordinate the press with the breath.", "Guidelines recommend a spacer for pressurised metered-dose inhalers generally, and it is essential for children, for older people, and for anyone during an attack. Breathe in and out through the spacer five times after each puff, and give one puff at a time."] },
+        { h: "Rinse your mouth after a steroid inhaler", p: ["Rinse and spit after any inhaler containing a corticosteroid. This is what prevents oral thrush and hoarseness, the two side effects that most often make people quietly stop their controller."] },
+        { h: "Bring the device to your appointment", p: ["Bring every inhaler you use — not the box, the actual device — to each review. A technique check takes two minutes and is the single highest-value thing that happens in many asthma and COPD appointments.", "If your inhaler has no dose counter, ask how to tell when it is empty. An empty inhaler still sprays, still tastes the same, and contains no medicine."] }
+      ],
+      src: ["GINA 2024 Global Strategy for Asthma Management and Prevention — inhaler skills and adherence", "GOLD 2024 Global Strategy for the Diagnosis, Management and Prevention of COPD — inhaler technique", "NICE NG80 Asthma: diagnosis, monitoring and chronic asthma management"]
+    },
+    {
+      id: "reading-your-spirometry", t: "Understanding your spirometry report",
+      topic: "pulmonary-function-testing", cat: "Patient Guides", read: "6 min",
+      lead: "Four numbers do most of the work. Once you know what they mean, the report stops being a page of decimals.",
+      body: [
+        { h: "What the test measures", p: ["Spirometry asks you to take the deepest breath you can and blow it out as hard and as long as you can. It measures how much air you can move and how fast you can move it. It does not measure oxygen levels, and it does not image the lungs."] },
+        { h: "The four numbers", p: [], list: ["FVC — forced vital capacity. The total volume you blew out. A low FVC suggests the lungs are not expanding fully.", "FEV1 — the volume in the first second. This is the headline number for how obstructed the airways are.", "FEV1/FVC — the ratio. This is what separates the two main patterns. A ratio below 0.70 after a bronchodilator is the usual threshold for fixed airflow obstruction.", "Per cent predicted — your value compared with people of the same age, height, sex and ethnicity. This is why the same litres mean different things in different people."] },
+        { h: "Obstruction and restriction", p: ["An obstructive pattern — a reduced ratio — means air is leaving slowly. Asthma and COPD are the common causes. A restrictive pattern — a preserved or high ratio with a reduced FVC — means the lungs are not filling fully, which points towards the lung tissue, the chest wall, or the muscles rather than the airways.", "Spirometry can suggest restriction but cannot confirm it. That needs full lung volumes, which are measured separately."] },
+        { h: "Reversibility", p: ["If the test is repeated after a bronchodilator and the FEV1 improves substantially, the obstruction is at least partly reversible — which supports asthma. Airflow limitation that persists after a bronchodilator is what defines COPD.", "A single normal spirometry does not exclude asthma. Asthma is variable by nature, and it is entirely possible to test normal on a good day."] },
+        { h: "Gas transfer, if it was done", p: ["DLCO or TLCO measures how well gas crosses from the air sacs into the blood. It is often the first number to fall in emphysema and in interstitial lung disease, and it can be abnormal when the spirometry still looks acceptable."] },
+        { h: "Two cautions", p: ["A test is only as good as the effort. A report will usually say whether the blows met quality standards; if they did not, the numbers mean less than they appear to.", "And a number is not a diagnosis. Spirometry is interpreted alongside your history, your examination and your imaging — never on its own."] }
+      ],
+      src: ["ATS/ERS 2019 Standardization of Spirometry", "ERS/ATS 2021 Technical standard on interpretive strategies for routine lung function tests", "GOLD 2024 — spirometric criteria for airflow limitation"]
+    },
+    {
+      id: "a-nodule-was-found", t: "A lung nodule was found. What happens next?",
+      topic: "lung-nodules", cat: "Patient Guides", read: "7 min",
+      lead: "Most lung nodules are not cancer. The purpose of what follows is to answer the question quickly rather than to leave you worrying slowly.",
+      body: [
+        { h: "What a nodule is", p: ["A pulmonary nodule is a small rounded spot in the lung, usually under 30 mm, seen on a CT or an X-ray. They are common. Scans done for other reasons — a chest infection, an injury, a pre-employment check — find them all the time.", "Most turn out to be old scars, healed infection, or small collections of inflammatory tissue. In a country with a high background of tuberculosis, healed granulomas are a particularly common explanation."] },
+        { h: "What the team is weighing up", p: ["The plan depends on the nodule and on you:"], list: ["Size. Under about 6 mm, the risk is very low. Risk rises with diameter.", "Appearance. Smooth and solid behaves differently from spiculated or part-solid. Certain patterns of calcification and fat are effectively diagnostic of a benign cause.", "Growth. A nodule stable over two years of imaging is reassuring; one that grows needs action.", "Your risk. Age, smoking history, occupational exposure, previous cancer and a family history all shift the assessment."] },
+        { h: "The three possible plans", p: ["Almost every nodule leads to one of three routes."], list: ["No further imaging, when the nodule is very small or has clearly benign features.", "Interval CT surveillance, repeating the scan at defined intervals to see whether anything changes. This is the commonest plan, and being placed on it is generally a good sign.", "Further tests now — a PET-CT, or a biopsy — when the nodule is large enough, growing, or looks suspicious."] },
+        { h: "How a sample is taken, if one is needed", p: ["Where the nodule sits decides the route. A nodule near the chest wall is usually reached with a CT-guided needle through the skin. One nearer the centre is often reached through the airways at bronchoscopy, sometimes with endobronchial ultrasound or navigation. Both are day procedures."] },
+        { h: "Why the follow-up scan matters", p: ["The single most useful thing you can do is attend the follow-up scan on time. Surveillance only works if the interval is kept — a scan deferred by a year turns a plan into a gap.", "Bring any previous imaging you have, from any hospital. An old scan showing the same nodule unchanged can end the process immediately."] },
+        { h: "When to come back sooner", p: ["Do not wait for a scheduled scan if you cough up blood, lose weight without trying, develop chest pain that does not settle, or become newly breathless."] }
+      ],
+      src: ["Fleischner Society 2017 Guidelines for Management of Incidental Pulmonary Nodules Detected on CT Images", "British Thoracic Society Guidelines for the Investigation and Management of Pulmonary Nodules", "NICE NG12 Suspected cancer: recognition and referral"]
+    },
+    {
+      id: "antifibrotics-in-pf-ild", t: "Antifibrotics in progressive fibrosing ILD: practical prescribing",
+      topic: "pulmonary-fibrosis", cat: "Expert Insights", read: "9 min",
+      lead: "The evidence moved from one disease to one behaviour. What follows is the practical consequence at the bedside.",
+      body: [
+        { h: "The shift that matters", p: ["Antifibrotic therapy began as an IPF story. It no longer is. Trial evidence established that a progressive fibrosing phenotype — regardless of the underlying ILD diagnosis — responds to antifibrotic therapy with a slowing of FVC decline.", "The practical consequence is that the question at review is no longer only \"which ILD is this?\" but also \"is this one behaving progressively?\" Both answers change management."] },
+        { h: "Defining progression at the bedside", p: ["Progression is judged over roughly a year on a combination of physiology, symptoms and imaging — a relative fall in FVC, worsening breathlessness or cough, and increasing fibrosis on HRCT. No single element is sufficient on its own, which is why serial measurement matters more than any one reading.", "This makes the follow-up schedule part of the treatment. A patient seen once a year with no interval lung function cannot be assessed for progression at all."] },
+        { h: "Choosing, and what to warn about", p: ["Both licensed agents slow decline rather than reverse scarring, and the conversation at initiation should say so plainly. Expectations set as \"this will improve my breathing\" lead to early discontinuation when they are not met.", "Tolerability drives real-world persistence far more than efficacy does. Gastrointestinal effects and, with one agent, photosensitivity are the usual reasons people stop. Dose reduction and interruption are legitimate strategies and are preferable to abandonment."], list: ["Baseline and scheduled liver function testing is required with both agents.", "Diarrhoea is managed proactively rather than reactively — anti-motility agents, dose reduction, then interruption.", "Nausea is reduced by taking the drug with food and by splitting the dose.", "Counsel on sun protection where photosensitivity is a known effect.", "Review interacting drugs, including anticoagulants and strong enzyme inducers and inhibitors."] },
+        { h: "What antifibrotics do not replace", p: ["Treating the fibrosis does not remove the rest of the plan. Where an inflammatory or autoimmune driver is present, immunosuppression may still be indicated — and in some ILDs it is the primary treatment. Antifibrotics sit alongside that decision, not instead of it."], list: ["Oxygen assessment, including on exertion, where saturations fall.", "Pulmonary rehabilitation, which improves function and quality of life across fibrotic ILD.", "Vaccination and prompt treatment of infection.", "Screening for pulmonary hypertension and for reflux where clinically indicated.", "Early, parallel discussion of transplantation in suitable candidates."] },
+        { h: "The referral point most often missed", p: ["Transplant referral is repeatedly made too late rather than too early. Referral is a conversation and an assessment, not a commitment, and a patient assessed early keeps options that a patient assessed at crisis does not."] }
+      ],
+      src: ["ATS/ERS/JRS/ALAT 2022 Clinical Practice Guideline: Idiopathic Pulmonary Fibrosis (an Update) and Progressive Pulmonary Fibrosis in Adults", "NICE NG115 and TA504/TA379 — antifibrotic therapy", "ISHLT Consensus Document for the Selection of Lung Transplant Candidates (2021)"]
+    },
+    {
+      id: "breathless-not-the-lungs", t: "When breathlessness is not the lungs",
+      topic: "pulmonary-hypertension", cat: "Expert Insights", read: "8 min",
+      lead: "A normal chest X-ray and near-normal spirometry in a breathless patient is not reassurance. It is a prompt to widen the differential.",
+      body: [
+        { h: "The trap", p: ["Exertional breathlessness with unremarkable initial tests is one of the commonest reasons a serious diagnosis is delayed. The instinct is to reassure; the correct move is to keep going, because several of the conditions that present exactly this way are treatable and time-sensitive."] },
+        { h: "What is worth excluding, and how", p: [], list: ["Pulmonary hypertension. Often normal on X-ray and spirometry, with an isolated reduction in gas transfer as the only early clue. Echocardiography is the screening test; right heart catheterisation confirms.", "Chronic thromboembolic disease. A history of venous thromboembolism may be absent. A V/Q scan, not a CT pulmonary angiogram, is the appropriate screening investigation — and this is a potentially curable cause.", "Heart failure with preserved ejection fraction. Common, easily missed, and not excluded by a normal ejection fraction on a resting scan.", "Anaemia and thyroid disease. Cheap to exclude and regularly forgotten.", "Deconditioning and obesity, which are diagnoses of exclusion rather than first assumptions.", "Dysfunctional breathing, which frequently coexists with organic disease rather than replacing it."] },
+        { h: "The two numbers that redirect the work-up", p: ["Gas transfer and exercise oxygen saturation do more than anything else to separate these groups. An isolated low DLCO with preserved spirometry points hard towards the pulmonary vasculature or early interstitial disease. Desaturation on a walk test that was invisible at rest changes both urgency and direction."] },
+        { h: "Where CPET earns its place", p: ["When resting tests are normal and the symptom is exertional, the test that reproduces the symptom is the one that explains it. Cardiopulmonary exercise testing measures ventilation, gas exchange and cardiac response under load simultaneously, and it separates a cardiac limit from a ventilatory limit from a peripheral one.", "It is also the honest answer to the patient who has been told repeatedly that everything is normal while they cannot climb a flight of stairs."] },
+        { h: "Practical rule", p: ["If breathlessness is progressive and the initial tests are normal, the correct next step is another test, not reassurance and discharge."] }
+      ],
+      src: ["2022 ESC/ERS Guidelines for the diagnosis and treatment of pulmonary hypertension", "ERS/ATS 2021 Technical standard on interpretive strategies for routine lung function tests", "ERS Statement on standardisation of cardiopulmonary exercise testing in chronic lung disease"]
+    },
+    {
+      id: "pulmonary-rehabilitation", t: "Pulmonary rehabilitation: what it is and who it helps",
+      topic: "copd", cat: "Articles", read: "6 min",
+      lead: "It is a supervised exercise and education programme, and across chronic lung disease it produces larger gains in breathlessness and quality of life than most drugs do.",
+      body: [
+        { h: "What actually happens", p: ["A programme typically runs twice a week for six to twelve weeks. Each session combines supervised aerobic and resistance exercise with education — on breathing techniques, on inhalers, on pacing, on nutrition, on what to do when symptoms flare, and on managing the anxiety that breathlessness produces.", "The exercise is prescribed and progressed individually. Nobody is asked to do more than they can, and the starting point can be very low."] },
+        { h: "Why it works when the lungs have not changed", p: ["Rehabilitation does not improve spirometry, and it is not meant to. It works on everything around the lungs — the leg muscles that fatigue early, the deconditioning that follows months of avoiding exertion, the breathing pattern, and the fear that makes people stop before they need to.", "That is why someone whose FEV1 is unchanged can finish a programme walking substantially further and feeling markedly less breathless."] },
+        { h: "Who should be referred", p: [], list: ["Anyone with COPD who is breathless on everyday activity — a formal grade of 2 or more on the mMRC scale is the usual threshold.", "After a hospital admission for an exacerbation, where early rehabilitation reduces readmission.", "Fibrotic interstitial lung disease, bronchiectasis and pulmonary hypertension, where benefit is also established.", "Before and after lung surgery or transplantation, as prehabilitation and recovery.", "Persistent breathlessness after a severe respiratory infection."] },
+        { h: "The honest caveats", p: ["The gains fade if the exercise stops. The programme is the start of a habit, not a course of treatment that finishes — a maintenance plan should be agreed before discharge.", "And uptake is the weak point everywhere. The commonest reason a patient does not benefit is that they never started: travel, timing and cost matter more than motivation. Ask about those directly when referring."] }
+      ],
+      src: ["ATS/ERS Statement on Pulmonary Rehabilitation", "GOLD 2024 — pulmonary rehabilitation", "NICE NG115 Chronic obstructive pulmonary disease in over 16s"]
+    },
+    {
+      id: "silica-exposure", t: "Silica exposure in stone and construction work",
+      topic: "occupational-lung-disease", cat: "Articles", read: "7 min",
+      lead: "Silicosis is entirely preventable, entirely irreversible, and still occurring — including in young workers after short, intense exposures.",
+      body: [
+        { h: "Where the dust comes from", p: ["Crystalline silica is released whenever material containing quartz is cut, ground, drilled or polished dry. That covers stone cutting and polishing, engineered and artificial stone work, granite and sandstone quarrying, construction and demolition, tunnelling, foundry work, sandblasting, and ceramics.", "The dangerous fraction is respirable — small enough to reach the air sacs and invisible in ordinary light. A workplace can look clean and still be hazardous."] },
+        { h: "What it does", p: ["Inhaled silica causes progressive scarring of the lung. Classical silicosis develops over years, but accelerated and acute forms occur after heavy exposure over months — and artificial stone work has produced severe disease in workers in their twenties and thirties.", "Silica exposure also raises the risk of tuberculosis substantially, and is classified as a lung carcinogen. It is associated with COPD, kidney disease and autoimmune disease."] },
+        { h: "Why it is missed", p: ["Early silicosis is silent. By the time breathlessness and cough appear, the scarring is established and cannot be reversed. There is no treatment that removes it — which is precisely why detection has to happen through surveillance rather than through symptoms.", "It is also mistaken for tuberculosis, which delays both diagnoses, and the two genuinely coexist often enough that finding one is a reason to look for the other."] },
+        { h: "What actually prevents it", p: ["Control at source is the only intervention that works reliably. Respirators are the last line, not the first."], list: ["Wet cutting and wet polishing rather than dry.", "Local exhaust ventilation and on-tool dust extraction.", "Enclosure and isolation of the dustiest processes.", "Substitution of high-silica materials where possible.", "Properly fitted respiratory protection, fit-tested, where controls cannot fully remove exposure.", "Not taking dust home: changing facilities, and no laundering of work clothes with household washing."] },
+        { h: "For workers and employers", p: ["Any exposed worker with a cough, breathlessness or weight loss should be assessed — and should say what they do for a living, unprompted, because the occupational history is the piece most often missing from the notes.", "Where one worker is diagnosed, the others doing the same job need screening. Occupational lung disease is rarely an individual finding."] }
+      ],
+      src: ["WHO/ILO Global Programme for the Elimination of Silicosis", "ATS Statement: Occupational Contribution to the Burden of Airway Disease", "IARC Monographs — crystalline silica, Group 1 carcinogen", "WHO Guidelines on tuberculosis screening in silica-exposed workers"]
+    },
+    {
+      id: "sleep-apnoea-and-the-heart", t: "Sleep apnoea and the heart",
+      topic: "sleep-medicine", cat: "Articles", read: "5 min",
+      lead: "Untreated obstructive sleep apnoea is a cardiovascular condition that happens to present at night.",
+      body: [
+        { h: "What happens during an apnoea", p: ["The upper airway collapses repeatedly during sleep. Each time, oxygen falls, carbon dioxide rises, and the body produces a surge of sympathetic activity to reopen the airway. Blood pressure and heart rate spike, and sleep fragments — often hundreds of times a night, without the person waking properly or remembering any of it."] },
+        { h: "The cardiovascular consequences", p: ["Repeated overnight, that cycle has measurable daytime effects."], list: ["Hypertension, particularly blood pressure that resists three or more drugs, and pressure that fails to dip overnight.", "Atrial fibrillation, with a markedly higher recurrence rate after cardioversion or ablation when the apnoea is untreated.", "Heart failure, where sleep-disordered breathing is common and independently associated with worse outcomes.", "Coronary disease and stroke risk.", "Poorer glycaemic control in type 2 diabetes."] },
+        { h: "Who should be tested", p: [], list: ["Loud habitual snoring with witnessed pauses in breathing.", "Waking unrefreshed, morning headache, or daytime sleepiness.", "Resistant hypertension, or non-dipping blood pressure.", "Atrial fibrillation, especially before a rhythm-control procedure.", "Before surgery requiring general anaesthesia, where undiagnosed apnoea raises perioperative risk."] },
+        { h: "What treatment changes", p: ["CPAP reliably abolishes the events, improves sleepiness and quality of life, and lowers blood pressure — the reduction being largest in resistant hypertension and in those who use it consistently. Adherence is the whole game: a machine used four hours a night is a treatment, and one left in the cupboard is not.", "Weight loss, positional therapy and mandibular advancement devices have defined roles, and surgery is appropriate in selected anatomy. The choice depends on severity and on what a person will actually use."] },
+        { h: "One practical point", p: ["Sleepiness at the wheel is the most immediately dangerous symptom and the least often volunteered. Ask about it directly, and advise accordingly until treatment is established."] }
+      ],
+      src: ["American Academy of Sleep Medicine Clinical Practice Guideline for Diagnostic Testing for Adult OSA", "AASM Clinical Practice Guideline: Treatment of OSA with Positive Airway Pressure", "2021 ESC Guidelines and AHA Scientific Statement on OSA and cardiovascular disease"]
+    },
+    {
+      id: "quitting-what-works", t: "Quitting: what actually works",
+      topic: "smoking-cessation", cat: "Patient Guides", read: "6 min",
+      lead: "Willpower alone has the lowest success rate of any method. Combining medication with support multiplies the odds several times over.",
+      body: [
+        { h: "Why stopping is hard, and why that is not a character flaw", p: ["Nicotine dependence is a physical dependence with a defined withdrawal syndrome — irritability, poor concentration, restlessness, low mood, disturbed sleep and intense craving. Most of it peaks within the first week and settles substantially by four weeks.", "Understanding that the worst is time-limited, and treatable, is what gets people through the period where most attempts fail."] },
+        { h: "What the evidence supports", p: ["Three things independently raise the chance of success, and they stack:"], list: ["Medication. Nicotine replacement works best as a combination — a patch for background craving plus a fast-acting form (gum, lozenge, spray, inhalator) for breakthrough. Prescription options including varenicline and bupropion are more effective again where suitable.", "Behavioural support. Structured support, in person or by telephone, roughly doubles the effect of medication alone.", "A quit date. A defined day, prepared for, outperforms open-ended intention."] },
+        { h: "The practical plan", p: [], list: ["Set a date within two weeks, and tell the people around you.", "Start medication as advised — some are begun before the quit date.", "Remove cigarettes, lighters and ashtrays from home, car and workplace the night before.", "Identify your three highest-risk moments — after a meal, with tea or alcohol, with particular company — and decide in advance what you will do instead.", "Expect craving to come in waves of a few minutes. It passes whether or not you smoke.", "Treat a lapse as information, not as failure. Most people who succeed have made several attempts."] },
+        { h: "What changes, and how quickly", p: ["Carbon monoxide levels normalise within a day. Circulation and lung function begin improving within weeks to months. The excess risk of heart disease falls steeply in the first year, and the risk of lung cancer declines steadily over the years that follow.", "Quitting improves outcomes at every age and at every stage of disease — including after a diagnosis of COPD, and including after a diagnosis of lung cancer, where it improves treatment tolerance and survival."] },
+        { h: "For beedis, and for smokeless tobacco", p: ["Beedis deliver comparable or higher carbon monoxide and tar despite their size, and carry the same risks. Smokeless and chewed tobacco is not a safe substitute; it carries its own oral, oesophageal and cardiovascular risk. Both merit the same structured support."] }
+      ],
+      src: ["WHO Framework Convention on Tobacco Control and WHO tobacco cessation guidelines", "NICE NG209 Tobacco: preventing uptake, promoting quitting and treating dependence", "US Public Health Service Clinical Practice Guideline: Treating Tobacco Use and Dependence", "Cochrane Reviews on combination nicotine replacement therapy and behavioural support"]
+    },
+    {
+      id: "biologics-in-severe-asthma", t: "Biologics in severe asthma: who qualifies",
+      topic: "severe-asthma", cat: "Expert Insights", read: "10 min",
+      lead: "Before phenotyping anyone for a biologic, establish that the asthma is severe rather than merely uncontrolled. Most referrals fail at that first step.",
+      body: [
+        { h: "Difficult-to-treat is not severe", p: ["Severe asthma means asthma that remains uncontrolled despite optimised high-dose inhaled corticosteroid plus a second controller, taken correctly and consistently, with comorbidity addressed — or that deteriorates when that treatment is reduced.", "The majority of patients arriving at a severe asthma clinic do not meet that definition on arrival. They have inhaler technique errors, poor adherence, ongoing exposure, or an untreated comorbidity. Prescribing a biologic over any of those is expensive, ineffective and delays the actual fix."] },
+        { h: "The checklist that must come first", p: [], list: ["Confirm the diagnosis objectively. Not all wheeze is asthma; vocal cord dysfunction, bronchiectasis, COPD and cardiac disease all masquerade.", "Observe inhaler technique with the patient’s own device, at every visit.", "Assess adherence with prescription refill data rather than by asking. Reported adherence and actual adherence differ substantially.", "Treat comorbidity: allergic and non-allergic rhinitis, nasal polyposis, reflux, obesity, obstructive sleep apnoea, anxiety and dysfunctional breathing.", "Remove ongoing exposure — smoking, occupational sensitisers, indoor allergen, biomass smoke.", "Review drugs that worsen asthma, including beta blockers and NSAIDs in susceptible patients."] },
+        { h: "Phenotyping, once severity is established", p: ["The decision then rests on inflammatory phenotype, measured while the picture is still interpretable — some markers are suppressed by systemic corticosteroid, so timing matters."], list: ["Blood eosinophil count, on more than one occasion.", "Fractional exhaled nitric oxide where available.", "Total IgE with specific sensitisation to a perennial aeroallergen, for the allergic pathway.", "Exacerbation frequency and maintenance oral corticosteroid burden.", "Coexisting nasal polyposis, atopic dermatitis or eosinophilic comorbidity, which may make one agent preferable when several are options."] },
+        { h: "Setting expectations", p: ["The realistic goals are fewer exacerbations, reduced or discontinued maintenance oral corticosteroid, and better symptom control and quality of life. Lung function gains are typically modest.", "Response is assessed formally — commonly at around four months, with a fuller review at a year — against criteria agreed before starting. Non-response is a reason to reassess the phenotype and the diagnosis, not simply to switch agents indefinitely."] },
+        { h: "The point most worth making to patients", p: ["A biologic is an addition, not a replacement. Inhaled therapy continues, and the biggest risk after a good response is that it quietly stops."] }
+      ],
+      src: ["GINA 2024 — Difficult-to-treat and severe asthma in adolescent and adult patients", "ERS/ATS Guidelines on definition, evaluation and treatment of severe asthma", "NICE technology appraisals for biologic therapies in severe asthma"]
+    },
+    {
+      id: "one-airway", t: "Allergic rhinitis and asthma: one airway",
+      topic: "allergy", cat: "Articles", read: "5 min",
+      lead: "The nose and the chest are a single continuous airway. Treating only the lower half is why some asthma stays stubborn.",
+      body: [
+        { h: "The united airway", p: ["The lining of the nose and the lining of the bronchi share structure, inflammatory cells and mediators. Allergic inflammation rarely respects the boundary: most people with asthma have rhinitis, and a substantial proportion of people with persistent rhinitis have asthma, sometimes undiagnosed.", "Clinically, this means untreated nasal disease is a common and correctable reason for asthma that will not settle."] },
+        { h: "Why the nose affects the chest", p: [], list: ["A blocked nose forces mouth breathing, so air reaches the bronchi unfiltered, unwarmed and undehumidified.", "Post-nasal drip provokes cough and airway irritation.", "Shared systemic inflammation drives both sites at once.", "Disturbed sleep from nasal obstruction worsens daytime symptoms and control."] },
+        { h: "What to treat, and in what order", p: ["Intranasal corticosteroid is the most effective single treatment for persistent allergic rhinitis and improves asthma symptoms alongside it. Antihistamines help sneeze, itch and rhinorrhoea more than they help blockage. Saline irrigation is cheap, safe and underused.", "Technique matters here too: the spray should be aimed away from the septum, using the opposite hand, without sniffing hard afterwards. Epistaxis and treatment failure usually trace back to aim."] },
+        { h: "Allergen avoidance, realistically", p: ["Complete avoidance is rarely achievable. Reduction is, and it is worth targeting the exposures that actually matter for the individual rather than issuing a generic list."], list: ["House dust mite: mattress and pillow encasings, hot washing of bedding, reduced soft furnishing in the bedroom.", "Pollen: track the local season, keep windows shut at peak times, shower and change after long periods outdoors.", "Mould: address damp and leaks rather than treating the symptoms alone.", "Pets: honest discussion, since partial measures achieve little if the animal sleeps in the bedroom."] },
+        { h: "When to consider immunotherapy", p: ["Where symptoms are driven by a confirmed, clinically relevant allergen and persist despite optimal medication, allergen immunotherapy can modify the disease rather than suppress it. It requires a confirmed sensitisation matching the clinical pattern, and a specialist assessment."] }
+      ],
+      src: ["ARIA 2019 — Allergic Rhinitis and its Impact on Asthma", "GINA 2024 — comorbidities in asthma", "EAACI Guidelines on Allergen Immunotherapy"]
+    },
+    {
+      id: "staging-lung-cancer", t: "Staging lung cancer: why it decides everything",
+      topic: "lung-cancer", cat: "Expert Insights", read: "9 min",
+      lead: "Treatment intent, sequence and prognosis all follow from the stage. Getting it right is not administrative — it is the single highest-value step in the pathway.",
+      body: [
+        { h: "What staging answers", p: ["Staging describes the size and local extent of the tumour, whether lymph nodes are involved and which ones, and whether disease has spread beyond the chest. That determines whether the intent is cure or control, and whether the first treatment is surgery, radiotherapy, systemic therapy, or a combination.", "Two patients with an identical tumour on the scan can have entirely different treatment plans on the basis of a single involved node."] },
+        { h: "Why the mediastinum is the crux", p: ["Nodal status is where staging most often changes the plan, and where imaging alone is least reliable. CT under-calls and over-calls. PET-CT is more accurate but still yields false positives — particularly in a population with a high background of granulomatous disease and healed tuberculosis, where an avid node may be entirely benign.", "That is the argument for tissue confirmation rather than radiological assumption: treating a patient as incurable on the strength of an inflammatory node is a serious and avoidable error, and so is operating on a patient with unrecognised nodal disease."] },
+        { h: "How nodes are sampled", p: ["Endobronchial ultrasound with transbronchial needle aspiration is the usual first-line approach, reaching the paratracheal and hilar stations through the airway, with endoscopic ultrasound extending access to lower and posterior stations. Surgical mediastinoscopy remains available where results are discordant with the clinical picture.", "A negative needle result in a strongly suspicious node is a reason to go further, not to stop."] },
+        { h: "Molecular and biomarker testing is part of staging now", p: ["For non-small-cell disease, the tissue must answer more than \"is it cancer\". Predictive biomarker testing determines eligibility for targeted and immune therapies, and increasingly influences treatment even in earlier-stage disease.", "The practical implication is at the moment of sampling: obtain enough tissue, and plan the biopsy route with the downstream testing in mind. Repeating a procedure because the sample was adequate for diagnosis but not for genotyping costs the patient weeks."] },
+        { h: "The multidisciplinary meeting is not a formality", p: ["Staging synthesises radiology, pathology, molecular results, lung function and fitness. It is a multidisciplinary judgement, and outcomes are demonstrably better where that discussion actually happens rather than being recorded as having happened."] },
+        { h: "What patients should be told", p: ["That the tests before treatment are what make the treatment right, and that a delay of a few days to obtain proper staging is almost always worth it. The commonest source of anxiety in this window is not knowing why nothing appears to be happening."] }
+      ],
+      src: ["IASLC 8th Edition TNM Classification for Lung Cancer", "NICE NG122 Lung cancer: diagnosis and management", "ESMO Clinical Practice Guidelines for non-small-cell lung cancer", "ACCP/ERS guidance on endosonographic mediastinal staging"]
+    },
+    {
+      id: "what-happens-at-bronchoscopy", t: "What happens at a bronchoscopy, start to finish",
+      topic: "bronchoscopy", cat: "Patient Guides", read: "6 min",
+      lead: "It is a camera test of the airways, it usually takes fifteen to thirty minutes, and most people go home the same day.",
+      body: [
+        { h: "Before the day", p: ["You will be asked not to eat for several hours beforehand, with a shorter window for clear fluids. The exact timings come from the unit and should be followed precisely, because a stomach that is not empty is the commonest reason a procedure is postponed.", "Tell the team about blood thinners, diabetes medication, inhalers, allergies, loose teeth, and any previous reaction to sedation. Blood thinners often need adjusting in advance — never stop them on your own."] },
+        { h: "In the room", p: ["A cannula goes into the back of your hand. Monitoring goes on your finger and chest. Local anaesthetic is sprayed or gargled to numb the throat and nose, which tastes bitter and makes the throat feel swollen — that feeling is expected and does not mean the airway is closing.", "Sedation is usually given so that you are drowsy and comfortable rather than fully asleep. The bronchoscope passes through the nose or mouth, past the vocal cords, into the windpipe and then the bronchi. It is thinner than the airway and does not block your breathing. Oxygen is given throughout."] },
+        { h: "What may be done through the scope", p: [], list: ["A wash of the airway, to send for infection and cell studies.", "Brushings or small biopsies of the airway lining.", "Biopsies of lung tissue, sometimes with X-ray or ultrasound guidance.", "Endobronchial ultrasound to see and sample lymph nodes next to the airway.", "Removal of a mucus plug or a foreign body, or treatment of a narrowed airway."] },
+        { h: "Afterwards", p: ["You rest in recovery until the sedation wears off. You must not eat or drink until the throat numbness has gone — usually one to two hours — because swallowing is not safe until sensation returns.", "A sore throat, a hoarse voice, a mild cough and small streaks of blood in the spit for a day or so are all common. So is feeling tired for the rest of the day."] },
+        { h: "Going home", p: ["If you have had sedation you need a responsible adult to take you home, and you must not drive, operate machinery, sign anything legally binding or drink alcohol for 24 hours."] },
+        { h: "When to seek help", p: ["Contact the hospital or attend an emergency department for more than a small amount of fresh blood, worsening breathlessness, chest pain, or a fever developing in the days afterwards."] }
+      ],
+      src: ["British Thoracic Society Guideline for Diagnostic Flexible Bronchoscopy in Adults", "BTS Guidelines for the management of patients on anticoagulants and antiplatelet agents undergoing endoscopic procedures"]
+    },
+    {
+      id: "living-with-ild", t: "Living with interstitial lung disease",
+      topic: "ild", cat: "Patient Guides", read: "7 min",
+      lead: "ILD is a family of conditions, not one disease — and the name on your letter changes what happens next more than almost anything else.",
+      body: [
+        { h: "Why the exact diagnosis matters so much", p: ["Interstitial lung disease describes scarring or inflammation of the lung tissue itself rather than the airways. There are more than a hundred causes, and they are treated in opposite directions: some respond to suppressing the immune system, some are made worse by it, and some need antifibrotic therapy instead.", "That is why the work-up is detailed and can feel slow — a high-resolution CT, blood tests for autoimmune disease, a careful exposure history, and often a multidisciplinary discussion between a pulmonologist, a radiologist and a pathologist. Getting the pattern right is what makes the treatment right."] },
+        { h: "The exposure history is part of the diagnosis", p: ["Be exhaustive, including things you would not think to mention:"], list: ["Birds at home or nearby — pigeons, poultry, feather bedding and pillows.", "Damp, mould, air conditioning and humidifiers.", "Work with dust, fumes, asbestos, silica, metals or organic material.", "Hobbies involving dust or animals.", "Every medicine you have taken, including those stopped long ago, and any radiotherapy.", "Joint pains, rashes, dry eyes and mouth, reflux, or cold and colour-changing fingers."] },
+        { h: "What the follow-up numbers are for", p: ["Lung function is repeated at intervals not because a single reading is meaningful but because the trend is. The direction of travel over six to twelve months decides whether treatment is working and whether the disease is behaving progressively — which is itself a treatment decision.", "Attending those appointments even when you feel unchanged is genuinely part of the treatment."] },
+        { h: "What helps day to day", p: [], list: ["Pulmonary rehabilitation, which improves walking distance and breathlessness in fibrotic ILD.", "Oxygen assessment if your saturations fall on exertion — the drop often happens while walking and is invisible sitting still.", "Vaccination, and early treatment of chest infection.", "Stopping smoking, which matters in every ILD.", "Treating reflux and sleep apnoea where present.", "Support for the cough, which is often the most wearing symptom and is worth raising specifically."] },
+        { h: "Transplant is a conversation to have early", p: ["For those with progressive disease, referral for transplant assessment is easier and safer when made early. Referral is an assessment and a discussion — not a commitment — and being assessed early preserves options that late referral removes."] },
+        { h: "When to seek help sooner", p: ["Get medical advice promptly for a sudden or rapid worsening of breathlessness over days, new fever or coloured sputum, or chest pain. Acute deterioration in ILD needs assessment rather than waiting for the next appointment."] }
+      ],
+      src: ["ATS/ERS/JRS/ALAT 2022 Clinical Practice Guideline on IPF and Progressive Pulmonary Fibrosis", "ATS/ERS 2020 Diagnosis of Hypersensitivity Pneumonitis in Adults", "ISHLT Consensus Document for the Selection of Lung Transplant Candidates (2021)"]
+    },
+    {
+      id: "referring-for-lung-transplant", t: "Referring for lung transplantation: the timing error that costs most",
+      topic: "lung-transplantation", cat: "Expert Insights", read: "8 min",
+      lead: "The commonest mistake in transplant referral is not referring the wrong patient. It is referring the right patient too late.",
+      body: [
+        { h: "Referral and listing are different decisions", p: ["Referral starts an assessment. Listing commits a patient to the waiting list. Conflating the two is what produces late referral: clinicians wait until they believe the patient is ready to be listed, by which point the assessment itself — which takes time, and may identify correctable problems — has to be done against the clock.", "A referral that concludes \"not yet, review in six months\" is a successful referral, not a wasted one."] },
+        { h: "When to pick up the phone", p: ["Referral is appropriate when disease is progressive despite optimal therapy and the trajectory suggests advanced disease within the next couple of years, rather than when the patient is already at the end of it. Concretely:"], list: ["Fibrotic ILD with declining lung function or gas transfer despite treatment, and any patient requiring supplemental oxygen.", "COPD with progressive decline, rising exacerbation frequency, hypercapnia, or pulmonary hypertension.", "Cystic fibrosis or bronchiectasis with falling lung function, frequent exacerbations or massive haemoptysis.", "Pulmonary arterial hypertension that remains in a higher risk category despite appropriate combination therapy.", "Any of these after an ICU admission for respiratory failure."] },
+        { h: "What the assessment is actually looking for", p: ["Beyond the lungs: cardiac and renal function, nutritional state, bone health, infection and colonisation, malignancy history, psychological readiness, adherence, and the practical support available at home. Several of these are modifiable, which is the argument for finding them early."], list: ["Nutrition and body composition, in both directions.", "Deconditioning, which is treatable with rehabilitation and is not itself a contraindication.", "Smoking and substance use, where a documented period of abstinence is required.", "Adherence history, addressed honestly rather than assumed.", "A realistic caregiver plan, which is as decisive as any physiological measure."] },
+        { h: "ECMO as a bridge", p: ["Extracorporeal support can bridge selected patients to transplantation when ventilation alone will not sustain them. Where a patient can be kept awake, mobile and participating in physiotherapy on support, muscle mass and respiratory function are better preserved, which matters for tolerating a long operation and for recovery afterwards.", "This is only possible where the patient is already known to a transplant service. It is another reason early referral is a clinical decision rather than an administrative one."] },
+        { h: "What to tell the patient at referral", p: ["That referral is an assessment and a conversation; that it does not commit them to anything; and that being assessed early gives them more options, not fewer. Fear of the word is a major reason patients decline referral, and it is best addressed at the point of making it."] }
+      ],
+      src: ["ISHLT Consensus Document for the Selection of Lung Transplant Candidates: 2021 Update", "ATS/ERS/JRS/ALAT 2022 Guideline on IPF and Progressive Pulmonary Fibrosis", "2022 ESC/ERS Guidelines for the diagnosis and treatment of pulmonary hypertension"]
+    },
+    {
+      id: "what-interventional-pulmonology-replaces", t: "What interventional pulmonology has replaced",
+      topic: "interventional-pulmonology", cat: "Expert Insights", read: "7 min",
+      lead: "A large amount of what once required an operation is now done through the airway, as a day case, with the patient home the same evening.",
+      body: [
+        { h: "The shift", p: ["Interventional pulmonology covers minimally invasive diagnosis and treatment of the airways, lungs and pleura. Its growth has changed the default answer to several questions that used to end in a surgical referral — mediastinal staging, tissue diagnosis of diffuse lung disease, management of pleural effusion, and relief of central airway obstruction.", "The gain is not only avoiding an operation. It is the reduction in time to diagnosis, which in cancer pathways translates directly into earlier treatment."] },
+        { h: "Where it now leads", p: [], list: ["Mediastinal nodal staging: endobronchial and endoscopic ultrasound with needle aspiration, in place of routine surgical mediastinoscopy.", "Peripheral lung lesions: guided and navigational bronchoscopy, with radial ultrasound and increasingly with robotic platforms.", "Diffuse parenchymal disease: transbronchial cryobiopsy as an alternative to surgical lung biopsy in selected patients discussed at a multidisciplinary meeting.", "Pleural disease: medical thoracoscopy under local anaesthesia and sedation, with talc poudrage or an indwelling catheter for malignant effusion.", "Central airway obstruction: debulking, dilatation, stenting and ablative therapy, which can restore breathing within a single procedure.", "Severe emphysema: endobronchial valve placement for bronchoscopic lung volume reduction in carefully selected patients."] },
+        { h: "Selection is the whole discipline", p: ["These procedures are safe in the right patient and not in the wrong one. Cryobiopsy carries meaningful bleeding and pneumothorax risk and belongs in centres with the equipment and the protocols to manage both. Valve placement depends on demonstrating absent collateral ventilation and on fissure integrity, and produces little benefit without it.", "The right question is rarely \"can this be done bronchoscopically\" but \"does this patient gain from it, and is the alternative genuinely worse\"."] },
+        { h: "Why sedation and airway planning matter", p: ["A longer therapeutic procedure in a compromised airway is a shared airway problem. Planning the sedation strategy, the airway device and the escalation plan in advance is what keeps these procedures day cases rather than admissions."] },
+        { h: "One diagnostic implication", p: ["Because tissue now increasingly has to support molecular testing as well as diagnosis, the choice of technique and the number of passes should be planned with that downstream requirement in mind, not decided at the end."] }
+      ],
+      src: ["ACCP/AABIP guidance on interventional pulmonary procedures", "ERS Statement on transbronchial lung cryobiopsy in diffuse parenchymal lung disease", "BTS Pleural Disease Guideline", "NICE guidance on endobronchial valve insertion for emphysema"]
+    },
+    {
+      id: "when-a-chest-infection-is-not-settling", t: "When a chest infection is not settling",
+      topic: "respiratory-infections", cat: "Patient Guides", read: "5 min",
+      lead: "Most chest infections improve within a fortnight. The skill is recognising the ones that are not going to.",
+      body: [
+        { h: "The normal course", p: ["Fever and the worst of the malaise usually settle within about a week. The cough is the slowest symptom to go and can persist for three to six weeks after everything else has resolved — that alone is not a sign of failure.", "Feeling tired for several weeks after pneumonia is normal and expected."] },
+        { h: "When to be seen again", p: [], list: ["You are getting worse rather than better after three days of treatment.", "Fever returns after settling, or persists beyond a week.", "Breathlessness is increasing, or you are breathless at rest.", "Chest pain is worsening, particularly if it is sharp and worse on breathing in.", "You are coughing up blood.", "You cannot keep fluids down, or you feel faint on standing."] },
+        { h: "Symptoms that mean now, not tomorrow", p: ["Severe breathlessness, blue lips or fingertips, confusion or unusual drowsiness, or chest pain that does not settle. These need emergency assessment rather than a routine appointment."] },
+        { h: "Why a cough lasting three weeks is investigated", p: ["A cough persisting beyond three weeks is the threshold at which further assessment is recommended, including consideration of tuberculosis. In India this matters particularly: TB is common, presents exactly like a chest infection that will not clear, and is entirely treatable once identified.", "Weight loss, night sweats, or blood in the sputum alongside a persistent cough make that assessment urgent."] },
+        { h: "Who needs a repeat chest X-ray", p: ["A follow-up film around six weeks after pneumonia is usually advised for smokers, for those over fifty, and for anyone whose symptoms have not fully resolved — because a small proportion of apparent pneumonia is an underlying lesion presenting as infection."] },
+        { h: "What helps, and what does not", p: ["Fluids, rest, simple analgesia and time. Antibiotics help bacterial infection and do nothing at all for a viral one, and taking them unnecessarily contributes to resistance. If antibiotics are prescribed, finish the course as directed."] }
+      ],
+      src: ["WHO and National TB Elimination Programme guidance on presumptive TB — cough of two weeks or more", "NICE NG138 Pneumonia (community-acquired): antimicrobial prescribing", "BTS Guidelines for the management of community acquired pneumonia in adults"]
+    },
+    {
+      id: "copd-action-plan", t: "Your COPD flare-up plan: knowing the difference between a bad day and an exacerbation",
+      topic: "copd", cat: "Patient Guides", read: "6 min",
+      lead: "An exacerbation treated early is usually managed at home. The same exacerbation treated late is often managed in hospital.",
+      body: [
+        { h: "What an exacerbation is", p: ["A sustained worsening beyond your normal day-to-day variation, lasting more than a day or two, that needs a change in treatment. The three symptoms that matter are more breathlessness, more sputum, and a change in sputum colour.", "One bad afternoon after climbing stairs is not an exacerbation. Two days of needing your reliever far more than usual, with a change in your phlegm, is."] },
+        { h: "Know your baseline", p: ["You cannot recognise a change without knowing the starting point. Be able to say how far you can normally walk on the flat, how many times a day you normally need your reliever, and what your sputum normally looks like. Write it down."] },
+        { h: "What to do when it starts", p: [], list: ["Increase your reliever inhaler as your plan specifies, using a spacer.", "Start any rescue medication you have been given, exactly as instructed — not for every cough.", "Keep moving gently rather than going to bed entirely; complete rest worsens deconditioning quickly.", "Tell someone at home what is happening, so a deterioration is noticed.", "Contact your team on the same day if you have started rescue treatment, so it is recorded and reviewed."] },
+        { h: "Go to hospital if", p: [], list: ["You are breathless at rest, or too breathless to speak in full sentences.", "Your lips or fingertips look blue.", "You are confused, unusually drowsy, or very agitated.", "You have chest pain.", "Your ankles are swelling rapidly.", "You are not improving 48 hours after starting rescue treatment."] },
+        { h: "After a flare-up", p: ["Every exacerbation is an event worth reviewing, because each one is associated with a further loss of lung function and a higher chance of the next. Ask for a review of your inhalers and technique, your vaccination status, and referral to pulmonary rehabilitation — which is most effective in the weeks after an exacerbation.", "If you still smoke, this is the single change that alters the trajectory more than any medicine."] }
+      ],
+      src: ["GOLD 2024 Global Strategy for Prevention, Diagnosis and Management of COPD", "NICE NG115 Chronic obstructive pulmonary disease in over 16s: diagnosis and management"]
+    },
+    {
+      id: "preparing-for-cpet", t: "Preparing for a cardiopulmonary exercise test",
+      topic: "cpet", cat: "Patient Guides", read: "5 min",
+      lead: "It is the test that reproduces your symptom on purpose — which is exactly why it explains what the resting tests could not.",
+      body: [
+        { h: "Why you have been sent", p: ["Resting tests look at the lungs and heart at rest. If your problem only appears when you exert yourself, a resting test can be entirely normal and still miss the cause.", "CPET measures breathing, gas exchange, heart rate and rhythm together while the workload rises steadily, so it can separate a limit coming from the lungs, from the heart, from the circulation, or from deconditioning."] },
+        { h: "On the day", p: [], list: ["Wear comfortable clothes and proper shoes you can exercise in.", "Eat lightly a couple of hours before; avoid a heavy meal.", "Avoid caffeine, alcohol and vigorous exercise beforehand, as instructed by the unit.", "Do not smoke on the day of the test.", "Bring a list of your medicines and your inhalers. Ask in advance which, if any, to withhold — do not stop anything on your own."] },
+        { h: "What the test involves", p: ["You cycle or walk on a treadmill while the resistance or speed increases gradually. You wear a mask or mouthpiece that measures the air you breathe in and out, ECG electrodes on the chest, a blood pressure cuff and a finger probe. Sometimes a small arterial or earlobe blood sample is taken.", "It usually lasts eight to twelve minutes of actual exercise, and the whole appointment takes about an hour."] },
+        { h: "The most important instruction", p: ["Go as hard as you genuinely can, and stop when you need to. The test works because it takes you to your limit — a test stopped early out of caution gives an uninterpretable result. Staff monitor you continuously and will stop the test if they need to."] },
+        { h: "Afterwards", p: ["You may feel tired, and your legs may ache the next day. There are no restrictions on driving or eating. The results are interpreted alongside your other tests and discussed at your next appointment rather than given at the bedside."] }
+      ],
+      src: ["ERS Statement on standardisation of cardiopulmonary exercise testing in chronic lung disease", "ATS/ACCP Statement on Cardiopulmonary Exercise Testing"]
+    },
+    {
+      id: "asthma-in-children", t: "Asthma in children: what parents most often ask",
+      topic: "asthma", cat: "Articles", read: "6 min",
+      lead: "Well-controlled childhood asthma should not limit school, sport or sleep. If it is doing any of those, the treatment needs reviewing — not accepting.",
+      body: [
+        { h: "What good control looks like", p: ["A child with well-controlled asthma sleeps through the night without coughing, plays and runs like their friends, does not miss school for chest symptoms, and needs their reliever inhaler no more than a couple of times a week.", "Anything less than that is a reason for review. Children compensate by quietly avoiding exertion, so \"he is fine, he just does not like running\" is worth asking about specifically."] },
+        { h: "Spacers are not optional", p: ["Children should use a pressurised inhaler with a spacer, with a mask for the youngest and a mouthpiece once they can seal their lips reliably. A spacer delivers more drug to the lungs and less to the mouth, and removes the co-ordination the child cannot yet manage.", "Give one puff at a time, with five tidal breaths through the spacer after each. Wash the spacer in warm soapy water and let it drip dry rather than rubbing it, which builds up static."] },
+        { h: "The worry about inhaled steroids", p: ["This is the most frequent question, and it deserves a straight answer. Inhaled corticosteroids at the doses used in childhood asthma have a small effect on growth velocity, largely in the first year of treatment, with a minimal effect on final adult height.", "Against that, poorly controlled asthma itself impairs growth, disturbs sleep, costs school days and carries a real risk of severe attacks. Repeated courses of oral steroids — the consequence of stopping the controller — carry considerably more risk than the inhaler does."] },
+        { h: "Triggers worth acting on at home", p: [], list: ["Tobacco smoke, including smoking outside the room or on a balcony — smoke travels on clothing and hair.", "Mosquito coils, incense, and cooking smoke in unventilated kitchens.", "House dust mite in bedding and soft toys.", "Damp and visible mould.", "Viral colds, which cause most childhood attacks and cannot be avoided entirely — which is why the controller continues through them."] },
+        { h: "Get help urgently if", p: [], list: ["The reliever is not working, or is needed again within four hours.", "The child is too breathless to speak, eat or complete a sentence.", "You can see the skin sucking in between or below the ribs, or the tummy pulling under the ribcage.", "The lips or nail beds look blue or grey.", "The child becomes drowsy, floppy or confused.", "A quiet chest after a period of loud wheeze — this is more serious, not less."] },
+        { h: "Bring these to every appointment", p: ["The inhalers themselves, the spacer, and the written action plan. Every child with asthma should have one, and everyone who cares for them — including school — should have a copy."] }
+      ],
+      src: ["GINA 2024 — Asthma in children 5 years and younger, and 6 to 11 years", "NICE NG80 Asthma: diagnosis, monitoring and chronic asthma management", "BTS/SIGN British guideline on the management of asthma"]
+    }
   ];
-  /* Videos mapped to topics. `yt` is the YouTube id; `ch` is the source channel and
-     defaults to Yashoda. Entries carrying `ext: true` come from another institution
-     and are labelled as such on the card so they are never mistaken for Yashoda's
-     own content. Entries with no `yt` render an "in production" card.
-     NOTE: YouTube is unreachable from the build environment, so no id below was
-     opened and confirmed — they need a spot-check pass. */
+  /*
+   * Videos, by subject. `yt` is the YouTube id; `ch` is the source channel and
+   * defaults to Yashoda. `also` lists the other subject pages a video belongs
+   * on, so one video can serve two topics without being listed twice in the
+   * hub. Entries carrying `ext: true` come from another institution and are
+   * labelled on the card so they are never mistaken for Yashoda's own content.
+   *
+   * Every id here was taken from a real YouTube URL returned by a web search.
+   * The build environment cannot open YouTube, so none has been watched — the
+   * set still deserves one human spot-check pass before it is called final.
+   */
   KH_VIDEOS = [
-    { t: 'Inhalation Therapy & Inhalation Devices', topic: 'asthma', yt: 'Qqfsh6rFQDo' },
-    { t: 'Asthma Treatment in Hyderabad, India', topic: 'severe-asthma', yt: '6LG0IyIiSAo' },
-    { t: 'Treatment for Lung Disease', topic: 'copd', yt: 'fMrLWquHAgU' },
-    { t: 'Lung Transplant Surgery — Systemic Sclerosis & ILD', topic: 'ild', yt: 'FovZEt-huiE' },
-    { t: 'Bilateral Lung Transplant for Fibrotic Interstitial Lung Disease', topic: 'ild', yt: 'oj-W8KysTCc' },
-    { t: 'Idiopathic Pulmonary Fibrosis (IPF) Awareness', topic: 'pulmonary-fibrosis', yt: 'jfL60bQbNeQ' },
-    { t: 'Lung Cancer: Types & Treatment', topic: 'lung-cancer', yt: 'oObj7U9YV7A' },
-    { t: 'Treatment for Lung Cancer', topic: 'lung-cancer', yt: '7qfGLoFtAWw' },
-    { t: 'Lung Cancer Awareness and Prevention', topic: 'lung-cancer', yt: '8KE1xSSpORg' },
-    { t: 'Top 10 Lung Cancer Facts', topic: 'lung-cancer', yt: '8bfcpE8mJc4' },
-    { t: 'Smoking & Lung Cancer Connection', topic: 'smoking-cessation', yt: '80ZXCE2dl6Q' },
-    { t: 'Treatment for Obstructive Sleep Apnea', topic: 'sleep-medicine', yt: 'yfNqrG3rSo0' },
-    { t: 'Obstructive Sleep Apnea — Screening & Diagnosis, an update', topic: 'sleep-medicine', yt: 'W2AJKk2Weu0' },
-    { t: 'Sleep Apnea Webinar — Sleep Medicine & Sleep Disorders', topic: 'sleep-medicine', yt: 'a48R6Jpho60' },
-    { t: 'Yashoda Sleep Institute', topic: 'sleep-medicine', yt: '8MNYfHbSusE' },
-    { t: 'Management of Pneumonia & LRTI', topic: 'respiratory-infections', yt: 'OvYMbLIGrWM' },
-    { t: 'The Old and the New of Sedation in Bronchoscopy', topic: 'bronchoscopy', yt: 'nCvjvlPudZQ' },
-    { t: 'BRONCHUS 2025 — Advancing Interventional Pulmonology', topic: 'interventional-pulmonology', yt: '3ObqTHpIPYc' },
-    { t: 'Linear EBUS — An Update', topic: 'interventional-pulmonology', yt: 'FeymGMfLuQo' },
-    { t: 'Double Lung Transplant', topic: 'lung-transplantation', yt: '8GvoTippoZc' },
-    { t: 'Lung Transplant Surgery — Post-TB Bronchiectasis', topic: 'lung-transplantation', yt: 'kpoxKYjfEKQ' },
-    { t: 'Success Cases Series of Lung Transplant in India', topic: 'lung-transplantation', yt: '353Mz7wfBuI' },
-    { t: 'Department of Heart & Lung', topic: 'lung-transplantation', yt: 'DQy0Y_PvNNs' },
-    { t: 'Pulmonary & Critical Care — Basics & Beyond', topic: 'pulmonary-function-testing', yt: 'GM9HO-Qh_QA' },
-
-    /* --- external sources, used only where Yashoda has no video on the topic --- */
-    { t: 'How Does Lung Cancer Screening Work?', topic: 'lung-nodules', yt: 'gFaxi8-i9NE', ch: 'Cleveland Clinic', ext: true },
-    { t: 'Mayo Clinic Minute — Lighting up lung nodules during surgery', topic: 'lung-nodules', yt: 'ivxg-aawqeY', ch: 'Mayo Clinic', ext: true },
-    { t: 'Mayo Clinic Minute: Under pressure with pulmonary hypertension', topic: 'pulmonary-hypertension', yt: 'KGu8jCMQOoc', ch: 'Mayo Clinic', ext: true },
-    { t: 'Pulmonary Hypertension Overview', topic: 'pulmonary-hypertension', yt: 'm0bRgBNAro0', ch: 'Mayo Clinic', ext: true },
-    { t: 'Mayo Clinic Minute: Tips to deal with spring pollen and allergies', topic: 'allergy', yt: 'Sc45QvlCEN0', ch: 'Mayo Clinic', ext: true },
-    { t: 'Mayo Clinic Minute — How to manage hay fever symptoms', topic: 'allergy', yt: '1zfs6wlIEO4', ch: 'Mayo Clinic', ext: true },
-    { t: 'Mayo Clinic Minute: Using your nasal spray properly', topic: 'allergy', yt: 'ICqBAN28Tgo', ch: 'Mayo Clinic', ext: true },
-
-    /* --- still no suitable video from Yashoda, Mayo or Cleveland --- */
-    { t: 'Preparing for a CPET', topic: 'cpet', placeholder: true },
-    { t: 'Silica and occupational lung disease', topic: 'occupational-lung-disease', placeholder: true }
+    { t: "Inhalation Therapy & Inhalation Devices", topic: "asthma", yt: "Qqfsh6rFQDo", also: ["copd", "severe-asthma"] },
+    { t: "Asthma and the Inhalers Used for Treatment — World Asthma Day", topic: "asthma", yt: "cl2FT4Zwd90", also: ["severe-asthma"] },
+    { t: "Asthma Treatment in Hyderabad — Dr V Nagarjuna Maturu", topic: "asthma", yt: "g9IaDf1IAY0", also: ["severe-asthma"] },
+    { t: "Childhood Asthma: Causes and Prevention Strategies", topic: "asthma", yt: "00QsLc8FBZQ", also: ["allergy"] },
+    { t: "Asthma Treatment in Hyderabad, India", topic: "severe-asthma", yt: "6LG0IyIiSAo", also: ["asthma"] },
+    { t: "Treatment for Lung Disease", topic: "copd", yt: "fMrLWquHAgU" },
+    { t: "Mayo Clinic Minute: COPD brought on by tobacco", topic: "copd", yt: "wVKdzxOtl54", ch: "Mayo Clinic", ext: true, also: ["smoking-cessation"] },
+    { t: "Have COPD? Get Help to Quit Smoking", topic: "copd", yt: "2ct5A3Y_vrk", ch: "Duke Health", ext: true, also: ["smoking-cessation"] },
+    { t: "Lung Transplant Surgery — Systemic Sclerosis & ILD", topic: "ild", yt: "FovZEt-huiE", also: ["lung-transplantation", "pulmonary-fibrosis"] },
+    { t: "Bilateral Lung Transplant for Fibrotic Interstitial Lung Disease", topic: "ild", yt: "oj-W8KysTCc", also: ["lung-transplantation", "pulmonary-fibrosis"] },
+    { t: "Idiopathic Pulmonary Fibrosis (IPF) Awareness", topic: "pulmonary-fibrosis", yt: "jfL60bQbNeQ", also: ["ild"] },
+    { t: "Managing Idiopathic Pulmonary Fibrosis", topic: "pulmonary-fibrosis", yt: "aCJJz8le5Tk", ch: "Mayo Clinic", ext: true, also: ["ild"] },
+    { t: "Pulmonary Fibrosis", topic: "pulmonary-fibrosis", yt: "fpOXr10C8_A", ch: "American Lung Association", ext: true },
+    { t: "Living with an Interstitial Lung Disease", topic: "ild", yt: "wzOSWDrRKwY", ch: "American Lung Association", ext: true, also: ["pulmonary-fibrosis"] },
+    { t: "Understanding Interstitial Lung Disease", topic: "ild", yt: "FOe0sdZY9pw", ch: "American Lung Association", ext: true },
+    { t: "Lung Cancer: Types & Treatment", topic: "lung-cancer", yt: "oObj7U9YV7A" },
+    { t: "Treatment for Lung Cancer", topic: "lung-cancer", yt: "7qfGLoFtAWw" },
+    { t: "Lung Cancer Awareness and Prevention", topic: "lung-cancer", yt: "8KE1xSSpORg", also: ["smoking-cessation"] },
+    { t: "Top 10 Lung Cancer Facts", topic: "lung-cancer", yt: "8bfcpE8mJc4", also: ["smoking-cessation"] },
+    { t: "EBUS + EUS (B) for Lung Cancer Staging", topic: "lung-cancer", yt: "k7W8AIHMoRc", also: ["interventional-pulmonology", "lung-nodules", "bronchoscopy"] },
+    { t: "How Does Lung Cancer Screening Work?", topic: "lung-nodules", yt: "gFaxi8-i9NE", ch: "Cleveland Clinic", ext: true },
+    { t: "Mayo Clinic Minute — Lighting up lung nodules during surgery", topic: "lung-nodules", yt: "ivxg-aawqeY", ch: "Mayo Clinic", ext: true },
+    { t: "Mayo Clinic Minute: Under pressure with pulmonary hypertension", topic: "pulmonary-hypertension", yt: "KGu8jCMQOoc", ch: "Mayo Clinic", ext: true },
+    { t: "Pulmonary Hypertension Overview", topic: "pulmonary-hypertension", yt: "m0bRgBNAro0", ch: "Mayo Clinic", ext: true },
+    { t: "Double Lung Transplant", topic: "lung-transplantation", yt: "8GvoTippoZc" },
+    { t: "Lung Transplant Surgery — Post-TB Bronchiectasis", topic: "lung-transplantation", yt: "kpoxKYjfEKQ", also: ["respiratory-infections"] },
+    { t: "Success Cases Series of Lung Transplant in India", topic: "lung-transplantation", yt: "353Mz7wfBuI" },
+    { t: "Department of Heart & Lung", topic: "lung-transplantation", yt: "DQy0Y_PvNNs", also: ["ecmo"] },
+    { t: "The First Combined Heart–Lung Transplant — Dr Naresh Kumar", topic: "lung-transplantation", yt: "PjhdF1VPi48" },
+    { t: "BRONCHUS 2025 — Advancing Interventional Pulmonology", topic: "interventional-pulmonology", yt: "3ObqTHpIPYc" },
+    { t: "Exploring Innovations in Pulmonology — Highlights from BRONCHUS 2025", topic: "interventional-pulmonology", yt: "aL13iX2gYSk", also: ["bronchoscopy"] },
+    { t: "Linear EBUS — An Update", topic: "interventional-pulmonology", yt: "FeymGMfLuQo", also: ["lung-cancer", "bronchoscopy"] },
+    { t: "Bilateral Main Stem Obstruction — Interventional Pulmonology Virtual Meet", topic: "interventional-pulmonology", yt: "_1f1kjfwajA", also: ["bronchoscopy"] },
+    { t: "Dr Hari Kishan Gonuguntla, Senior Interventional Pulmonologist", topic: "interventional-pulmonology", yt: "fvUjltBWMPY" },
+    { t: "The Old and the New of Sedation in Bronchoscopy", topic: "bronchoscopy", yt: "nCvjvlPudZQ", also: ["interventional-pulmonology"] },
+    { t: "Benign Airway Stenosis after TB and Intubation — an Endoscopic Approach", topic: "bronchoscopy", yt: "GoE1laPMfaA", also: ["interventional-pulmonology", "respiratory-infections"] },
+    { t: "Pulmonary & Critical Care — Basics & Beyond", topic: "pulmonary-function-testing", yt: "GM9HO-Qh_QA", also: ["cpet"] },
+    { t: "Pulmonology at Yashoda Hospitals, Hyderabad", topic: "pulmonary-function-testing", yt: "kPhsBrwlWuA", also: ["cpet"] },
+    { t: "Mayo Clinic Minute: Tips to deal with spring pollen and allergies", topic: "allergy", yt: "Sc45QvlCEN0", ch: "Mayo Clinic", ext: true },
+    { t: "Mayo Clinic Minute — How to manage hay fever symptoms", topic: "allergy", yt: "1zfs6wlIEO4", ch: "Mayo Clinic", ext: true },
+    { t: "Mayo Clinic Minute: Using your nasal spray properly", topic: "allergy", yt: "ICqBAN28Tgo", ch: "Mayo Clinic", ext: true },
+    { t: "Treatment for Obstructive Sleep Apnea", topic: "sleep-medicine", yt: "yfNqrG3rSo0" },
+    { t: "Obstructive Sleep Apnea — Screening & Diagnosis, an update", topic: "sleep-medicine", yt: "W2AJKk2Weu0" },
+    { t: "Sleep Apnea Webinar — Sleep Medicine & Sleep Disorders", topic: "sleep-medicine", yt: "a48R6Jpho60" },
+    { t: "Yashoda Sleep Institute", topic: "sleep-medicine", yt: "8MNYfHbSusE" },
+    { t: "Pulmo Mentor — Sleep Medicine", topic: "sleep-medicine", yt: "r3hVlMnvkL4" },
+    { t: "Management of Pneumonia & LRTI", topic: "respiratory-infections", yt: "OvYMbLIGrWM" },
+    { t: "Viral Pneumonia and Rapidly Progressive Breathlessness Treated Successfully", topic: "respiratory-infections", yt: "GN-XG8rc1AI" },
+    { t: "Smoking & Lung Cancer Connection", topic: "smoking-cessation", yt: "80ZXCE2dl6Q", also: ["lung-cancer"] },
+    { t: "ECMO for ARDS", topic: "ecmo", yt: "16Pef1d9-Kg" },
+    { t: "ECMO Therapy for COVID Treatment at Yashoda Hospitals", topic: "ecmo", yt: "ouGl8RKo-vM" },
+    { t: "Air Ambulance Services for Critical Patients — Ventilatory Support", topic: "ecmo", yt: "zT2jZ7DK7LQ" },
+    { t: "Air Ambulance Coming of Age in the Second Wave — Webinar", topic: "ecmo", yt: "ilrURcnH6C8" },
+    { t: "Preparing for a CPET", topic: "cpet", placeholder: true },
+    { t: "Silica and occupational lung disease", topic: "occupational-lung-disease", placeholder: true },
+    { t: "What an occupational lung health assessment involves", topic: "occupational-lung-disease", placeholder: true }
   ];
+  /*
+   * Teaching cases for the clinical audience.
+   *
+   * These are illustrative teaching scenarios written to a guideline, NOT
+   * records of real patients, and every page says so above the fold. A
+   * fabricated case presented as a Yashoda patient would be an invented
+   * clinical claim, which this project does not make.
+   */
   KH_CASES = [
-    { t: 'Persistent wheeze in a young adult', topic: 'asthma', lvl: 'Foundation', d: 'A case built around diagnostic confirmation and inhaler technique before escalation.', placeholder: true },
-    { t: 'Breathlessness with a normal chest X-ray', topic: 'pulmonary-hypertension', lvl: 'Advanced', d: 'Working through exertional breathlessness when initial imaging is unremarkable.', placeholder: true },
-    { t: 'Incidental 8 mm nodule on a pre-employment scan', topic: 'lung-nodules', lvl: 'Intermediate', d: 'Risk assessment and the choice between surveillance and sampling.', placeholder: true },
-    { t: 'Progressive fibrosis despite immunosuppression', topic: 'pulmonary-fibrosis', lvl: 'Advanced', d: 'Recognising a progressive fibrotic phenotype and changing direction.', placeholder: true },
-    { t: 'Frequent exacerbator with severe emphysema', topic: 'copd', lvl: 'Intermediate', d: 'Optimising therapy and assessing volume reduction candidacy.', placeholder: true },
-    { t: 'Occupational asthma in a spray painter', topic: 'occupational-lung-disease', lvl: 'Intermediate', d: 'Linking symptom pattern to workplace exposure and acting on it.', placeholder: true }
+    {
+      id: "persistent-wheeze-young-adult", t: "Persistent wheeze in a young adult",
+      topic: "asthma", lvl: "Foundation", d: "A case built around diagnostic confirmation and inhaler technique before escalation.",
+      present: "A 24-year-old office worker is referred with eighteen months of intermittent wheeze and a dry night-time cough. She has been prescribed a reliever inhaler by three different clinicians and is using it most days. She has never had spirometry. She has hay fever each spring and a cat at home.",
+      steps: [
+        { h: "What is missing before anything is escalated", p: ["The diagnosis has never been confirmed objectively, and the controller has never been established. Escalating treatment at this point would be escalating an assumption."], list: ["Spirometry with reversibility testing, to demonstrate variable airflow obstruction.", "A peak flow diary over two weeks, which captures variability that a single clinic test can miss.", "Assessment of atopy given the seasonal pattern and the animal at home.", "Direct observation of inhaler technique with her own device."] },
+        { h: "What the assessment shows", p: ["Spirometry demonstrates obstruction with significant reversibility after a bronchodilator, and the peak flow diary shows diurnal variability with consistent morning dipping. Observed technique reveals that she fires the canister and then begins to breathe in, and does not breathe out first. She has no controller inhaler at all — reliever-only treatment."] },
+        { h: "The decision", p: ["Reliever-only treatment is no longer recommended in asthma at any severity. The correct step is not a higher dose of reliever but the introduction of inhaled corticosteroid-containing controller therapy, alongside a corrected technique and a spacer.", "Allergic rhinitis is treated in parallel rather than separately, and the practical realities of the cat are discussed honestly rather than issued as an instruction."] },
+        { h: "Outcome and review", p: ["At eight weeks her reliever use has fallen to under twice a week, the night cough has stopped, and peak flow variability has settled. No escalation of dose was required at any point."] }
+      ],
+      points: ["Reliever-only treatment is not a safe treatment strategy in asthma, however mild it appears.", "Objective confirmation of variable obstruction should precede long-term treatment.", "Observed inhaler technique changes management more often than a dose change does.", "Upper airway disease treated in parallel improves lower airway control."],
+      src: ["GINA 2024 Global Strategy for Asthma Management and Prevention", "NICE NG80", "ARIA 2019"]
+    },
+    {
+      id: "breathless-normal-chest-xray", t: "Breathlessness with a normal chest X-ray",
+      topic: "pulmonary-hypertension", lvl: "Advanced", d: "Working through exertional breathlessness when initial imaging is unremarkable.",
+      present: "A 46-year-old woman describes two years of progressive breathlessness on exertion. She can no longer climb two flights without stopping. Chest X-ray is normal, spirometry is normal, and she has been reassured twice and treated empirically for asthma without benefit.",
+      steps: [
+        { h: "Why reassurance is the wrong next step", p: ["Progressive exertional breathlessness with normal initial tests is a recognised pattern for several serious and treatable diagnoses. Normal spirometry excludes significant airflow obstruction; it excludes nothing about the pulmonary vasculature, the interstitium in its earliest stages, or the heart."] },
+        { h: "The tests that redirect the work-up", p: ["Two measurements do most of the discriminating here."], list: ["Gas transfer. An isolated reduction in DLCO with preserved spirometry points towards the pulmonary circulation or early interstitial disease.", "Oxygen saturation on exertion. A fall that is invisible at rest changes both direction and urgency.", "Echocardiography, as the screening test for elevated pulmonary pressures.", "A V/Q scan rather than CTPA, as the appropriate screening test for chronic thromboembolic disease.", "Basic exclusions that are cheap and repeatedly forgotten: full blood count and thyroid function."] },
+        { h: "What is found", p: ["DLCO is markedly reduced with normal spirometry. Saturations fall on a walk test. Echocardiography suggests elevated pulmonary artery pressure with right ventricular changes. The V/Q scan shows mismatched perfusion defects, and right heart catheterisation confirms precapillary pulmonary hypertension consistent with chronic thromboembolic disease."] },
+        { h: "Why this matters", p: ["Chronic thromboembolic pulmonary hypertension is potentially curable by surgical endarterectomy in appropriate anatomy, with balloon pulmonary angioplasty and medical therapy for those unsuitable. It is also routinely diagnosed years late, because the initial tests are normal and the symptom is attributed to weight, anxiety or deconditioning.", "A CT pulmonary angiogram alone would not have excluded it. The V/Q scan is the screening investigation, and this is the single most consequential technical point in the case."] }
+      ],
+      points: ["Normal spirometry and a normal chest X-ray do not exclude serious cardiopulmonary disease.", "An isolated low DLCO is a red flag, not a soft finding.", "Exertional desaturation must be sought deliberately; it is invisible at rest.", "V/Q scanning, not CTPA, is the screening test for chronic thromboembolic pulmonary hypertension.", "Progressive breathlessness with normal tests warrants another test, not discharge."],
+      src: ["2022 ESC/ERS Guidelines for the diagnosis and treatment of pulmonary hypertension", "ERS/ATS 2021 Technical standard on interpretive strategies for routine lung function tests"]
+    },
+    {
+      id: "incidental-8mm-nodule", t: "Incidental 8 mm nodule on a pre-employment scan",
+      topic: "lung-nodules", lvl: "Intermediate", d: "Risk assessment and the choice between surveillance and sampling.",
+      present: "A 52-year-old man has a CT for a pre-employment medical. It reports a solitary solid nodule of 8 mm in the right upper lobe, smooth-edged, with no calcification. He has a twenty pack-year smoking history and stopped four years ago. He is entirely asymptomatic.",
+      steps: [
+        { h: "The variables that decide the plan", p: [], list: ["Size: 8 mm sits in the band where surveillance or further characterisation is indicated, rather than discharge or immediate intervention.", "Character: solid and smooth, with no benign calcification pattern and no fat.", "Risk factors: substantial smoking history in a man over fifty places him above the low-risk group.", "Comparison imaging: the single most valuable and most often skipped step."] },
+        { h: "Look for old films first", p: ["Any previous chest imaging from any facility is retrieved before anything else is arranged. A nodule demonstrably unchanged over two or more years requires no further action, and this step alone resolves a substantial proportion of referrals at no cost and no risk.", "In this case no prior imaging exists."] },
+        { h: "Surveillance or sample", p: ["At 8 mm with intermediate risk, the reasonable options are interval CT surveillance or functional imaging with PET-CT. Biopsy of an 8 mm nodule is technically achievable but carries a meaningful non-diagnostic rate and procedural risk that is not yet justified by the pre-test probability.", "A local consideration carries real weight: in a population with a high prevalence of healed tuberculosis, PET avidity has a substantially higher false-positive rate. An avid node or nodule here is not by itself evidence of malignancy, and acting on it as though it were is a recognised error."] },
+        { h: "The plan and its failure mode", p: ["Interval CT is arranged at three months, with a defined schedule thereafter and a named person responsible for reviewing the result. Growth triggers escalation to PET-CT and tissue sampling; two years of stability ends surveillance.", "The commonest way this pathway fails is administrative rather than clinical — the follow-up scan is not booked, or the result is not actioned. The safety net matters as much as the interval."] }
+      ],
+      points: ["Retrieving prior imaging resolves many nodules immediately and costs nothing.", "Management follows size, morphology and individual risk together, not size alone.", "PET-CT false positives are more frequent where granulomatous disease is endemic.", "A surveillance plan without a booked scan and a named reviewer is not a plan."],
+      src: ["Fleischner Society 2017 Guidelines for Management of Incidental Pulmonary Nodules", "British Thoracic Society Guidelines for the Investigation and Management of Pulmonary Nodules"]
+    },
+    {
+      id: "progressive-fibrosis-despite-immunosuppression", t: "Progressive fibrosis despite immunosuppression",
+      topic: "pulmonary-fibrosis", lvl: "Advanced", d: "Recognising a progressive fibrotic phenotype and changing direction.",
+      present: "A 61-year-old woman with rheumatoid arthritis-associated interstitial lung disease has been on immunosuppression for eighteen months. Her FVC has fallen by 12 per cent relative over the past year, her cough has worsened, and repeat HRCT shows increased reticulation and new traction bronchiectasis.",
+      steps: [
+        { h: "Recognising the pattern", p: ["This meets the criteria for progressive pulmonary fibrosis: worsening physiology, worsening symptoms and radiological progression, occurring despite appropriate treatment of the underlying condition.", "The important cognitive step is that \"the immunosuppression is not working, so increase it\" is not the only available conclusion — and in a fibrotic phenotype it is often the wrong one."] },
+        { h: "What must be excluded before changing direction", p: [], list: ["Infection, including opportunistic infection on immunosuppression, and tuberculosis.", "Drug-induced lung toxicity from the current regimen.", "Heart failure and fluid overload contributing to the physiological decline.", "Progression of an alternative or additional diagnosis, including hypersensitivity pneumonitis from an unrecognised ongoing exposure.", "Measurement error — a single poor-quality manoeuvre is not a trend."] },
+        { h: "The multidisciplinary decision", p: ["With those excluded and the pattern confirmed at a multidisciplinary discussion, the addition of antifibrotic therapy is indicated for the progressive fibrosing phenotype, alongside continued treatment of the rheumatoid disease.", "This is an addition, not a substitution — the inflammatory component of the disease still requires management, and stopping immunosuppression on the strength of the fibrotic label would be an error in the opposite direction."] },
+        { h: "What else changes at this visit", p: [], list: ["Formal assessment for exertional desaturation and ambulatory oxygen.", "Referral to pulmonary rehabilitation.", "Vaccination review and a plan for prompt treatment of infection.", "Discussion of transplant referral, which at this trajectory should be initiated now rather than deferred.", "Explicit counselling that antifibrotic therapy slows decline and does not reverse scarring, with a tolerability plan agreed at initiation."] }
+      ],
+      points: ["Progression is defined on physiology, symptoms and imaging together, over roughly a year.", "Infection, drug toxicity and cardiac contribution are excluded before attributing decline to the ILD.", "Antifibrotic therapy is added to, not substituted for, treatment of the underlying disease.", "Transplant referral is a decision for the point of recognised progression, not for the crisis."],
+      src: ["ATS/ERS/JRS/ALAT 2022 Clinical Practice Guideline on IPF and Progressive Pulmonary Fibrosis in Adults", "ISHLT Consensus Document for the Selection of Lung Transplant Candidates (2021)"]
+    },
+    {
+      id: "frequent-exacerbator-severe-emphysema", t: "Frequent exacerbator with severe emphysema",
+      topic: "copd", lvl: "Intermediate", d: "Optimising therapy and assessing volume reduction candidacy.",
+      present: "A 64-year-old former smoker with severe emphysema has had four exacerbations in the past twelve months, two requiring admission. He is breathless walking to his gate. He is on a long-acting bronchodilator combination and is referred for consideration of lung volume reduction.",
+      steps: [
+        { h: "Optimise before intervening", p: ["Referral for an intervention is not a reason to skip the basics, and in a frequent exacerbator the basics are frequently where the gains are."], list: ["Confirm inhaler technique with his own devices, and confirm adherence rather than assume it.", "Review whether the regimen matches his phenotype, including the role of inhaled corticosteroid in an exacerbating patient and the blood eosinophil count that informs it.", "Confirm vaccination status.", "Confirm smoking status honestly, including household smoking.", "Assess for and treat the comorbidities that drive readmission: cardiac disease, anxiety and depression, bronchiectasis, reflux, sleep-disordered breathing, and nutritional depletion.", "Refer to pulmonary rehabilitation, which is most effective in the period after an exacerbation and is a prerequisite for meaningful assessment of any intervention."] },
+        { h: "Assessing candidacy", p: ["Bronchoscopic lung volume reduction with endobronchial valves benefits carefully selected patients with severe hyperinflation and target-lobe destruction — and produces little or no benefit without the right physiology and anatomy."], list: ["Severe airflow obstruction with demonstrable hyperinflation on lung volumes.", "Heterogeneous or, in selected cases, homogeneous emphysema with a clear target lobe on quantitative CT.", "Absence of collateral ventilation, with fissure integrity assessed on CT and confirmed physiologically.", "Adequate gas transfer and absence of significant pulmonary hypertension.", "Clinical stability away from an exacerbation, having completed rehabilitation, and not currently smoking."] },
+        { h: "Setting expectations", p: ["Where the criteria are met, the expected gains are in breathlessness, exercise capacity and quality of life. Pneumothorax is the principal early complication and requires the placing centre to have a clear management pathway.", "Where the criteria are not met — and in this patient collateral ventilation is demonstrated in the target lobe — the honest answer is that valves will not help, and the plan returns to optimising exacerbation prevention, rehabilitation and comorbidity."] },
+        { h: "Not the end of the pathway", p: ["Unsuitability for valves is not unsuitability for everything. Surgical volume reduction in selected anatomy and transplant assessment both remain on the table and should be considered explicitly rather than allowed to lapse."] }
+      ],
+      points: ["Exacerbation frequency is a treatable phenotype before it is an interventional problem.", "Rehabilitation and comorbidity management change readmission rates more reliably than escalation alone.", "Valve candidacy depends on target-lobe destruction and absent collateral ventilation.", "A negative assessment for one intervention should trigger consideration of the others."],
+      src: ["GOLD 2024 Global Strategy for Prevention, Diagnosis and Management of COPD", "NICE guidance on endobronchial valve insertion for advanced emphysema", "ERS/ATS statement on interventional pulmonology for emphysema"]
+    },
+    {
+      id: "occupational-asthma-spray-painter", t: "Occupational asthma in a spray painter",
+      topic: "occupational-lung-disease", lvl: "Intermediate", d: "Linking symptom pattern to workplace exposure and acting on it.",
+      present: "A 34-year-old man working in vehicle refinishing reports eighteen months of cough, wheeze and chest tightness. He notices he is clear on holiday and worse by the end of the working week. He has been treated as adult-onset asthma with escalating inhaled therapy and partial benefit.",
+      steps: [
+        { h: "The question that was never asked", p: ["Adult-onset asthma should prompt an occupational history in every case. Roughly one in six cases of adult-onset asthma is attributable to workplace exposure, and the diagnosis is frequently made years late — by which time the airway changes may be permanent.", "The pattern described here — improvement away from work, deterioration across the working week — is the classic history and is diagnostic until disproved."] },
+        { h: "Establishing the link objectively", p: ["A history alone is not enough to justify the consequences of the diagnosis, which may include changing the person’s job."], list: ["Serial peak flow measurements, several times daily across periods at work and away from work, over several weeks. This is the cornerstone investigation.", "Identification of the specific sensitiser from safety data sheets. In vehicle refinishing, isocyanates in two-pack paints are the classic cause.", "Specific IgE or skin testing where a validated test exists for the agent.", "Specific inhalation challenge in a specialist centre where the diagnosis remains uncertain and the stakes are high.", "Confirmation that others doing the same job are assessed — occupational disease is rarely a single case."] },
+        { h: "The intervention that determines outcome", p: ["The single factor most strongly associated with recovery is early and complete removal from exposure. Continued exposure with escalating medication leads to persistent, and eventually fixed, airflow obstruction.", "Reduction of exposure and improved respiratory protection are inferior to removal and should not be presented as equivalent. This is a genuinely difficult conversation, because it may mean the loss of a trade — and that difficulty is precisely why the diagnosis is so often deferred."] },
+        { h: "The wider duties", p: [], list: ["Reporting the case through the applicable occupational health and statutory route.", "Workplace assessment of engineering controls, ventilation and spray booth integrity.", "Health surveillance for co-workers with the same exposure.", "Support for the patient regarding employment, compensation and retraining, which is part of the clinical responsibility rather than separate from it."] }
+      ],
+      points: ["Ask every adult with new asthma what they do for a living.", "Improvement away from work and deterioration across the week is the pattern to act on.", "Serial peak flow at and away from work is the cornerstone of objective confirmation.", "Outcome depends on early, complete removal from exposure — not on more inhaled therapy.", "One diagnosis obliges assessment of the co-workers sharing the exposure."],
+      src: ["BOHRF Guidelines for the prevention, identification and management of occupational asthma", "ATS Statement: Occupational Contribution to the Burden of Airway Disease", "ERS Task Force on the management of work-related asthma"]
+    }
+  ];
+  /*
+   * ECMO and the air ambulance (/ecmo-and-air-ambulance).
+   *
+   * Two things that belong on one page because in practice they are one
+   * service: the team that can put a patient on ECMO is the team that can go
+   * and fetch them.
+   *
+   * SOURCING. Everything attributed to Yashoda below comes from Yashoda's own
+   * published pages, listed in ECMO_SRC — the 24x7 availability, the national
+   * and international cover, the transfer types, the terrace evacuation at
+   * Hitec City, the Awake ECMO series and the Advanced Lung Failure Unit. The
+   * general explanation of what ECMO is and does is standard ELSO-level
+   * education. No volume, first or outcome has been written here that is not on
+   * one of those pages. Anything the department wants said that is not yet
+   * published needs to come from them (CLAUDE.md, standing instruction 1).
+   */
+  ECMO_WHAT = [
+    { t: 'It does the lungs’ job for them', d: 'Blood is drawn out of a large vein, passed through an artificial lung that adds oxygen and removes carbon dioxide, and returned warmed. The lungs are left to rest instead of being forced to work.' },
+    { t: 'It is support, not a cure', d: 'ECMO does not treat the illness. It buys the time in which the illness can be treated, or the lung can recover, or a transplant can be reached.' },
+    { t: 'Two configurations', d: 'Veno-venous ECMO supports the lungs alone. Veno-arterial supports the heart as well. Which one is used depends on whether the circulation is failing alongside the lungs.' },
+    { t: 'A team, continuously', d: 'Someone is watching the circuit at all times — intensivists, perfusionists, respiratory therapists, physiotherapists and specialist nurses. ECMO is a staffing commitment more than a machine.' }
+  ];
+  ECMO_AWAKE = [
+    'The patient is not deeply sedated and not on a ventilator, so they can be awake, sit up, talk to their family and eat.',
+    'They can do physiotherapy every day, which preserves the muscles used to breathe rather than letting them waste.',
+    'Muscle kept is muscle available to get through a long operation and to recover afterwards.',
+    'Staying upright and mobile helps keep parts of the lung from collapsing.',
+    'For someone waiting for a lung transplant, this is the difference between waiting and deteriorating.'
+  ];
+  /* Transfer types, as listed on Yashoda's air ambulance page. */
+  ECMO_AIR = [
+    { t: 'ECMO transfers', d: 'The team can cannulate a patient onto ECMO where they are, then move them — so a patient too unstable to travel becomes a patient who can.' },
+    { t: 'Trauma emergency response', d: 'Rapid retrieval where road transfer would take too long.' },
+    { t: 'Planned air transfers', d: 'Booked movement of patients with complex needs who cannot travel commercially.' },
+    { t: 'Organ retrieval', d: 'Time-critical transport for transplantation, where hours decide viability.' },
+    { t: 'Neonatal and paediatric transfers', d: 'Cots and equipment sized for the smallest patients.' },
+    { t: 'High-risk obstetric transfers', d: 'Moving mother and baby together to a unit that can manage both.' },
+    { t: 'Disaster management', d: 'Coordinated response when local capacity is overwhelmed.' }
+  ];
+  ECMO_CALL = [
+    'Say where the patient is, what is happening, and what support they are on now.',
+    'A doctor speaks to the referring team — the decision to fly is a clinical one, made on the phone.',
+    'The retrieval team, the aircraft and the receiving bed are arranged together, not one after the other.',
+    'Where ECMO is needed before the patient can move, cannulation happens at the referring hospital.',
+    'The team travels with the patient for the whole journey.'
+  ];
+  ECMO_NOW = [
+    'Severe breathlessness, or breathlessness at rest',
+    'Lips, tongue or fingertips turning blue or grey',
+    'Confusion, unusual drowsiness, or difficulty staying awake',
+    'Chest pain that does not settle',
+    'Coughing up blood'
+  ];
+  ECMO_SRC = [
+    'Yashoda Hospitals — Air Ambulance in Hyderabad (yashodahospitals.com/air-ambulance-in-hyderabad/)',
+    'Yashoda Hospitals — ECMO: Advanced Critical Care for Heart & Lung Conditions (yashodahospitals.com/technologies/extracorporeal-membrane-oxygenation/)',
+    'Yashoda Hospitals — Awake ECMO Treatment (yashodahospitals.com/special-case-studies/awake-ecmo-treatment/)',
+    'Extracorporeal Life Support Organization (ELSO) General Guidelines for Adult Respiratory Failure',
+    'ISHLT Consensus Document for the Selection of Lung Transplant Candidates (2021)'
   ];
   KH_TABS = ['All', 'Articles', 'Videos', 'Clinical Cases', 'Patient Guides', 'Expert Insights'];
   /* §8: symptoms are how patients actually search, so they are first-class results
@@ -4626,42 +5470,64 @@ class Component extends DCLogic {
     triage: '/symptom-checker', clubs: '/clubs', club: '/clubs/member', allergy: '/allergy-calendar',
     case: '/case-of-the-month', shikhar: '/shikhar', doctors: '/for-doctors', corporates: '/for-corporates',
     schools: '/for-schools', alumni: '/alumni', knowledge: '/knowledge-hub', find: '/doctors', procs: '/tests-and-procedures',
-    act: '/asthma-control-test', cat: '/copd-assessment-test'
+    act: '/asthma-control-test', cat: '/copd-assessment-test', ecmo: '/ecmo-and-air-ambulance'
   };
   META = {
     act: ['Asthma Control Test (ACT) — Yashoda Pulmonology', 'Take the Asthma Control Test in the waiting room: five questions, a score out of 25, and a summary to show your pulmonologist.'],
     cat: ['COPD Assessment Test (CAT) and mMRC — Yashoda Pulmonology', 'Score your COPD in the waiting room: the CAT questionnaire out of 40 and the mMRC breathlessness grade, with a summary to show your pulmonologist.'],
     alumni: ['ŪPIRI Clinical Network — Yashoda Pulmonology', 'A community of doctors connected by learning, collaboration and better patient care. Case discussions, CME, mentorship and access to advanced pulmonary expertise.'],
+    ecmo: ['ECMO & 24×7 Air Ambulance — Yashoda Pulmonology', 'Extracorporeal membrane oxygenation and Awake ECMO at Yashoda Hospitals, and the 24×7 air ambulance that can cannulate a patient where they are and fly them in. Emergency line 105910.'],
     procs: ['Tests & Procedures — Yashoda Pulmonology', 'Pulmonary tests and procedures explained in plain language: what they are, why they are done, what happens, how to prepare and what follows.'],
     find: ['Find a Lung Specialist — Yashoda Pulmonology', 'Meet the pulmonology consultants at Yashoda Hospitals Hyderabad. Filter by condition, procedure, location and language, and book an appointment.'],
     knowledge: ['Yashoda Knowledge Hub — Pulmonary Medicine', 'Trusted pulmonary knowledge from Yashoda experts: conditions, articles, expert videos, clinical cases and patient guides across pulmonary medicine.'],
     home: ['ŪPIRI — Yashoda Pulmonology | Lung conditions, specialists and tests', 'Understand lung conditions, find the right pulmonologist, learn what your tests involve, and use practical lung-health tools. The pulmonary platform of Yashoda Hospitals, Hyderabad.']
   };
   pathFor(route, topic) {
+    /* the long-form reads sit under the hub they belong to, so the URL says
+       where you are: /knowledge-hub/guide/… and /knowledge-hub/case/… */
+    if (route === 'knowledge' && this.state.khGuide) return '/knowledge-hub/guide/' + this.state.khGuide;
+    if (route === 'knowledge' && this.state.khCase) return '/knowledge-hub/case/' + this.state.khCase;
     if (route === 'knowledge' && topic) return '/knowledge-hub/' + topic;
     if (route === 'find' && this.state.docId) return '/doctors/' + this.state.docId;
     if (route === 'procs' && this.state.procId) return '/tests-and-procedures/' + this.state.procId;
     return this.ROUTES[route] || '/';
+  }
+  /* Every branch returns the same shape, so a caller can spread it over state
+     without one route leaving another route's id behind. */
+  atPath(patch) {
+    return { route: 'home', khTopic: null, khGuide: null, khCase: null, docId: null, procId: null, ...patch };
   }
   routeFromPath(path) {
     const clean = ('/' + String(path || '').replace(/^\/+|\/+$/g, '')).replace(/\/index\.html$/, '/');
     const pr = clean.match(/^\/tests-and-procedures\/(.+)$/);
     if (pr) {
       const x = this.PROCEDURES.find(y => y.id === pr[1]);
-      return { route: 'procs', khTopic: null, docId: null, procId: x ? x.id : null };
+      return this.atPath({ route: 'procs', procId: x ? x.id : null });
     }
     const dr = clean.match(/^\/doctors\/(.+)$/);
     if (dr) {
       const d = this.DOCTORS.find(x => x.id === dr[1]);
-      return { route: 'find', khTopic: null, docId: d ? d.id : null, procId: null };
+      return this.atPath({ route: 'find', docId: d ? d.id : null });
+    }
+    /* guide and case are matched before the bare topic, or /knowledge-hub/guide/x
+       would be read as a topic called "guide/x" and silently fall back to the hub */
+    const gr = clean.match(/^\/knowledge-hub\/guide\/(.+)$/);
+    if (gr) {
+      const a = this.KH_ARTICLES.find(x => x.id === gr[1]);
+      return this.atPath({ route: 'knowledge', khGuide: a ? a.id : null });
+    }
+    const cr = clean.match(/^\/knowledge-hub\/case\/(.+)$/);
+    if (cr) {
+      const c = this.KH_CASES.find(x => x.id === cr[1]);
+      return this.atPath({ route: 'knowledge', khCase: c ? c.id : null });
     }
     const kh = clean.match(/^\/knowledge-hub\/(.+)$/);
     if (kh) {
       const t = this.KH_TOPICS.find(x => x.id === kh[1]);
-      return { route: 'knowledge', khTopic: t ? t.id : null, docId: null, procId: null };
+      return this.atPath({ route: 'knowledge', khTopic: t ? t.id : null });
     }
     const hit = Object.keys(this.ROUTES).find(k => this.ROUTES[k] === clean);
-    return { route: hit || 'home', khTopic: null, docId: null, procId: null };
+    return this.atPath({ route: hit || 'home' });
   }
   syncUrl(route, topic, replace) {
     const url = this.pathFor(route, topic) + location.search;
@@ -4681,11 +5547,17 @@ class Component extends DCLogic {
     const t = topic && this.KH_TOPICS.find(x => x.id === topic);
     const d = (route === 'find' && this.state.docId) ? this.DOCTORS.find(x => x.id === this.state.docId) : null;
     const pc = (route === 'procs' && this.state.procId) ? this.PROCEDURES.find(x => x.id === this.state.procId) : null;
+    const ar = this.state.khGuide ? this.KH_ARTICLES.find(x => x.id === this.state.khGuide) : null;
+    const cs = this.state.khCase ? this.KH_CASES.find(x => x.id === this.state.khCase) : null;
     const pair = pc
       ? [pc.n + ' — Yashoda Pulmonology', pc.plain]
       : d
       ? [d.name + ' — ' + d.desig + ', Yashoda Hospitals ' + d.unit,
          d.name + ' is a ' + d.desig + ' at Yashoda Hospitals, ' + d.unit + ', with ' + d.exp + ' of experience. ' + d.qual]
+      : ar
+      ? [ar.t + ' — Yashoda Knowledge Hub', ar.lead.slice(0, 155)]
+      : cs
+      ? [cs.t + ' — Clinical case, Yashoda Knowledge Hub', cs.d.slice(0, 155)]
       : t
         ? [t.n + ' — Yashoda Knowledge Hub', t.ov.slice(0, 155)]
         : (this.META[route] || this.META.home);
@@ -4705,7 +5577,7 @@ class Component extends DCLogic {
       }).setAttribute('content', val);
     });
     this.applyAlternates(url);
-    this.applySchema(route, t, url, pair, d, pc);
+    this.applySchema(route, t, url, pair, d, pc, ar, cs);
   }
   /* Every route reads in four languages off the same URL, so each one advertises
      the others. English is the x-default: it is the language the copy is in. */
@@ -4723,12 +5595,20 @@ class Component extends DCLogic {
     }).setAttribute('href', url);
   }
   /* Breadcrumbs mirror the visible trail so crawlers see the same hierarchy. */
-  crumbs(route, t, d, pc) {
+  crumbs(route, t, d, pc, written) {
     const items = [{ name: 'Home', item: this.ORIGIN + '/' }];
-    if (pc) { items.push({ name: 'Tests & Procedures', item: this.ORIGIN + '/tests-and-procedures' }, { name: pc.n, item: this.ORIGIN + '/tests-and-procedures/' + pc.id }); }
+    if (written) {
+      const tp = this.KH_TOPICS.find(x => x.id === written.topic);
+      items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' });
+      if (tp) items.push({ name: tp.n, item: this.ORIGIN + '/knowledge-hub/' + tp.id });
+      items.push({ name: written.t, item: this.ORIGIN + this.pathFor('knowledge', null) });
+    }
+    else if (pc) { items.push({ name: 'Tests & Procedures', item: this.ORIGIN + '/tests-and-procedures' }, { name: pc.n, item: this.ORIGIN + '/tests-and-procedures/' + pc.id }); }
     else if (d) { items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' }, { name: d.name, item: this.ORIGIN + '/doctors/' + d.id }); }
     else if (t) { items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' }, { name: t.n, item: this.ORIGIN + '/knowledge-hub/' + t.id }); }
     else if (route === 'procs') items.push({ name: 'Tests & Procedures', item: this.ORIGIN + '/tests-and-procedures' });
+    else if (route === 'ecmo') items.push({ name: 'Tests & Procedures', item: this.ORIGIN + '/tests-and-procedures' },
+      { name: 'ECMO & Air Ambulance', item: this.ORIGIN + '/ecmo-and-air-ambulance' });
     else if (route === 'find') items.push({ name: 'Doctors', item: this.ORIGIN + '/doctors' });
     else if (route === 'knowledge') items.push({ name: 'Knowledge Hub', item: this.ORIGIN + '/knowledge-hub' });
     else if (route === 'alumni') items.push({ name: 'ŪPIRI Clinical Network', item: this.ORIGIN + '/alumni' });
@@ -4739,13 +5619,31 @@ class Component extends DCLogic {
   }
   /* Structured data, rewritten per route. Conditions get MedicalWebPage so the
      Knowledge Hub can be understood as a medical reference rather than marketing. */
-  applySchema(route, t, url, pair, d, pc) {
+  applySchema(route, t, url, pair, d, pc, ar, cs) {
     const publisher = {
       '@type': 'MedicalOrganization', name: this.BRAND.name,
       department: { '@type': 'MedicalOrganization', name: this.BRAND.name + ' ' + this.BRAND.unit },
       url: this.BRAND.site
     };
-    const data = pc
+    /* A guide and a teaching case are both articles, but they are written for
+       different readers — declaring the audience is what stops a clinician-facing
+       case being surfaced to a worried patient as advice. */
+    const written = ar || cs;
+    const data = written
+      ? {
+        '@context': 'https://schema.org',
+        '@type': ar ? 'MedicalWebPage' : 'MedicalScholarlyArticle',
+        name: pair[0], headline: written.t, description: pair[1], url, inLanguage: 'en', publisher,
+        audience: { '@type': 'Audience', audienceType: ar ? 'Patient' : 'Clinician' },
+        about: (() => {
+          const tp = this.KH_TOPICS.find(x => x.id === written.topic);
+          return tp ? { '@type': 'MedicalCondition', name: tp.n, description: tp.ov } : undefined;
+        })(),
+        citation: written.src,
+        isPartOf: { '@type': 'WebSite', name: 'ŪPIRI · ' + this.BRAND.name, url: this.ORIGIN },
+        breadcrumb: this.crumbs(route, null, null, null, written)
+      }
+      : pc
       ? {
         '@context': 'https://schema.org', '@type': 'MedicalProcedure', name: pc.n, description: pc.plain, url,
         howPerformed: pc.what, preparation: pc.prep.join(' '), followup: pc.after.join(' '),
@@ -4977,10 +5875,16 @@ class Component extends DCLogic {
     const start = this.props.startScreen;
     const fromUrl = this.routeFromPath(location.pathname);
     if (start && start !== 'home') patch.route = start;
-    else if (fromUrl.route !== 'home' || fromUrl.khTopic || fromUrl.docId || fromUrl.procId) {
+    else if (fromUrl.route !== 'home' || fromUrl.khTopic || fromUrl.docId || fromUrl.procId || fromUrl.khGuide || fromUrl.khCase) {
       patch.route = fromUrl.route; patch.khTopic = fromUrl.khTopic;
       patch.docId = fromUrl.docId || null; patch.procId = fromUrl.procId || null;
+      patch.khGuide = fromUrl.khGuide || null; patch.khCase = fromUrl.khCase || null;
       this.state.docId = patch.docId; this.state.procId = patch.procId;
+      this.state.khGuide = patch.khGuide; this.state.khCase = patch.khCase;
+      /* a read arrived at directly still knows which topic it belongs to */
+      if (patch.khGuide) { const a = this.KH_ARTICLES.find(x => x.id === patch.khGuide); patch.khTopic = a ? a.topic : null; }
+      if (patch.khCase) { const c = this.KH_CASES.find(x => x.id === patch.khCase); patch.khTopic = c ? c.topic : null; }
+      this.state.khTopic = patch.khTopic;
     }
     try { const d = JSON.parse(localStorage.getItem('upiri2:rendo')); if (d) patch.rd = d; } catch (e) { }
     this.setState(patch);
@@ -4998,12 +5902,229 @@ class Component extends DCLogic {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && (this.state.menu || this.state.mobileNav)) this.setState({ menu: null, mobileNav: false });
     });
+    this.startRails();
+    this.watchAirlift();
     window.addEventListener('popstate', () => {
       const r = this.routeFromPath(location.pathname);
+      let topic = r.khTopic;
+      if (r.khGuide) { const a = this.KH_ARTICLES.find(x => x.id === r.khGuide); topic = a ? a.topic : null; }
+      if (r.khCase) { const c = this.KH_CASES.find(x => x.id === r.khCase); topic = c ? c.topic : null; }
       this.state.docId = r.docId || null; this.state.procId = r.procId || null;
-      this.setState({ route: r.route, khTopic: r.khTopic, docId: r.docId || null, procId: r.procId || null });
-      this.applyMeta(r.route, r.khTopic);
+      this.state.khGuide = r.khGuide || null; this.state.khCase = r.khCase || null;
+      this.setState({ route: r.route, khTopic: topic, docId: r.docId || null, procId: r.procId || null,
+        khGuide: r.khGuide || null, khCase: r.khCase || null });
+      this.applyMeta(r.route, topic);
     });
+  }
+
+  /* ---------------------------------------------------------------------------
+     The horizontal rails.
+
+     One timer walks every `[data-rail]` on the page rather than each rail owning
+     its own, because the dc runtime patches its subtree in place — a rail element
+     can be replaced between ticks, so the timer looks the rails up fresh each
+     time instead of holding a reference to one.
+
+     A rail is held (not advanced) while the visitor is using it: pointer over it,
+     keyboard focus inside it, a swipe or wheel in progress, or a video playing in
+     it. `railHold` is a timestamp rather than a boolean so every one of those
+     collapses to the same "leave it alone until" question.
+     --------------------------------------------------------------------------- */
+  /*
+   * "Relevant Yashoda services" used to be a row of inert pills, which is the
+   * worst of both worlds: it names a thing the site already has a page for and
+   * then makes the visitor go and find it. Each name here resolves to the page
+   * that already exists — a club, a tool, a procedure, a condition, or a guide.
+   * A name with no entry stays a plain pill rather than a link to nowhere.
+   */
+  SERVICE_LINKS = {
+    'ŪPIRI Asthma Club': { club: 'asthma' },
+    'ŪPIRI COPD Club': { club: 'copd' },
+    'ŪPIRI ILD Club': { club: 'ild' },
+    'ŪPIRI Allergy Calendar': { route: 'allergy' },
+    'ŪPIRI Lung Age': { route: 'breath' },
+    'ŪPIRI Symptom Checker': { route: 'triage' },
+    'ŪPIRI Nodule Journey': { route: 'journey' },
+    'ŪPIRI Shikhar altitude assessment': { route: 'shikhar' },
+    'Rendo Ūpiri quit-smoking programme': { route: 'rendo' },
+    'ŪPIRI@Work occupational screening': { route: 'corporates' },
+    'AI Lung Nodule Clinic': { route: 'journey' },
+    'Nodule Board (MDT)': { route: 'journey' },
+    'Pulmonology OPD': { route: 'find' },
+    'Pulmonary function testing': { proc: 'pulmonary-function-test' },
+    'Pulmonary function laboratory': { proc: 'pulmonary-function-test' },
+    'CPET / exercise testing': { proc: 'cpet' },
+    'CPET laboratory': { proc: 'cpet' },
+    'Diagnostic bronchoscopy service': { proc: 'bronchoscopy' },
+    'Sleep laboratory': { proc: 'sleep-study' },
+    'Sleep medicine clinic': { topic: 'sleep-medicine' },
+    'Interventional pulmonology': { topic: 'interventional-pulmonology' },
+    'Severe Asthma & Biologics Centre': { topic: 'severe-asthma' },
+    'Pulmonary hypertension assessment': { topic: 'pulmonary-hypertension' },
+    'Allergy & immunology clinic': { topic: 'allergy' },
+    'ILD multidisciplinary clinic': { topic: 'ild' },
+    'Advanced lung disease clinic': { topic: 'lung-transplantation' },
+    'Pulmonary rehabilitation': { guide: 'pulmonary-rehabilitation' }
+  };
+  serviceChip(name) {
+    const to = this.SERVICE_LINKS[name];
+    if (!to) return { t: name, hasLink: false, noLink: true, open: null };
+    const open = to.club ? () => this.goClub(to.club)
+      : to.topic ? () => this.goTopic(to.topic)
+      : to.proc ? () => this.goProc(to.proc)
+      : to.guide ? () => this.goGuide(to.guide)
+      : () => this.go(to.route);
+    return { t: name, hasLink: true, noLink: false, open };
+  }
+
+  /* ---------------------------------------------------------------------------
+     The airlift.
+
+     On the ECMO page, once the visitor has scrolled far enough to be reading
+     about the air ambulance rather than just landing on it: Uppi takes out his
+     phone and calls, a helicopter comes in from the left, collects him at the
+     right where he stands, carries him off to the left — and comes back from
+     the right to put him down again.
+
+     Two boundaries this deliberately keeps:
+
+       · The page owns the helicopter, Uppi owns Uppi. Every effect on the
+         character goes through `__uppi.airlift(phase)`, which sets an INPUT on
+         his state machine. Nothing here touches the rig or the motion layer.
+       · It runs once per visit to the page, and never when the visitor has
+         asked for reduced motion — in which case the helicopter is simply
+         there, parked, and the 24×7 message still arrives.
+     --------------------------------------------------------------------------- */
+  AIRLIFT = { in: 2600, hover: 900, out: 2200, back: 2400 };
+  uppi() { try { return window.__uppi || null; } catch (e) { return null; } }
+  airliftPhase(p) { const u = this.uppi(); if (u && typeof u.airlift === 'function') u.airlift(p); }
+
+  /* Watches for the scene to exist and to be scrolled to. The dc runtime patches
+     its own subtree, so the scene element is looked up rather than held. */
+  watchAirlift() {
+    this._airWatch = setInterval(() => {
+      if (this.state.route !== 'ecmo') return;
+      const scene = document.querySelector('[data-r="heli-scene"]:not([data-armed])');
+      if (!scene) return;
+      scene.dataset.armed = '1';
+      const mark = document.querySelector('[data-r="heli-mark"]');
+      if (!mark || typeof IntersectionObserver !== 'function') { this.runAirlift(); return; }
+      const io = new IntersectionObserver((entries) => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        io.disconnect();
+        this.runAirlift();
+      }, { rootMargin: '0px 0px -18% 0px' });
+      io.observe(mark);
+    }, 350);
+  }
+
+  runAirlift() {
+    if (this._airRan) return;
+    this._airRan = true;
+    this.setState({ ecmoPop: true });
+
+    const heli = document.querySelector('[data-r="heli"]');
+    const rider = document.querySelector('[data-r="heli-rider"]');
+    let reduced = false;
+    try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* no matchMedia */ }
+    if (!heli || reduced) {
+      /* §24: no flight. The message is the point, and it still arrives. */
+      if (heli) heli.style.opacity = '1';
+      return;
+    }
+
+    const A = this.AIRLIFT;
+    const park = 'translateX(calc(100vw - 178px))';     /* where Uppi stands */
+    const fly = (frames, opts) => heli.animate(frames, { easing: 'ease-in-out', fill: 'forwards', ...opts }).finished.catch(() => {});
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+    const show = (el, on) => { if (el) el.style.opacity = on ? '1' : '0'; };
+
+    (async () => {
+      /* 1 — he makes the call */
+      this.airliftPhase('call');
+      await wait(700);
+
+      /* 2 — in from the left, decelerating into a hover beside him */
+      heli.style.opacity = '1';
+      await fly([{ transform: 'translateX(-38vw)' }, { transform: park }], { duration: A.in, easing: 'cubic-bezier(.2,.6,.3,1)' });
+      await wait(A.hover);
+
+      /* 3 — collected: the dock steps aside so the passenger reads as him */
+      this.airliftPhase('board');
+      show(rider, true);
+      await wait(360);
+
+      /* 4 — away to the left, and gone */
+      await fly([{ transform: park }, { transform: 'translateX(-42vw)' }], { duration: A.out, easing: 'cubic-bezier(.5,0,.75,.4)' });
+      await wait(500);
+
+      /* 5 — back from the right, and he is put down where he was */
+      heli.style.transform = 'translateX(122vw)';
+      await fly([{ transform: 'translateX(122vw)' }, { transform: park }], { duration: A.back, easing: 'cubic-bezier(.2,.6,.3,1)' });
+      show(rider, false);
+      this.airliftPhase('land');
+      await wait(700);
+      await fly([{ transform: park }, { transform: 'translateX(126vw)' }], { duration: 1600, easing: 'cubic-bezier(.5,0,.75,.4)' });
+      heli.style.opacity = '0';
+    })();
+  }
+
+  RAIL_MS = 2000;
+  railStep(el) {
+    const first = el.firstElementChild;
+    const w = first ? first.getBoundingClientRect().width : el.clientWidth * 0.8;
+    return Math.round(w + 14);
+  }
+  railHold(el, ms) { if (el) el.dataset.railHold = String(Date.now() + ms); }
+  railBy = (id, dir) => {
+    const el = document.querySelector('[data-rail="' + id + '"]');
+    if (!el) return;
+    /* an arrow is a deliberate act: stop advancing for long enough to read */
+    this.railHold(el, 9000);
+    el.scrollBy({ left: dir * this.railStep(el), behavior: 'smooth' });
+  };
+  startRails() {
+    let reduced = false;
+    try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { /* no matchMedia */ }
+
+    /* Delegated, because the rails come and go with the route. These are the
+       one-off gestures; hovering and focus are asked about at tick time instead,
+       below, since an event only tells you when something STARTED. */
+    const hold = (e, ms) => {
+      const el = e.target && e.target.closest && e.target.closest('[data-rail]');
+      if (el) this.railHold(el, ms);
+    };
+    document.addEventListener('pointerdown', (e) => hold(e, 9000), { passive: true });
+    document.addEventListener('touchstart', (e) => hold(e, 9000), { passive: true });
+    document.addEventListener('wheel', (e) => hold(e, 6000), { passive: true });
+    document.addEventListener('keydown', (e) => hold(e, 9000));
+
+    if (reduced) return;   /* §24: it still scrolls, it just does not move itself */
+
+    this._railTimer = setInterval(() => {
+      if (document.hidden) return;
+      document.querySelectorAll('[data-rail]').forEach((el) => {
+        if (Number(el.dataset.railHold || 0) > Date.now()) return;
+        /*
+         * Asked, not remembered.
+         *
+         * `pointermove` was the obvious way to hold a hovered rail and it is
+         * wrong: a pointer resting on a card stops producing events, so the hold
+         * lapsed after a second and the card the visitor was reading scrolled
+         * away underneath them. `:hover` is a live question with no bookkeeping,
+         * and it stays true for as long as the pointer is actually there.
+         */
+        try { if (el.matches(':hover')) return; } catch (e2) { /* no :hover support */ }
+        if (el.contains(document.activeElement)) return;   /* tabbing through it */
+        /* something is playing in there — never scroll a video out from under someone */
+        if (el.querySelector('iframe')) return;
+        const max = el.scrollWidth - el.clientWidth;
+        if (max <= 2) return;                       /* everything already fits */
+        const step = this.railStep(el);
+        const next = el.scrollLeft + step >= max - 2 ? 0 : el.scrollLeft + step;
+        el.scrollTo({ left: next, behavior: 'smooth' });
+      });
+    }, this.RAIL_MS);
   }
 
   lerp(a, b, t) {
@@ -5015,7 +6136,11 @@ class Component extends DCLogic {
     const t = 1 - Math.max(0, Math.min(1, health));
     return { base: this.lerp('#F2989F', '#787D89', t), deep: this.lerp('#DE6E7A', '#565B66', t), light: this.lerp('#FBC7CC', '#9CA3AF', t) };
   }
-  go = (r) => { this.state.docId = null; this.state.procId = null; this.setState({ route: r, khTopic: null, docId: null, procId: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
+  /* `pathFor` reads this.state directly, so every id the previous screen owned is
+     cleared on the instance BEFORE syncUrl runs — otherwise leaving a guide would
+     push the guide's own URL onto the next route. */
+  clearIds() { this.state.docId = null; this.state.procId = null; this.state.khGuide = null; this.state.khCase = null; }
+  go = (r) => { this.clearIds(); this.setState({ route: r, khTopic: null, docId: null, procId: null, khGuide: null, khCase: null }); this.syncUrl(r, null); window.scrollTo({ top: 0 }); };
   goProc = (id) => {
     this.state.procId = id;
     this.setState({ route: 'procs', procId: id, khTopic: null, docId: null });
@@ -5040,8 +6165,33 @@ class Component extends DCLogic {
     try { history.pushState({}, '', '/doctors'); } catch (e) { }
     this.applyMeta('find', null); window.scrollTo({ top: 0 });
   };
-  goTopic = (id) => { this.setState({ route: 'knowledge', khTopic: id }); this.syncUrl('knowledge', id); window.scrollTo({ top: 0 }); };
-  backToHub = () => { this.setState({ khTopic: null }); this.syncUrl('knowledge', null); window.scrollTo({ top: 0 }); };
+  goTopic = (id) => { this.clearIds(); this.setState({ route: 'knowledge', khTopic: id, khGuide: null, khCase: null }); this.syncUrl('knowledge', id); window.scrollTo({ top: 0 }); };
+  backToHub = () => { this.clearIds(); this.setState({ khTopic: null, khGuide: null, khCase: null }); this.syncUrl('knowledge', null); window.scrollTo({ top: 0 }); };
+  /* Opening a read keeps the topic it belongs to, so "back to the topic" has
+     somewhere to go and the breadcrumb reads Home → Hub → Topic → this page. */
+  goGuide = (id, e) => {
+    /* These are real <a href> links so they can be middle-clicked, copied and
+       crawled. The handler takes the click back for the SPA, exactly as the
+       header nav does. */
+    if (e && e.preventDefault) e.preventDefault();
+    const a = this.KH_ARTICLES.find(x => x.id === id);
+    this.clearIds(); this.state.khGuide = id;
+    this.setState({ route: 'knowledge', khGuide: id, khCase: null, khTopic: a ? a.topic : null });
+    this.syncUrl('knowledge', null); window.scrollTo({ top: 0 });
+  };
+  goCase = (id, e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const c = this.KH_CASES.find(x => x.id === id);
+    this.clearIds(); this.state.khCase = id;
+    this.setState({ route: 'knowledge', khCase: id, khGuide: null, khTopic: c ? c.topic : null });
+    this.syncUrl('knowledge', null); window.scrollTo({ top: 0 });
+  };
+  backToTopic = () => {
+    const id = this.state.khTopic;
+    if (!id) return this.backToHub();
+    this.clearIds(); this.setState({ khGuide: null, khCase: null });
+    this.syncUrl('knowledge', id); window.scrollTo({ top: 0 });
+  };
   countUp(key, target, dur) {
     dur = dur || 1300;
     if (this._raf) cancelAnimationFrame(this._raf);
@@ -5448,7 +6598,7 @@ class Component extends DCLogic {
     const catInTab = c => s.khTab === 'All' || s.khTab === 'Articles' || c === s.khTab;
     const khArticles = this.KH_ARTICLES
       .filter(a => catInTab(a.cat))
-      .map(a => ({ t: a.t, cat: a.cat, read: a.read, topicId: a.topic, topicName: topicName(a.topic), placeholder: !!a.placeholder }));
+      .map(a => ({ t: a.t, id: a.id, cat: a.cat, read: a.read, topicId: a.topic, topicName: topicName(a.topic), placeholder: !!a.placeholder }));
     const videoVm = (v, name) => {
       const playing = !!v.yt && s.khPlaying === v.yt;
       return {
@@ -5469,7 +6619,13 @@ class Component extends DCLogic {
       };
     };
     const khVideos = this.KH_VIDEOS.map(v => videoVm(v, topicName(v.topic)));
-    const khCases = this.KH_CASES.map(c => ({ t: c.t, d: c.d, lvl: c.lvl, topicId: c.topic, topicName: topicName(c.topic), placeholder: !!c.placeholder }));
+    /* A topic shows the videos filed under it AND the ones that list it in
+       `also`, so a subject reaches four or five without the same video being
+       listed twice in the hub's own flat list. */
+    const tpVideos = tp
+      ? this.KH_VIDEOS.filter(v => v.topic === tp.id || (v.also || []).includes(tp.id))
+      : [];
+    const khCases = this.KH_CASES.map(c => ({ t: c.t, id: c.id, d: c.d, lvl: c.lvl, topicId: c.topic, topicName: topicName(c.topic), placeholder: !!c.placeholder }));
 
     /* §8: search results grouped by kind, so it is obvious why each one appeared */
     const procIds = this.PROCEDURES.map(x => x.id);
@@ -5498,7 +6654,7 @@ class Component extends DCLogic {
       {
         g: 'Articles', d: 'Patient guides and expert writing',
         items: this.KH_ARTICLES.filter(a => matches(a.t, a.cat, topicName(a.topic)))
-          .map(a => ({ t: a.t, d: topicName(a.topic) + ' · ' + a.read + ' read', open: () => this.goTopic(a.topic) }))
+          .map(a => ({ t: a.t, d: topicName(a.topic) + ' · ' + a.read + ' read', open: () => this.goGuide(a.id) }))
       },
       {
         g: 'Videos', d: 'Expert video content',
@@ -5508,20 +6664,22 @@ class Component extends DCLogic {
       {
         g: 'Clinical cases', d: 'Teaching cases for doctors',
         items: this.KH_CASES.filter(c => matches(c.t, c.d, topicName(c.topic)))
-          .map(c => ({ t: c.t, d: topicName(c.topic) + ' · ' + c.lvl, open: () => this.goTopic(c.topic) }))
+          .map(c => ({ t: c.t, d: topicName(c.topic) + ' · ' + c.lvl, open: () => this.goCase(c.id) }))
       }
     ].filter(gr => gr.items.length);
     const khHitCount = khGroups.reduce((a, gr) => a + gr.items.length, 0);
 
-    const feat = (list, kind) => {
+    /* `go` is what the card actually opens: a written piece opens itself, a
+       video still opens the topic page that plays it. */
+    const feat = (list, kind, go) => {
       const x = list[0];
-      return x ? { kind, t: x.t, topicName: topicName(x.topic), open: () => this.goTopic(x.topic) } : null;
+      return x ? { kind, t: x.t, topicName: topicName(x.topic), open: () => (go ? go(x) : this.goTopic(x.topic)) } : null;
     };
     const khFeatured = [
-      feat(this.KH_ARTICLES.filter(a => a.cat === 'Articles' || a.cat === 'Expert Insights'), 'Featured article'),
+      feat(this.KH_ARTICLES.filter(a => a.cat === 'Articles' || a.cat === 'Expert Insights'), 'Featured article', x => this.goGuide(x.id)),
       feat(this.KH_VIDEOS, 'Featured expert video'),
-      feat(this.KH_CASES, 'Featured clinical case'),
-      feat(this.KH_ARTICLES.filter(a => a.cat === 'Patient Guides'), 'Featured patient guide')
+      feat(this.KH_CASES, 'Featured clinical case', x => this.goCase(x.id)),
+      feat(this.KH_ARTICLES.filter(a => a.cat === 'Patient Guides'), 'Featured patient guide', x => this.goGuide(x.id))
     ].filter(Boolean);
 
     return {
@@ -5692,7 +6850,8 @@ class Component extends DCLogic {
         { t: 'Breath Clubs', go: () => this.go('clubs') },
         { t: 'Allergy Calendar', go: () => this.go('allergy') },
         { t: 'Rendo Ūpiri — quit smoking', go: () => this.go('rendo') },
-        { t: 'Shikhar — altitude check', go: () => this.go('shikhar') }
+        { t: 'Shikhar — altitude check', go: () => this.go('shikhar') },
+        { t: 'ECMO & Air Ambulance (24×7)', go: () => this.go('ecmo') }
       ].map(i => ({
         t: i.t,
         go: () => { this.setState({ menu: null, mobileNav: false }); i.go(); }
@@ -5810,8 +6969,29 @@ class Component extends DCLogic {
       drImg: doc ? doc.img : '', drImgAlt: doc ? doc.name + ', ' + doc.desig : '',
       drInitials: doc ? doc.name.replace(/^Dr\.?\s*/, '').split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() : '',
       /* condition page -> specialists */
-      tpDocs: tp ? this.DOCTORS.filter(d => d.conds.includes(tp.id)).slice(0, 3).map(docCard) : [],
-      tpHasDocs: tp ? this.DOCTORS.some(d => d.conds.includes(tp.id)) : false,
+      /* ---- Meet the specialists: filtered by branch, shown as a rail ----
+         Every consultant who treats the condition is reachable now, rather than
+         the first three the array happened to hold, and the branch selector is
+         what a visitor in Hyderabad actually decides on first. */
+      ...(() => {
+        const forTopic = tp ? this.DOCTORS.filter(d => d.conds.includes(tp.id)) : [];
+        const branches = [...new Set(forTopic.map(d => d.unit))].sort();
+        const all = 'All branches';
+        const pick = branches.includes(s.tpBranch) ? s.tpBranch : all;
+        const shown = pick === all ? forTopic : forTopic.filter(d => d.unit === pick);
+        const n = shown.length;
+        return {
+          tpDocs: shown.map(docCard),
+          tpHasDocs: forTopic.length > 0,
+          tpDocCount: n + (n === 1 ? ' specialist' : ' specialists') + (pick === all ? ' across ' + branches.length + (branches.length === 1 ? ' branch' : ' branches') : ' at ' + pick),
+          tpDocNone: n === 0,
+          tpBranch: pick,
+          tpBranches: [all, ...branches].map(b => ({ v: b, label: b })),
+          onBranch: (e) => this.setState({ tpBranch: e.target.value }),
+          tpDocPrev: () => this.railBy('topic-docs', -1),
+          tpDocNext: () => this.railBy('topic-docs', 1)
+        };
+      })(),
 
       /* ---- what brings you here today? ----
          Each question opens the tool or pathway that answers it. The two symptom
@@ -5932,9 +7112,25 @@ class Component extends DCLogic {
       councilRoles: this.COUNCIL_ROLES.map(c => ({ r: c.r, d: c.d, initials: c.r.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() })),
       alumniEngage: this.ALUMNI_ENGAGE.map(e => ({ t: e.t, d: e.d })),
 
+      /* ---- ECMO & the air ambulance (/ecmo-and-air-ambulance) ---- */
+      isEcmo: s.route === 'ecmo',
+      goEcmo: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('ecmo'); },
+      ecmoWhat: this.ECMO_WHAT.map(x => ({ t: x.t, d: x.d })),
+      ecmoAwake: this.ECMO_AWAKE.map(t => ({ t })),
+      ecmoAir: this.ECMO_AIR.map(x => ({ t: x.t, d: x.d })),
+      ecmoCall: this.ECMO_CALL.map(t => ({ t })),
+      ecmoNow: this.ECMO_NOW.map(t => ({ t })),
+      ecmoSrc: this.ECMO_SRC.map(t => ({ t })),
+      ecmoVideos: this.KH_VIDEOS.filter(v => v.topic === 'ecmo' || (v.also || []).includes('ecmo')).map(v => videoVm(v, 'ECMO & air ambulance')),
+      ecmoHasVideos: this.KH_VIDEOS.some(v => v.topic === 'ecmo' || (v.also || []).includes('ecmo')),
+      ecmoVidPrev: () => this.railBy('ecmo-videos', -1),
+      ecmoVidNext: () => this.railBy('ecmo-videos', 1),
+      ecmoPop: s.ecmoPop,
+      closeEcmoPop: () => this.setState({ ecmoPop: false }),
+
       /* ---- knowledge hub (/knowledge-hub) ---- */
-      isKnowledge: s.route === 'knowledge' && !s.khTopic,
-      isTopic: s.route === 'knowledge' && !!s.khTopic,
+      isKnowledge: s.route === 'knowledge' && !s.khTopic && !s.khGuide && !s.khCase,
+      isTopic: s.route === 'knowledge' && !!s.khTopic && !s.khGuide && !s.khCase,
       goKnowledge: (e) => { if (e && e.preventDefault) e.preventDefault(); this.go('knowledge'); },
       backToHub: this.backToHub,
       khQuery: s.khQuery,
@@ -5955,9 +7151,9 @@ class Component extends DCLogic {
       khTabs: this.KH_TABS.map(t => ({ label: t, pick: () => this.setState({ khTab: t }), st: this.pillSt(s.khTab === t) })),
       khTopicCards: khTopicCards,
       khShowTopics: !khQ && (s.khTab === 'All'),
-      khArticles: khArticles.map(a => ({ ...a, open: () => this.goTopic(a.topicId) })),
+      khArticles: khArticles.map(a => ({ ...a, href: '/knowledge-hub/guide/' + a.id, open: (e) => this.goGuide(a.id, e) })),
       khVideos: khVideos.map(v => ({ ...v, open: () => this.goTopic(v.topicId) })),
-      khCases: khCases.map(c => ({ ...c, open: () => this.goTopic(c.topicId) })),
+      khCases: khCases.map(c => ({ ...c, href: '/knowledge-hub/case/' + c.id, open: (e) => this.goCase(c.id, e) })),
       khShowArticles: !khQ && (s.khTab === 'All' || s.khTab === 'Articles' || s.khTab === 'Patient Guides' || s.khTab === 'Expert Insights'),
       khShowVideos: !khQ && (s.khTab === 'All' || s.khTab === 'Videos'),
       khShowCases: !khQ && (s.khTab === 'All' || s.khTab === 'Clinical Cases'),
@@ -5967,13 +7163,58 @@ class Component extends DCLogic {
       tp: tp || {}, tpOv: tp ? tp.ov : '', tpName: tp ? tp.n : '',
       tpSym: tp ? tp.sym.map(t => ({ t })) : [], tpDx: tp ? tp.dx.map(t => ({ t })) : [],
       tpTx: tp ? tp.tx.map(t => ({ t })) : [], tpSpec: tp ? tp.spec.map(t => ({ t })) : [],
-      tpAdv: tp ? tp.adv.map(t => ({ t })) : [], tpSvc: tp ? tp.svc.map(t => ({ t })) : [],
-      tpArticles: tp ? this.KH_ARTICLES.filter(a => a.topic === tp.id).map(a => ({ ...a, topicName: tp.n })) : [],
-      tpVideos: tp ? this.KH_VIDEOS.filter(v => v.topic === tp.id).map(v => videoVm(v, tp.n)) : [],
-      tpCases: tp ? this.KH_CASES.filter(c => c.topic === tp.id).map(c => ({ ...c, topicName: tp.n })) : [],
+      tpAdv: tp ? tp.adv.map(t => ({ t })) : [], tpSvc: tp ? tp.svc.map(t => this.serviceChip(t)) : [],
+      tpArticles: tp ? this.KH_ARTICLES.filter(a => a.topic === tp.id)
+        .map(a => ({ t: a.t, cat: a.cat, read: a.read, topicName: tp.n, href: '/knowledge-hub/guide/' + a.id, open: (e) => this.goGuide(a.id, e) })) : [],
+      tpVideos: tpVideos.map(v => videoVm(v, tp ? tp.n : '')),
+      tpCases: tp ? this.KH_CASES.filter(c => c.topic === tp.id)
+        .map(c => ({ t: c.t, d: c.d, lvl: c.lvl, topicName: tp.n, href: '/knowledge-hub/case/' + c.id, open: (e) => this.goCase(c.id, e) })) : [],
       tpHasArticles: tp ? this.KH_ARTICLES.some(a => a.topic === tp.id) : false,
-      tpHasVideos: tp ? this.KH_VIDEOS.some(v => v.topic === tp.id) : false,
+      tpHasVideos: tpVideos.length > 0,
+      tpVideoCount: tpVideos.length + (tpVideos.length === 1 ? ' video' : ' videos'),
+      tpVidPrev: () => this.railBy('topic-videos', -1),
+      tpVidNext: () => this.railBy('topic-videos', 1),
       tpHasCases: tp ? this.KH_CASES.some(c => c.topic === tp.id) : false,
+      /* ---- the long-form reads ---- */
+      ...(() => {
+        const a = s.khGuide ? this.KH_ARTICLES.find(x => x.id === s.khGuide) : null;
+        const c = s.khCase ? this.KH_CASES.find(x => x.id === s.khCase) : null;
+        const w = a || c;
+        const wt = w ? this.KH_TOPICS.find(x => x.id === w.topic) : null;
+        /* the section body renders the same way for a guide and for a case, so
+           one template serves both and there is only one thing to keep right */
+        const sections = (list) => (list || []).map(sec => ({
+          h: sec.h,
+          p: (sec.p || []).map(t2 => ({ t: t2 })), hasP: !!(sec.p && sec.p.length),
+          list: (sec.list || []).map(t2 => ({ t: t2 })), hasList: !!(sec.list && sec.list.length)
+        }));
+        /* what else to read: same topic first, then anything else, never itself */
+        const more = w
+          ? [...this.KH_ARTICLES.filter(x => x.id !== w.id && x.topic === w.topic),
+             ...this.KH_ARTICLES.filter(x => x.id !== w.id && x.topic !== w.topic)]
+              .slice(0, 3)
+              .map(x => ({ t: x.t, cat: x.cat, read: x.read, open: () => this.goGuide(x.id) }))
+          : [];
+        return {
+          isReadGuide: !!a, isReadCase: !!c, isRead: !!w,
+          wrName: w ? w.t : '', wrLead: a ? a.lead : (c ? c.d : ''),
+          wrCat: a ? a.cat : (c ? c.lvl : ''), wrRead: a ? a.read : '',
+          wrHasRead: !!(a && a.read),
+          wrTopicName: wt ? wt.n : '', wrHasTopic: !!wt,
+          wrToTopic: wt ? (() => this.goTopic(wt.id)) : this.backToHub,
+          wrArt: wt ? this.artOf(wt.id) : '', wrArtAlt: wt ? this.artAlt(wt.id, wt.n) : '',
+          wrHasArt: !!(wt && this.artOf(wt.id)),
+          wrSections: sections(a ? a.body : (c ? c.steps : [])),
+          wrPresent: c ? c.present : '',
+          wrPoints: c ? c.points.map(t2 => ({ t: t2 })) : [],
+          wrSrc: w ? w.src.map(t2 => ({ t: t2 })) : [],
+          wrMore: more, wrHasMore: more.length > 0,
+          /* the same two real destinations every other page offers — the site's
+             own specialist directory, and the line that is actually answered */
+          wrFindDoc: () => this.go('find'),
+          backToTopic: this.backToTopic
+        };
+      })(),
       tpArt: tp ? this.artOf(tp.id) : '', tpArtAlt: tp ? this.artAlt(tp.id, tp.n) : '', tpNoArt: !(tp && this.artOf(tp.id)),
       tpPaths: tp ? this.iconOf(tp.ic).paths : [],
       tpVb: tp ? this.iconOf(tp.ic).vb : '0 0 24 24', tpSw: tp ? this.iconOf(tp.ic).sw : 2,
