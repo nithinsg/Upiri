@@ -253,9 +253,36 @@ and undid the point of picking a male one. `SpeechInput.setLanguage` moves the
 recogniser too, so a Telugu speaker can use the microphone in Telugu.
 
 **The Telugu for Uppi's lines is in `I18N.te`, flagged `TODO(yashoda)`: it has
-not been reviewed by a Telugu-speaking clinician.** Add a line he says and you
-must add its translation in the same edit, or he says that one line in English.
-ACT, CAT and mMRC stay in English — they are validated instruments.
+not been reviewed by a Telugu-speaking clinician.** ACT, CAT and mMRC stay in
+English — they are validated instruments, and `pages.test.mjs` excludes them
+from the coverage check for that reason.
+
+Four traps, each of which shipped a bilingual panel that looked fine in review:
+
+1. **The keys must be the EXACT strings the code emits.** Straight `'` vs curly
+   `’` is the obvious one; less obvious is that some literals are
+   double-quoted, so a single-quote-only extractor misses them.
+2. **`tx` in `support.js` TRIMS before looking up.** A key with a trailing
+   space can never match. The dictionary is emitted trimmed.
+3. **Translating the text is not enough — the RENDER SITE has to ask.** Chips,
+   action buttons, the band chip, the alert heading, the panel chrome and the
+   visitor's own echoed message each needed `this.t()` adding; the strings were
+   in the dictionary the whole time and still came out English.
+4. **A tapped chip is shown translated but SUBMITTED in English**, because the
+   extractor's patterns are English. `addYou` re-translates it for display so
+   the visitor's own message does not answer back in the wrong language.
+
+Sentences Uppi assembles rather than writes — the verdicts, which wrap a
+combining LIST of triage reasons — are handled by `UPPI_PATTERNS` in `chat.js`,
+which translates the frame and sends each reason back through the dictionary.
+Enumerating those as keys would mean one entry per combination.
+
+**How to check a change, rather than eyeballing it:** the harvest scripts in
+this session drove the real engine over ~20 openers x ~50 follow-ups and
+collected every distinct sentence, chip, action and band. `pages.test.mjs` now
+runs five conversations end to end and fails if ANY visible string is still in
+Latin script. Add a line he says without its translation and that test goes
+red.
 
 ### Knowledge Hub artwork
 
@@ -357,7 +384,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 486 assertions across five suites (~15min)
+npm test              # 487 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -399,7 +426,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (486 assertions)
+2. `npm test` — must report `all suites passed` (487 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:

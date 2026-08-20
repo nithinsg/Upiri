@@ -4020,74 +4020,476 @@ class Component extends DCLogic {
 
   I18N = {
     te: {
-      /* ---------------------------------------------------------------------
-         Uppi's own lines (§16).
-         ---------------------------------------------------------------------
-         He renders his own DOM outside the dc runtime, so he is not patched
-         when the page is translated — `chat.js` looks these up through
-         `window.__dcTranslate` instead, and picks a Telugu voice to say them
-         with. Whatever is missing here he says in English, in an English
-         voice, rather than pushing Telugu script through a voice that cannot
-         pronounce it.
+      /* --------------------------------------------------------------------
+         Everything Uppi can put on screen, in Telugu.
 
-         TODO(yashoda): these are working translations and have NOT been
-         reviewed by a Telugu-speaking clinician. The wording of the emergency
-         lines in particular should be signed off before this is called final.
-         The ACT, CAT and mMRC instruments are deliberately absent — they are
-         validated in English and must not be translated. */
+         Harvested by running the real engine over ~20 openers x ~50 follow-ups
+         and collecting every distinct sentence, chip, action and band — not by
+         grepping for string literals, because what he actually says is
+         assembled at runtime and a grep misses most of it. The combinatorial
+         verdicts ("Because of A and B, ...") are handled by UPPI_PATTERNS
+         below instead of being enumerated here.
+
+         TODO(yashoda): working translations, NOT reviewed by a Telugu-speaking
+         clinician. The urgency and emergency wording should be signed off
+         before this is called final. ACT, CAT and mMRC stay in English — they
+         are validated instruments. */
+      "Both":
+        "రెండూ",
+      "Dust":
+        "దుమ్ము",
+      "Send":
+        "పంపండి",
+      "Stop":
+        "ఆపండి",
+      "Close":
+        "మూసివేయండి",
+      "Smoke":
+        "పొగ",
+      "Rarely":
+        "అరుదుగా",
+      "5 to 12":
+        "5 నుండి 12",
+      "Dismiss":
+        "తీసివేయండి",
+      "I smoke":
+        "నేను పొగ తాగుతాను",
+      "Routine":
+        "సాధారణం",
+      "Under 5":
+        "5 సంవత్సరాల లోపు",
+      "Ask Uppi":
+        "ఊపిరిని అడగండి",
+      "Cold air":
+        "చల్లని గాలి",
+      "Exercise":
+        "వ్యాయామం",
+      "It's dry":
+        "పొడి దగ్గు",
+      "No fever":
+        "జ్వరం లేదు",
+      "Every day":
+        "ప్రతిరోజూ",
+      "Listening":
+        "వింటున్నాను",
+      "Sometimes":
+        "కొన్నిసార్లు",
+      "Tell Uppi":
+        "ఊపిరితో చెప్పండి",
+      "This week":
+        "ఈ వారంలో",
+      "A few days":
+        "కొన్ని రోజులు",
+      "A teenager":
+        "టీనేజర్",
+      "Close Uppi":
+        "ఊపిరిని మూసివేయండి",
+      "Immediately":
+        "వెంటనే",
+      "No, neither":
+        "లేదు, రెండూ కాదు",
+      "Call Yashoda":
+        "యశోదకు కాల్ చేయండి",
+      "Clear it now":
+        "ఇప్పుడే తొలగించండి",
+      "Speak to Uppi":
+        "ఊపిరితో మాట్లాడండి",
+      "About the same":
+        "దాదాపు అలాగే ఉంది",
+      "I have a cough":
+        "నాకు దగ్గు ఉంది",
+      "I'm breathless":
+        "నాకు ఊపిరి ఆడటం లేదు",
+      "Several months":
+        "చాలా నెలలు",
+      "Worse at night":
+        "రాత్రి ఎక్కువ",
+      "About two weeks":
+        "సుమారు రెండు వారాలు",
+      "I hear a wheeze":
+        "నాకు పిల్లికూత వినిపిస్తోంది",
+      "I used to smoke":
+        "నేను గతంలో పొగ తాగేవాడిని",
+      "Need some help?":
+        "ఏమైనా సహాయం కావాలా?",
+      "Over a few days":
+        "కొన్ని రోజుల్లో",
+      "Within 24 hours":
+        "24 గంటల్లోపు",
+      "How old are they?":
+        "వారి వయసు ఎంత?",
+      "I bring up phlegm":
+        "కఫం పడుతోంది",
+      "I have the report":
+        "రిపోర్ట్ నా దగ్గర ఉంది",
+      "I've never smoked":
+        "నేను ఎప్పుడూ పొగ తాగలేదు",
+      "coughing up blood":
+        "దగ్గులో రక్తం పడటం",
+      "your lung partner":
+        "మీ ఊపిరితిత్తుల తోడు",
+      "A few times a week":
+        "వారానికి కొన్నిసార్లు",
+      "I've been coughing":
+        "నాకు దగ్గు వస్తోంది",
+      "It's getting worse":
+        "ఎక్కువవుతోంది",
+      "It's slowly easing":
+        "నెమ్మదిగా తగ్గుతోంది",
+      "Manageable for now":
+        "ప్రస్తుతానికి నిర్వహించదగినది",
+      "No particular time":
+        "ప్రత్యేకమైన సమయం ఏమీ లేదు",
+      "Stop Uppi speaking":
+        "ఊపిరి మాట్లాడటం ఆపండి",
+      "Tell me a bit more":
+        "కొంచెం ఎక్కువ చెప్పండి",
+      "Book an appointment":
+        "అపాయింట్‌మెంట్ బుక్ చేయండి",
+      "I can talk normally":
+        "నేను మామూలుగా మాట్లాడగలను",
+      "It's the first time":
+        "ఇదే మొదటిసారి",
+      "Several times a day":
+        "రోజుకు చాలాసార్లు",
+      "Three weeks or more":
+        "మూడు వారాలు లేదా అంతకంటే ఎక్కువ",
+      "Yes, I've been told":
+        "అవును, నాకు చెప్పారు",
+      "Around dust or smoke":
+        "దుమ్ము లేదా పొగ దగ్గర",
+      "I feel tired all day":
+        "రోజంతా అలసటగా అనిపిస్తుంది",
+      "Worse in the morning":
+        "ఉదయం ఎక్కువ",
+      "Your message to Uppi":
+        "ఊపిరికి మీ సందేశం",
+      "Even when I sit still":
+        "కూర్చున్నప్పుడు కూడా",
+      "Gradually over months":
+        "నెలల తరబడి నెమ్మదిగా",
+      "Ask Yashoda to call me":
+        "నాకు కాల్ చేయమని యశోదను అడగండి",
+      "Conversation with Uppi":
+        "ఊపిరితో సంభాషణ",
+      "It's always been there":
+        "ఇది ఎప్పుడూ ఉంటుంది",
+      "Nothing I can pin down":
+        "ఖచ్చితంగా చెప్పలేను",
+      "Yes, there was a fever":
+        "అవును, జ్వరం వచ్చింది",
+      "I don't have it with me":
+        "అది నా దగ్గర లేదు",
+      "I have chest discomfort":
+        "ఛాతీలో ఇబ్బందిగా ఉంది",
+      "Only when I move around":
+        "కదిలినప్పుడు మాత్రమే",
+      "Seek emergency care now":
+        "ఇప్పుడే అత్యవసర చికిత్స తీసుకోండి",
+      "Uppi, your lung partner":
+        "ఊపిరి, మీ ఊపిరితిత్తుల తోడు",
+      "I get breathless talking":
+        "మాట్లాడేటప్పుడు ఊపిరి ఆడటం లేదు",
+      "Sleep studies at Yashoda":
+        "యశోదలో నిద్ర పరీక్షలు",
+      "Start a new conversation":
+        "కొత్త సంభాషణ మొదలుపెట్టండి",
+      "you asked to see someone":
+        "మీరు ఎవరినైనా కలవాలని అడిగారు",
+      "Hyderabad allergy calendar":
+        "హైదరాబాద్ అలర్జీ క్యాలెండర్",
+      "My asthma is getting worse":
+        "నా ఆస్తమా ఎక్కువవుతోంది",
+      "Nothing yet — just worried":
+        "ఇంకా ఏమీ లేదు — కేవలం ఆందోళనగా ఉంది",
+      "Please talk to someone now":
+        "దయచేసి ఇప్పుడే ఎవరితోనైనా మాట్లాడండి",
+      "I struggle around the house":
+        "ఇంట్లో పనులు చేయడం కష్టంగా ఉంది",
+      "No fever with it — helpful.":
+        "జ్వరం లేదు — ఇది ఉపయోగపడుతుంది.",
+      "This needs urgent attention":
+        "దీనికి వెంటనే వైద్య సహాయం అవసరం",
+      "Call the Yashoda Call Centre":
+        "యశోద కాల్ సెంటర్‌కు కాల్ చేయండి",
+      "I'm having trouble breathing":
+        "నాకు ఊపిరి తీసుకోవడం కష్టంగా ఉంది",
+      "Run the full Symptom Checker":
+        "పూర్తి లక్షణాల పరిశీలన చేయండి",
+      "See a doctor within 24 hours":
+        "24 గంటల్లో వైద్యులను కలవండి",
+      "What have you been noticing?":
+        "మీరు ఏమి గమనిస్తున్నారు?",
+      "Worth seeing a pulmonologist":
+        "పల్మనాలజిస్ట్‌ను కలవడం మంచిది",
+      "I want to book an appointment":
+        "నేను అపాయింట్‌మెంట్ బుక్ చేయాలి",
+      "Yes, this has happened before":
+        "అవును, ఇంతకుముందు ఇలా జరిగింది",
+      "a cough that started recently":
+        "ఇటీవల మొదలైన దగ్గు",
+      "Book a Pulmonology Appointment":
+        "పల్మనాలజీ అపాయింట్‌మెంట్ బుక్ చేయండి",
+      "Call 108 — emergency ambulance":
+        "108కి కాల్ చేయండి — అత్యవసర అంబులెన్స్",
+      "Need a hand finding something?":
+        "ఏదైనా వెతుకుతున్నారా? సహాయం కావాలా?",
+      "Talk to Uppi, your lung partner":
+        "ఊపిరితో మాట్లాడండి — మీ ఊపిరితిత్తుల తోడు",
+      "Tell Uppi what’s bothering you…":
+        "మిమ్మల్ని ఏమి ఇబ్బంది పెడుతోందో ఊపిరితో చెప్పండి…",
+      "Thanks — that's useful to know.":
+        "ధన్యవాదాలు — ఇది తెలుసుకోవడం ఉపయోగపడుతుంది.",
+      "a wheeze that keeps coming back":
+        "మళ్లీ మళ్లీ వస్తున్న పిల్లికూత",
+      "Also ask Yashoda to call me back":
+        "నాకు తిరిగి కాల్ చేయమని కూడా యశోదను అడగండి",
+      "How a lung nodule is followed up":
+        "ఊపిరితిత్తుల నాడ్యూల్‌ను ఎలా పరిశీలిస్తారు",
+      "I want to understand my symptoms":
+        "నా లక్షణాలను అర్థం చేసుకోవాలి",
+      "Has there been any fever with it?":
+        "దీంతో పాటు జ్వరం ఏమైనా వచ్చిందా?",
+      "Looking for something? I can help.":
+        "ఏదైనా వెతుకుతున్నారా? నేను సహాయం చేయగలను.",
+      "Rendo ŪPIRI — 90-day quit programme":
+        "రెండో ఊపిరి — 90 రోజుల పొగ మానే కార్యక్రమం",
+      "a voice change that has not settled":
+        "తగ్గని గొంతు మార్పు",
+      "a colour change in your lips or face":
+        "మీ పెదవులు లేదా ముఖం రంగు మారడం",
+      "breathlessness that came on suddenly":
+        "అకస్మాత్తుగా వచ్చిన ఊపిరి ఇబ్బంది",
+      "breathlessness together with a fever":
+        "జ్వరంతో పాటు ఊపిరి ఇబ్బంది",
+      "your child's breathing getting worse":
+        "మీ పిల్లల శ్వాస ఎక్కువగా ఇబ్బంది పడటం",
+      "allergy symptoms in the nose and eyes":
+        "ముక్కు, కళ్లలో అలర్జీ లక్షణాలు",
+      "severe pain or pressure in your chest":
+        "ఛాతీలో తీవ్రమైన నొప్పి లేదా ఒత్తిడి",
+      "Adding cough to the picture is useful.":
+        "దగ్గును కూడా చెప్పడం ఉపయోగపడుతుంది.",
+      "Do you smoke, or did you at any point?":
+        "మీరు పొగ తాగుతారా, లేదా ఎప్పుడైనా తాగారా?",
+      "I'm here if something's bothering you.":
+        "ఏదైనా ఇబ్బందిగా ఉంటే నేను ఇక్కడే ఉన్నాను.",
+      "chest infections that keep coming back":
+        "మళ్లీ మళ్లీ వస్తున్న ఛాతీ ఇన్ఫెక్షన్లు",
+      "Adding phlegm to the picture is useful.":
+        "కఫాన్ని కూడా చెప్పడం ఉపయోగపడుతుంది.",
+      "breathlessness that happens even at rest":
+        "విశ్రాంతిగా ఉన్నప్పుడు కూడా వచ్చే ఊపిరి ఇబ్బంది",
+      "snoring together with daytime sleepiness":
+        "గురక, దానితో పాటు పగటిపూట నిద్రమత్తు",
+      "weight loss you have not been trying for":
+        "మీరు ప్రయత్నించకుండానే బరువు తగ్గడం",
+      "being too breathless to finish a sentence":
+        "ఒక వాక్యం పూర్తి చేయలేనంత ఊపిరి ఇబ్బంది",
+      "a cough that has lasted three weeks or more":
+        "మూడు వారాలు లేదా అంతకంటే ఎక్కువ కాలంగా ఉన్న దగ్గు",
+      "breathlessness you are describing as severe":
+        "మీరు తీవ్రమైనదిగా చెబుతున్న ఊపిరి ఇబ్బంది",
+      "what you said about wanting to hurt yourself":
+        "మిమ్మల్ని మీరు గాయపరచుకోవాలని మీరు చెప్పిన మాట",
+      "a family history worth understanding properly":
+        "సరిగా అర్థం చేసుకోవాల్సిన కుటుంబ చరిత్ర",
+      "breathlessness that has been there for months":
+        "నెలలుగా ఉన్న ఊపిరి ఇబ్బంది",
+      "Adding breathlessness to the picture is useful.":
+        "ఊపిరి ఇబ్బందిని కూడా చెప్పడం ఉపయోగపడుతుంది.",
+      "Bringing something up with it is worth knowing.":
+        "కఫం పడుతుండటం తెలుసుకోవడం ముఖ్యం.",
+      "chest symptoms in someone who smokes or used to":
+        "పొగ తాగే లేదా గతంలో తాగిన వ్యక్తిలో ఛాతీ లక్షణాలు",
+      "A dry cough — that narrows things down a little.":
+        "పొడి దగ్గు — ఇది కొంచెం స్పష్టత ఇస్తుంది.",
+      "Is the cough dry, or are you bringing up phlegm?":
+        "దగ్గు పొడిగా ఉందా, లేక కఫం పడుతోందా?",
+      "breathlessness on exertion that is getting worse":
+        "శ్రమ చేసినప్పుడు వచ్చే, ఎక్కువవుతున్న ఊపిరి ఇబ్బంది",
+      "your inhaler not working the way it usually does":
+        "మీ ఇన్‌హేలర్ మామూలుగా పనిచేయకపోవడం",
+      "A fever alongside it shifts the picture a little.":
+        "దానితో పాటు జ్వరం ఉండటం చిత్రాన్ని కొంచెం మారుస్తుంది.",
+      "A chest X-ray usually settles the question quickly.":
+        "ఛాతీ ఎక్స్-రే సాధారణంగా ఈ ప్రశ్నను త్వరగా పరిష్కరిస్తుంది.",
+      "Adding daytime sleepiness to the picture is useful.":
+        "పగటి నిద్రమత్తును కూడా చెప్పడం ఉపయోగపడుతుంది.",
+      "your reliever inhaler not holding the way it should":
+        "మీ రిలీవర్ ఇన్‌హేలర్ ఉండాల్సినంత సేపు పనిచేయకపోవడం",
+      "a cough in a child that has lasted more than a month":
+        "ఒక నెల కంటే ఎక్కువ కాలంగా పిల్లలలో ఉన్న దగ్గు",
+      "a flare-up of a lung condition you already live with":
+        "మీకు ఇప్పటికే ఉన్న ఊపిరితిత్తుల సమస్య తీవ్రం కావడం",
+      "Of course — let's get you in front of a pulmonologist.":
+        "తప్పకుండా — మిమ్మల్ని పల్మనాలజిస్ట్ దగ్గరకు చేరుద్దాం.",
+      "chest discomfort alongside a cough that is not settling":
+        "తగ్గని దగ్గుతో పాటు ఛాతీలో ఇబ్బంది",
+      "How long has this been going on — days, weeks, or longer?":
+        "ఇది ఎంత కాలంగా ఉంది — రోజులా, వారాలా, ఇంకా ఎక్కువా?",
+      "Built up gradually rather than arriving overnight — noted.":
+        "ఒక్కసారిగా కాకుండా నెమ్మదిగా పెరిగింది — గమనించాను.",
+      "Your microphone is only on while you are speaking to Uppi.":
+        "మీరు ఊపిరితో మాట్లాడుతున్నప్పుడు మాత్రమే మీ మైక్రోఫోన్ ఆన్‌లో ఉంటుంది.",
+      "breathlessness on exertion that has been going on for weeks":
+        "వారాలుగా ఉన్న, శ్రమ చేసినప్పుడు వచ్చే ఊపిరి ఇబ్బంది",
+      "How long has the cough been going on — days, weeks, or longer?":
+        "దగ్గు ఎంత కాలంగా ఉంది — రోజులా, వారాలా, ఇంకా ఎక్కువా?",
+      "new symptoms alongside a lung condition already on your record":
+        "మీ రికార్డులో ఇప్పటికే ఉన్న ఊపిరితిత్తుల సమస్యతో పాటు కొత్త లక్షణాలు",
+      "a scan or breathing-test result that deserves a specialist read":
+        "నిపుణుల పరిశీలన అవసరమైన స్కాన్ లేదా శ్వాస పరీక్ష ఫలితం",
+      "And is it getting worse, staying about the same, or slowly easing?":
+        "ఇది ఎక్కువవుతోందా, అలాగే ఉందా, లేక నెమ్మదిగా తగ్గుతోందా?",
+      "lung cancer in the family alongside what you are noticing yourself":
+        "మీరు గమనిస్తున్న దానితో పాటు కుటుంబంలో ఊపిరితిత్తుల క్యాన్సర్",
+      "Did it come on over days, or has it built up gradually over months?":
+        "ఇది కొన్ని రోజుల్లో వచ్చిందా, లేక నెలల తరబడి నెమ్మదిగా పెరిగిందా?",
+      "chest symptoms during pregnancy, which are always worth a proper look":
+        "గర్భధారణ సమయంలో ఛాతీ లక్షణాలు — వీటిని ఎప్పుడూ సరిగా పరిశీలించాలి",
+      "How often are you reaching for your reliever inhaler in a normal week?":
+        "సాధారణ వారంలో రిలీవర్ ఇన్‌హేలర్ ఎన్నిసార్లు వాడుతున్నారు?",
+      "So this isn't the first time — a pattern that repeats is itself a clue.":
+        "అంటే ఇది మొదటిసారి కాదు — మళ్లీ మళ్లీ వచ్చే తీరు కూడా ఒక సూచనే.",
+      "Tell me a little more about what you are noticing, and when it happens.":
+        "మీరు గమనిస్తున్నది, అది ఎప్పుడు వస్తుందో కొంచెం వివరంగా చెప్పండి.",
+      "That still points the same way: worth having a pulmonologist look at it.":
+        "ఇది కూడా అదే వైపు సూచిస్తోంది: పల్మనాలజిస్ట్ చూడటం మంచిది.",
+      "Has this happened before — a spell like this in a previous year or season?":
+        "ఇంతకుముందు ఇలా జరిగిందా — గత సంవత్సరం లేదా ఏదైనా కాలంలో ఇలాంటిది?",
+      "That sounds like a lot to be dealing with, and I don't want to slow you down.":
+        "మీరు చాలా ఇబ్బంది పడుతున్నట్టు అనిపిస్తోంది, మిమ్మల్ని ఆలస్యం చేయాలని నేను అనుకోవడం లేదు.",
+      "So it's effort that brings it on rather than rest. That's a useful distinction.":
+        "అంటే విశ్రాంతిలో కాకుండా శ్రమ చేసినప్పుడు వస్తుంది. ఇది ఉపయోగకరమైన తేడా.",
+      "Do you have the report with you — does it give a size, and was anything recommended?":
+        "రిపోర్ట్ మీ దగ్గర ఉందా — అందులో కొలత ఇచ్చారా, ఏమైనా సూచించారా?",
+      "So it's only when you push a bit, not the whole time. That boundary is worth knowing.":
+        "అంటే కొంచెం శ్రమ చేసినప్పుడు మాత్రమే, ఎప్పుడూ కాదు. ఈ హద్దు తెలుసుకోవడం ముఖ్యం.",
+      "You've told me enough to be useful. The next step is someone listening to your chest.":
+        "మీరు చెప్పింది సరిపోతుంది. తదుపరి అడుగు — ఎవరైనా మీ ఛాతీని పరీక్షించడం.",
+      "Good to know you've never smoked — that does change which explanations are more likely.":
+        "మీరు ఎప్పుడూ పొగ తాగలేదని తెలియడం మంచిది — దీనివల్ల ఏ కారణాలు ఎక్కువ సాధ్యమో మారుతుంది.",
+      "That's a reasonable thing to be worried about, and it's worth working through properly.":
+        "దీని గురించి ఆందోళన పడటం సహజం, దీనిని సరిగా పరిశీలించడం మంచిది.",
+      "The fact that it is getting worse rather than settling is the part that matters most here.":
+        "ఇది తగ్గకుండా ఎక్కువవుతుండటమే ఇక్కడ అత్యంత ముఖ్యమైన విషయం.",
+      "When it is at its worst, can you still speak in full sentences and manage around the house?":
+        "ఎక్కువగా ఉన్నప్పుడు కూడా మీరు పూర్తి వాక్యాలు మాట్లాడగలరా, ఇంటి పనులు చేసుకోగలరా?",
+      "needing your reliever inhaler most days, which usually means the treatment needs revisiting":
+        "చాలా రోజులు రిలీవర్ ఇన్‌హేలర్ అవసరం కావడం — సాధారణంగా చికిత్సను మళ్లీ చూడాల్సి ఉందని అర్థం",
+      "Is there anything that reliably sets it off — dust, smoke, cold air, exercise, a particular room?":
+        "దీనిని ఖచ్చితంగా మొదలుపెట్టేది ఏదైనా ఉందా — దుమ్ము, పొగ, చల్లని గాలి, వ్యాయామం, ఏదైనా గది?",
+      "Thanks for being straight with me about that — it helps, and it's not something to be judged for.":
+        "దాని గురించి నిజం చెప్పినందుకు ధన్యవాదాలు — ఇది సహాయపడుతుంది, దీనికి ఎవరూ మిమ్మల్ని తప్పుపట్టరు.",
+      "Does anyone smoke at home, or is there much smoke or dust around — cooking fire, incense, traffic?":
+        "ఇంట్లో ఎవరైనా పొగ తాగుతారా, లేదా చుట్టూ పొగ, దుమ్ము ఎక్కువగా ఉంటుందా — వంట పొయ్యి, అగరుబత్తి, ట్రాఫిక్?",
       "Hi, I'm Uppi, your lung partner. Tell me what's bothering you, and we'll figure out what to do next.":
-        'నమస్తే, నేను ఊపిరి — మీ ఊపిరితిత్తుల తోడు. మిమ్మల్ని ఏమి ఇబ్బంది పెడుతోందో చెప్పండి, తరువాత ఏమి చేయాలో కలిసి చూద్దాం.',
-      'Tell Uppi': 'ఊపిరితో చెప్పండి',
-      'Ask Uppi': 'ఊపిరిని అడగండి',
-      /* the offers of help (§7, §8) */
-      'Need a hand finding something?': 'ఏదైనా వెతుకుతున్నారా? సహాయం కావాలా?',
-      'Looking for something? I can help.': 'ఏదైనా వెతుకుతున్నారా? నేను సహాయం చేయగలను.',
-      'Need some help?': 'ఏమైనా సహాయం కావాలా?',
-      "I'm here if something's bothering you.": 'ఏదైనా ఇబ్బందిగా ఉంటే నేను ఇక్కడే ఉన్నాను.',
-      /* what he asks (§17: one question at a time) */
-      'How long has the cough been going on — days, weeks, or longer?':
-        'దగ్గు ఎంత కాలంగా ఉంది — రోజులా, వారాలా, ఇంకా ఎక్కువా?',
-      'How long has this been going on — days, weeks, or longer?':
-        'ఇది ఎంత కాలంగా ఉంది — రోజులా, వారాలా, ఇంకా ఎక్కువా?',
-      'Does the breathlessness come on when you move around, or does it happen even when you are sitting still?':
-        'కదిలినప్పుడు ఊపిరి ఆడకపోతుందా, లేక కూర్చున్నప్పుడు కూడా అలాగే ఉంటుందా?',
-      'When it is at its worst, can you still speak in full sentences and manage around the house?':
-        'ఎక్కువగా ఉన్నప్పుడు కూడా మీరు పూర్తి వాక్యాలు మాట్లాడగలరా, ఇంటి పనులు చేసుకోగలరా?',
-      'Is the cough dry, or are you bringing up phlegm?':
-        'దగ్గు పొడిగా ఉందా, లేక కఫం పడుతోందా?',
-      'Is it worse at any particular time — at night, first thing in the morning, or after being around dust or smoke?':
-        'ఏదైనా ఒక సమయంలో ఎక్కువవుతుందా — రాత్రి, తెల్లవారుజామున, లేదా దుమ్ము, పొగ తగిలిన తరువాత?',
-      'How often are you reaching for your reliever inhaler in a normal week?':
-        'సాధారణ వారంలో రిలీవర్ ఇన్‌హేలర్ ఎన్నిసార్లు వాడుతున్నారు?',
-      'And is it getting worse, staying about the same, or slowly easing?':
-        'ఇది ఎక్కువవుతోందా, అలాగే ఉందా, లేక నెమ్మదిగా తగ్గుతోందా?',
-      'Is there anything that reliably sets it off — dust, smoke, cold air, exercise, a particular room?':
-        'దీనిని ఖచ్చితంగా మొదలుపెట్టేది ఏదైనా ఉందా — దుమ్ము, పొగ, చల్లని గాలి, వ్యాయామం, ఏదైనా గది?',
-      'Has anyone told you that you stop breathing or gasp during sleep — and how do you feel through the day?':
-        'నిద్రలో మీరు ఊపిరి ఆపేస్తున్నారని ఎవరైనా చెప్పారా — పగలంతా ఎలా అనిపిస్తోంది?',
-      'Has there been any fever with it?': 'దీంతో పాటు జ్వరం ఏమైనా వచ్చిందా?',
-      'Did it come on over days, or has it built up gradually over months?':
-        'ఇది కొన్ని రోజుల్లో వచ్చిందా, లేక నెలల తరబడి నెమ్మదిగా పెరిగిందా?',
-      'Has this happened before — a spell like this in a previous year or season?':
-        'ఇంతకుముందు ఇలా జరిగిందా — గత సంవత్సరం లేదా ఏదైనా కాలంలో ఇలాంటిది?',
-      'How old are they?': 'వారి వయసు ఎంత?',
-      'Is there anything you have noticed in yourself — a cough, breathlessness, anything that made you think about it now?':
-        'మీలో మీరు గమనించినది ఏదైనా ఉందా — దగ్గు, ఊపిరి ఆడకపోవడం, ఇప్పుడు దీని గురించి ఆలోచించేలా చేసినది?',
-      'Do you have the report with you — does it give a size, and was anything recommended?':
-        'రిపోర్ట్ మీ దగ్గర ఉందా — అందులో కొలత ఇచ్చారా, ఏమైనా సూచించారా?',
-      'Tell me a little more about what you are noticing, and when it happens.':
-        'మీరు గమనిస్తున్నది, అది ఎప్పుడు వస్తుందో కొంచెం వివరంగా చెప్పండి.',
-      /* what he offers to do next */
-      'Call 108 — emergency ambulance': '108కి కాల్ చేయండి — అత్యవసర అంబులెన్స్',
-      'Call Yashoda': 'యశోదకు కాల్ చేయండి',
-      'Call the Yashoda Call Centre': 'యశోద కాల్ సెంటర్‌కు కాల్ చేయండి',
-      'Ask Yashoda to call me': 'నాకు కాల్ చేయమని యశోదను అడగండి',
-      'Also ask Yashoda to call me back': 'నాకు తిరిగి కాల్ చేయమని కూడా యశోదను అడగండి',
-      'Book a Pulmonology Appointment': 'పల్మనాలజీ అపాయింట్‌మెంట్ బుక్ చేయండి',
-      'Run the full Symptom Checker': 'పూర్తి లక్షణాల పరిశీలన చేయండి',
-      /* the two urgent headings */
-      'This needs urgent attention': 'దీనికి వెంటనే వైద్య సహాయం అవసరం',
-      'Please talk to someone now': 'దయచేసి ఇప్పుడే ఎవరితోనైనా మాట్లాడండి',
+        "నమస్తే, నేను ఊపిరి — మీ ఊపిరితిత్తుల తోడు. మిమ్మల్ని ఏమి ఇబ్బంది పెడుతోందో చెప్పండి, తరువాత ఏమి చేయాలో కలిసి చూద్దాం.",
+      "Has anyone told you that you stop breathing or gasp during sleep — and how do you feel through the day?":
+        "నిద్రలో మీరు ఊపిరి ఆపేస్తున్నారని ఎవరైనా చెప్పారా — పగలంతా ఎలా అనిపిస్తోంది?",
+      "Does the breathlessness come on when you move around, or does it happen even when you are sitting still?":
+        "కదిలినప్పుడు ఊపిరి ఆడకపోతుందా, లేక కూర్చున్నప్పుడు కూడా అలాగే ఉంటుందా?",
+      "If anything changes, or you think of something you forgot to mention, tell me and I'll take another look.":
+        "ఏదైనా మారితే, లేదా చెప్పడం మరిచిపోయినది గుర్తొస్తే, నాకు చెప్పండి — నేను మళ్లీ చూస్తాను.",
+      "Night-time is a real clue. Symptoms that peak at night or early morning tend to behave in a particular way.":
+        "రాత్రి సమయం ఒక ముఖ్యమైన సూచన. రాత్రి లేదా తెల్లవారుజామున ఎక్కువయ్యే లక్షణాలు ఒక ప్రత్యేక రీతిలో ప్రవర్తిస్తాయి.",
+      "Is it worse at any particular time — at night, first thing in the morning, or after being around dust or smoke?":
+        "ఏదైనా ఒక సమయంలో ఎక్కువవుతుందా — రాత్రి, తెల్లవారుజామున, లేదా దుమ్ము, పొగ తగిలిన తరువాత?",
+      "Is there anything you have noticed in yourself — a cough, breathlessness, anything that made you think about it now?":
+        "మీలో మీరు గమనించినది ఏదైనా ఉందా — దగ్గు, ఊపిరి ఆడకపోవడం, ఇప్పుడు దీని గురించి ఆలోచించేలా చేసినది?",
+      "Breathlessness is worth taking seriously whenever it is new, or worse than it used to be for the same amount of effort.":
+        "ఊపిరి ఇబ్బంది కొత్తగా వచ్చినప్పుడు, లేదా అదే స్థాయి శ్రమకు గతంలో కంటే ఎక్కువగా ఉన్నప్పుడు, దానిని తీవ్రంగా పరిగణించాలి.",
+      "The Yashoda call centre is 080 6590 6165 if you need help getting there. I'll stay here, but please make the call first.":
+        "అక్కడికి చేరడంలో సహాయం కావాలంటే యశోద కాల్ సెంటర్ నంబర్ 080 6590 6165. నేను ఇక్కడే ఉంటాను, కానీ ముందు కాల్ చేయండి.",
+      "While you're here — what has been going on with your breathing? Anything you tell me now is worth mentioning in the room.":
+        "మీరు ఇక్కడ ఉన్నారు కాబట్టి — మీ శ్వాస విషయంలో ఏమి జరుగుతోంది? ఇప్పుడు మీరు చెప్పేది డాక్టర్ గదిలో కూడా చెప్పడం మంచిది.",
+      "An assessment usually starts with a chest X-ray and a breathing test, plus a sputum test where tuberculosis is a possibility.":
+        "పరీక్ష సాధారణంగా ఛాతీ ఎక్స్-రే, శ్వాస పరీక్షతో మొదలవుతుంది — క్షయ (టీబీ) అనుమానం ఉంటే కఫం పరీక్ష కూడా.",
+      "Diagnosis needs spirometry, a simple breathing test where you blow hard into a machine. It is the only way to confirm COPD rather than assume it.":
+        "నిర్ధారణకు స్పైరోమెట్రీ అవసరం — ఇది ఒక సాధారణ శ్వాస పరీక్ష, యంత్రంలోకి గట్టిగా ఊదాలి. సీఓపీడీని ఊహించకుండా నిర్ధారించడానికి ఇదొక్కటే మార్గం.",
+      "It is also genuinely hard, and it usually takes support rather than willpower alone. That is not a character judgement — it is how nicotine works.":
+        "ఇది నిజంగా కష్టం కూడా, సాధారణంగా కేవలం సంకల్పం కాకుండా సహాయం అవసరం. ఇది మీ వ్యక్తిత్వంపై తీర్పు కాదు — నికోటిన్ పనిచేసే తీరు అది.",
+      "I'm here for anything to do with breathing and lungs — a cough, a wheeze, breathlessness, allergies, sleep, smoking, or a test you've been asked to have.":
+        "శ్వాస, ఊపిరితిత్తులకు సంబంధించిన దేనికైనా నేను ఇక్కడ ఉన్నాను — దగ్గు, పిల్లికూత, ఊపిరి ఇబ్బంది, అలర్జీలు, నిద్ర, పొగ అలవాటు, లేదా మీకు చెప్పిన ఏదైనా పరీక్ష.",
+      "If an inhaler seems to have stopped working, technique is worth checking before the dose is changed. It is a two-minute thing to review at any appointment.":
+        "ఇన్‌హేలర్ పనిచేయడం ఆగినట్టు అనిపిస్తే, మోతాదు మార్చే ముందు వాడే పద్ధతిని ఒకసారి పరిశీలించడం మంచిది. ఏ అపాయింట్‌మెంట్‌లోనైనా ఇది రెండు నిమిషాల పని.",
+      "Uppi is a guide, not a doctor, and cannot diagnose. This conversation stays on your device and is cleared when you close the tab. In an emergency call {n}.":
+        "ఊపిరి ఒక సహాయకుడు మాత్రమే, వైద్యుడు కాదు — రోగ నిర్ధారణ చేయలేడు. ఈ సంభాషణ మీ పరికరంలోనే ఉంటుంది, ట్యాబ్ మూసేయగానే తొలగిపోతుంది. అత్యవసర పరిస్థితిలో {n}కి కాల్ చేయండి.",
+      "Go to the nearest emergency department now, or call 108 for an ambulance. If you are struggling to breathe, do not drive yourself — ask someone to take you.":
+        "ఇప్పుడే దగ్గరలోని అత్యవసర విభాగానికి వెళ్లండి, లేదా అంబులెన్స్ కోసం 108కి కాల్ చేయండి. ఊపిరి తీసుకోవడం కష్టంగా ఉంటే మీరే వాహనం నడపవద్దు — ఎవరినైనా తీసుకెళ్లమని అడగండి.",
+      "Three weeks is the point where a cough stops being a leftover from a cold and starts deserving a proper look. That is not a reason to panic — it is a reason to book.":
+        "మూడు వారాలు దాటిన దగ్గు ఇక జలుబు తాలూకు మిగులు కాదు — దానిని సరిగా పరిశీలించాల్సిన సమయం అది. ఇది భయపడాల్సిన కారణం కాదు — అపాయింట్‌మెంట్ తీసుకోవాల్సిన కారణం.",
+      "Sneezing, an itchy or blocked nose and watery eyes usually mean the lining of the nose is reacting to something in the air — dust mites, pollen, mould, pets or smoke.":
+        "తుమ్ములు, ముక్కు దురద లేదా మూసుకుపోవడం, కళ్లలో నీరు — సాధారణంగా గాలిలోని దేనికో ముక్కు లోపలి పొర స్పందిస్తోందని అర్థం — దుమ్ము పురుగులు, పుప్పొడి, బూజు, పెంపుడు జంతువులు లేదా పొగ.",
+      "Testing is straightforward: a sputum test and a chest X-ray. Anyone with that pattern should be tested rather than treated with repeated courses of ordinary antibiotics.":
+        "పరీక్ష సులభమే: కఫం పరీక్ష, ఛాతీ ఎక్స్-రే. ఆ తీరు ఉన్నవారికి మామూలు యాంటీబయాటిక్స్ మళ్లీ మళ్లీ ఇవ్వకుండా పరీక్ష చేయించాలి.",
+      "It is common, very treatable, and worth diagnosing because untreated it pushes up blood pressure and cardiac risk. The test is a sleep study, which can often be done at home.":
+        "ఇది సాధారణం, చికిత్సకు బాగా లొంగుతుంది, నిర్ధారించుకోవడం ముఖ్యం — ఎందుకంటే చికిత్స లేకపోతే ఇది రక్తపోటును, గుండె ప్రమాదాన్ని పెంచుతుంది. పరీక్ష అంటే నిద్ర పరీక్ష, దీనిని తరచుగా ఇంట్లోనే చేయవచ్చు.",
+      "Lungs are not the only cause — the heart, anaemia and anxiety all produce genuine breathlessness. That is part of why an assessment rather than a guess is the right next step.":
+        "ఊపిరితిత్తులే ఏకైక కారణం కాదు — గుండె, రక్తహీనత, ఆందోళన కూడా నిజమైన ఊపిరి ఇబ్బందిని కలిగిస్తాయి. అందుకే ఊహించడం కాకుండా సరైన పరీక్ష చేయించుకోవడమే తదుపరి అడుగు.",
+      "It needs specialist assessment — typically a high-resolution CT scan and detailed lung function testing — because the different types are managed very differently and some are treatable.":
+        "దీనికి నిపుణుల పరిశీలన అవసరం — సాధారణంగా హై-రిజల్యూషన్ సీటీ స్కాన్, వివరమైన ఊపిరితిత్తుల పనితీరు పరీక్షలు — ఎందుకంటే వేర్వేరు రకాలకు చికిత్స చాలా వేరుగా ఉంటుంది, కొన్నింటికి చికిత్స ఉంది.",
+      "Checking is quick and usually reassuring — a chest X-ray, and a CT scan if anything needs a closer look. Finding something early is the entire reason the threshold for looking is set low.":
+        "పరీక్ష త్వరగా అవుతుంది, సాధారణంగా ధైర్యాన్నిస్తుంది — ఛాతీ ఎక్స్-రే, ఇంకా దగ్గరగా చూడాల్సి వస్తే సీటీ స్కాన్. ముందుగానే గుర్తించడమే పరీక్ష చేయించే హద్దును తక్కువగా ఉంచడానికి కారణం.",
+      "It takes a few minutes, needs no needles, and is repeated a couple of times to get a reliable reading. You may be asked to do it again after an inhaler, to see how much the airways open up.":
+        "దీనికి కొన్ని నిమిషాలు పడుతుంది, సూదులు అవసరం లేదు, నమ్మదగిన కొలత కోసం రెండు మూడుసార్లు చేస్తారు. శ్వాసనాళాలు ఎంత తెరుచుకుంటాయో చూడటానికి ఇన్‌హేలర్ తరువాత మళ్లీ చేయమని అడగవచ్చు.",
+      "Signs that a child needs to be seen the same day: breathing fast or with obvious effort, the skin pulling in between or under the ribs, being too breathless to feed or speak, or drowsiness.":
+        "పిల్లలను అదే రోజు వైద్యులకు చూపించాల్సిన సూచనలు: వేగంగా లేదా స్పష్టంగా కష్టపడి ఊపిరి తీసుకోవడం, పక్కటెముకల మధ్య లేదా కింద చర్మం లోపలికి లాగడం, పాలు తాగలేనంత లేదా మాట్లాడలేనంత ఊపిరి ఇబ్బంది, లేదా నిద్రమత్తు.",
+      "Most coughs that start in the last week or two come from a viral infection, and they settle on their own — though the cough itself can hang around for a while after everything else has gone.":
+        "గత వారం రెండు వారాల్లో మొదలైన చాలా దగ్గులు వైరల్ ఇన్ఫెక్షన్ వల్ల వస్తాయి, అవి వాటంతట అవే తగ్గుతాయి — అయితే మిగతా లక్షణాలు పోయిన తరువాత కూడా దగ్గు కొంతకాలం ఉండవచ్చు.",
+      "Nothing you've described so far points to something that needs urgent attention. Keep an eye on how it changes over the next week — if it isn't settling, or anything new starts, that changes the answer.":
+        "మీరు ఇప్పటివరకు చెప్పిన దేనిలోనూ వెంటనే చూడాల్సిన సూచన లేదు. వచ్చే వారంలో ఇది ఎలా మారుతుందో గమనించండి — తగ్గకపోతే, లేదా కొత్తగా ఏదైనా మొదలైతే, సమాధానం మారుతుంది.",
+      "Spirometry means blowing as hard and as long as you can into a machine that measures how much air you move and how fast. It is the test that separates asthma from COPD rather than guessing between them.":
+        "స్పైరోమెట్రీ అంటే — మీరు ఎంత గాలిని ఎంత వేగంగా కదిలిస్తారో కొలిచే యంత్రంలోకి వీలైనంత గట్టిగా, వీలైనంత సేపు ఊదడం. ఆస్తమాను సీఓపీడీ నుండి ఊహించకుండా వేరు చేసే పరీక్ష ఇదే.",
+      "If it's easier, I can ask the Yashoda team to call you. Tap \"Ask Yashoda to call me\" below and give me your name and number, and I'll pass it straight to them. Nothing else from our conversation goes with it.":
+        "మీకు సులభమైతే, యశోద బృందాన్ని మీకు కాల్ చేయమని నేను అడగగలను. కింద \"నాకు కాల్ చేయమని యశోదను అడగండి\" నొక్కి, మీ పేరు, ఫోన్ నంబర్ ఇవ్వండి — నేను నేరుగా వారికి అందిస్తాను. మన సంభాషణలోని మరేదీ దానితో వెళ్లదు.",
+      "What matters is the trend. A cough that is slowly easing week by week is usually behaving normally. A cough that is getting worse, or that comes with fever and breathlessness, is worth having looked at sooner.":
+        "ముఖ్యమైనది దాని గమనం. వారం వారం నెమ్మదిగా తగ్గుతున్న దగ్గు సాధారణంగా మామూలుగానే ఉంటుంది. ఎక్కువవుతున్న దగ్గు, లేదా జ్వరం, ఊపిరి ఇబ్బందితో వచ్చే దగ్గును త్వరగా పరీక్షించుకోవడం మంచిది.",
+      "A wheeze is the whistling sound air makes when it squeezes through airways that have narrowed. Sometimes the small airways inside the lungs tighten, which can make breathing feel difficult or cause that whistle.":
+        "ఇరుకైన శ్వాసనాళాల గుండా గాలి వెళ్లేటప్పుడు వచ్చే విజిల్ లాంటి శబ్దమే పిల్లికూత. కొన్నిసార్లు ఊపిరితిత్తుల లోపలి చిన్న నాళాలు బిగుసుకుంటాయి, దీనివల్ల శ్వాస కష్టంగా అనిపించవచ్చు లేదా ఆ శబ్దం రావచ్చు.",
+      "It matters more than it looks. Untreated nasal allergy makes asthma harder to control, and the drip down the back of the throat is a common reason a cough will not settle. Treating the nose often quietens the chest.":
+        "ఇది కనిపించే దానికంటే ముఖ్యం. చికిత్స చేయని ముక్కు అలర్జీ ఆస్తమాను నియంత్రించడం కష్టం చేస్తుంది, గొంతు వెనుక భాగంలోకి కారడం దగ్గు తగ్గకపోవడానికి సాధారణ కారణం. ముక్కుకు చికిత్స చేస్తే తరచుగా ఛాతీ కూడా శాంతిస్తుంది.",
+      "Tuberculosis is still common in India, and it is treatable — but it needs to be found. The pattern to know is a cough lasting two weeks or more, often with evening fevers, night sweats, weight loss or loss of appetite.":
+        "క్షయ (టీబీ) భారతదేశంలో ఇప్పటికీ సాధారణం, దీనికి చికిత్స ఉంది — కానీ ముందుగా గుర్తించాలి. తెలుసుకోవలసిన తీరు: రెండు వారాలు లేదా అంతకంటే ఎక్కువ కాలం ఉన్న దగ్గు, తరచుగా సాయంత్రం జ్వరం, రాత్రి చెమటలు, బరువు తగ్గడం లేదా ఆకలి లేకపోవడంతో పాటు.",
+      "A wheeze that comes and goes — worse at night or early morning, worse around dust, smoke, cold air or exercise — is a pattern worth showing a doctor, because it responds well to treatment once it is properly identified.":
+        "వచ్చి పోయే పిల్లికూత — రాత్రి లేదా తెల్లవారుజామున ఎక్కువ, దుమ్ము, పొగ, చల్లని గాలి లేదా వ్యాయామంతో ఎక్కువ — ఇది వైద్యులకు చూపించదగిన తీరు, ఎందుకంటే సరిగా గుర్తించిన తరువాత దీనికి చికిత్స బాగా పనిచేస్తుంది.",
+      "Polluted air makes existing lung conditions flare and irritates healthy airways too. In Indian cities the main exposures are traffic and construction dust outdoors, and cooking smoke, incense and mosquito coils indoors.":
+        "కలుషిత గాలి ఉన్న ఊపిరితిత్తుల సమస్యలను తీవ్రం చేస్తుంది, ఆరోగ్యమైన శ్వాసనాళాలను కూడా చికాకు పెడుతుంది. భారతీయ నగరాల్లో ప్రధాన కారణాలు — బయట ట్రాఫిక్, నిర్మాణ దుమ్ము; ఇంట్లో వంట పొగ, అగరుబత్తులు, దోమల చుట్టలు.",
+      "Asthma means the airways are inflamed and easily irritated, so they narrow in response to triggers. It typically shows up as wheeze, cough, chest tightness or breathlessness that varies — worse at some times, gone at others.":
+        "ఆస్తమా అంటే శ్వాసనాళాలు వాపుతో, తేలికగా చికాకు పడేలా ఉండటం — దాంతో ట్రిగ్గర్‌లకు స్పందించి అవి ఇరుకవుతాయి. ఇది సాధారణంగా పిల్లికూత, దగ్గు, ఛాతీ బిగుతు లేదా మారుతూ ఉండే ఊపిరి ఇబ్బందిగా కనిపిస్తుంది — కొన్ని సమయాల్లో ఎక్కువ, కొన్నిసార్లు అసలు ఉండదు.",
+      "Unlike asthma, the narrowing does not fully reverse — but that does not mean nothing can be done. Stopping smoking, the right inhalers, vaccination and pulmonary rehabilitation all measurably change how well someone lives with it.":
+        "ఆస్తమాలా కాకుండా, ఈ ఇరుకుదల పూర్తిగా తిరిగి సరికాదు — కానీ ఏమీ చేయలేమని కాదు. పొగ మానేయడం, సరైన ఇన్‌హేలర్లు, టీకాలు, పల్మనరీ రిహాబిలిటేషన్ — ఇవన్నీ దీనితో జీవించే తీరును స్పష్టంగా మెరుగుపరుస్తాయి.",
+      "COPD is long-term narrowing of the airways, most often from years of smoking, and in India also from cooking smoke and occupational dust. It usually shows as breathlessness that has built up over years, a cough on most days, and phlegm.":
+        "సీఓపీడీ అంటే శ్వాసనాళాలు దీర్ఘకాలంగా ఇరుకవడం — చాలావరకు ఏళ్ల తరబడి పొగ తాగడం వల్ల, భారతదేశంలో వంట పొగ, పని ప్రదేశపు దుమ్ము వల్ల కూడా. ఇది సాధారణంగా ఏళ్ల తరబడి పెరిగిన ఊపిరి ఇబ్బంది, చాలా రోజులు దగ్గు, కఫంగా కనిపిస్తుంది.",
+      "Two things change asthma outcomes more than anything else: taking the preventer inhaler every day even when you feel fine, and using the inhaler correctly. A large share of people get less than half their dose because of technique alone.":
+        "ఆస్తమా ఫలితాలను మిగతా వేటికంటే ఎక్కువగా మార్చేవి రెండు: బాగానే ఉన్నామనిపించినా ప్రతిరోజూ ప్రివెంటర్ ఇన్‌హేలర్ వాడటం, ఇన్‌హేలర్‌ను సరైన పద్ధతిలో వాడటం. కేవలం పద్ధతి సరిగా లేకపోవడం వల్లే చాలామందికి సగం మోతాదు కూడా అందడం లేదు.",
+      "Practical steps help more than they sound like they would: cooking on gas or electricity rather than solid fuel, ventilating while cooking, avoiding outdoor exertion on the worst days, and keeping windows shut when a road is being dug up.":
+        "ఆచరణాత్మక చర్యలు అనిపించే దానికంటే ఎక్కువ సహాయపడతాయి: కట్టెలు కాకుండా గ్యాస్ లేదా విద్యుత్‌పై వంట, వంట చేసేటప్పుడు గాలి ఆడేలా చూడటం, గాలి ఎక్కువ కలుషితమైన రోజుల్లో బయట శ్రమ తగ్గించడం, రోడ్డు తవ్వుతున్నప్పుడు కిటికీలు మూసి ఉంచడం.",
+      "Loud snoring with pauses in breathing, gasping in the night, and feeling tired through the day despite enough hours in bed is the pattern of obstructive sleep apnoea — the throat relaxing enough during sleep to block airflow, over and over.":
+        "గట్టిగా గురక, మధ్యలో శ్వాస ఆగిపోవడం, రాత్రి ఒక్కసారిగా ఊపిరి పీల్చడం, తగినంత సేపు పడుకున్నా పగలంతా అలసటగా ఉండటం — ఇది అబ్‌స్ట్రక్టివ్ స్లీప్ అప్నియా తీరు. నిద్రలో గొంతు వదులై గాలి ప్రవాహం మళ్లీ మళ్లీ ఆగిపోతుంది.",
+      "If it's easier, I can ask the Yashoda team to call you — they can usually reach you quickly. Tap \"Ask Yashoda to call me\" below and give me your name and number, and I'll pass it straight to them. Nothing else from our conversation goes with it.":
+        "మీకు సులభమైతే, యశోద బృందాన్ని మీకు కాల్ చేయమని నేను అడగగలను — వారు సాధారణంగా త్వరగా సంప్రదిస్తారు. కింద \"నాకు కాల్ చేయమని యశోదను అడగండి\" నొక్కి, మీ పేరు, ఫోన్ నంబర్ ఇవ్వండి — నేను నేరుగా వారికి అందిస్తాను. మన సంభాషణలోని మరేదీ దానితో వెళ్లదు.",
+      "Wheezing is common in young children, and many who wheeze with colds grow out of it. That said, a child who wheezes repeatedly, coughs at night, or gets breathless with play deserves a proper assessment rather than repeated courses of cough syrup.":
+        "చిన్న పిల్లల్లో పిల్లికూత సాధారణం, జలుబుతో పిల్లికూత వచ్చే చాలామందికి పెద్దయ్యాక తగ్గిపోతుంది. అయితే మళ్లీ మళ్లీ పిల్లికూత వచ్చే, రాత్రి దగ్గే, ఆడుకునేటప్పుడు ఊపిరి ఆడని పిల్లలకు దగ్గు సిరప్‌లు మళ్లీ మళ్లీ ఇవ్వకుండా సరైన పరీక్ష చేయించాలి.",
+      "An inhaler only works if the medicine reaches the small airways, and technique decides whether it does. The commonest problems are breathing in too fast with a metered-dose inhaler, not holding the breath afterwards, and not using a spacer when one would help.":
+        "మందు చిన్న శ్వాసనాళాలకు చేరితేనే ఇన్‌హేలర్ పనిచేస్తుంది, అది జరుగుతుందా లేదా అనేది వాడే పద్ధతి నిర్ణయిస్తుంది. సాధారణ తప్పులు: మీటర్డ్-డోస్ ఇన్‌హేలర్‌తో చాలా వేగంగా ఊపిరి పీల్చడం, తరువాత ఊపిరి బిగపట్టకపోవడం, స్పేసర్ ఉపయోగపడేచోట దానిని వాడకపోవడం.",
+      "Most persistent coughs are not cancer. But a few features move a cough from \"watch it\" to \"check it now\": coughing up blood, weight loss without trying, a cough that has changed in someone who smokes or used to, or a hoarse voice that lasts beyond three weeks.":
+        "చాలా నిరంతర దగ్గులు క్యాన్సర్ కాదు. కానీ కొన్ని లక్షణాలు దగ్గును \"గమనించండి\" నుండి \"ఇప్పుడే పరీక్షించండి\" స్థాయికి మారుస్తాయి: దగ్గులో రక్తం, ప్రయత్నించకుండా బరువు తగ్గడం, పొగ తాగే లేదా గతంలో తాగిన వ్యక్తిలో దగ్గు మారడం, లేదా మూడు వారాలకు మించి ఉన్న గొంతు బొంగురు.",
+      "A fever with a cough, phlegm and breathlessness can mean an infection has reached the lung. That combination is worth being seen for promptly rather than waiting it out, particularly for anyone older, pregnant, or living with a long-term lung or heart condition.":
+        "జ్వరంతో పాటు దగ్గు, కఫం, ఊపిరి ఇబ్బంది ఉంటే ఇన్ఫెక్షన్ ఊపిరితిత్తులకు చేరిందని అర్థం కావచ్చు. ఈ కలయికను ఎదురుచూడకుండా వెంటనే చూపించుకోవడం మంచిది — ముఖ్యంగా వృద్ధులు, గర్భిణులు, లేదా దీర్ఘకాలిక ఊపిరితిత్తుల, గుండె సమస్య ఉన్నవారు.",
+      "I'm really glad you told me, and I don't want you to be alone with this. I'm not the right kind of help for it — please talk to someone now: Tele-MANAS on 14416 is free, 24 hours, and staffed by people trained for exactly this. If you are in immediate danger, call 112.":
+        "మీరు నాకు చెప్పినందుకు నిజంగా సంతోషం, ఈ విషయంలో మిమ్మల్ని ఒంటరిగా వదిలేయాలని నేను అనుకోవడం లేదు. దీనికి సరైన సహాయం నేను కాదు — దయచేసి ఇప్పుడే ఎవరితోనైనా మాట్లాడండి: టెలి-మానస్ 14416 ఉచితం, 24 గంటలూ అందుబాటులో ఉంటుంది, ఇలాంటి వాటికే శిక్షణ పొందినవారు ఉంటారు. మీకు తక్షణ ప్రమాదం ఉంటే 112కి కాల్ చేయండి.",
+      "Interstitial lung disease is a group of conditions in which the tissue between the air sacs becomes inflamed or scarred, making the lungs stiffer and less able to move oxygen across. The usual story is breathlessness building over months and a dry cough that will not go.":
+        "ఇంటర్‌స్టీషియల్ లంగ్ డిసీజ్ అంటే గాలి తిత్తుల మధ్య కణజాలం వాపు లేదా మచ్చలకు గురయ్యే వ్యాధుల సముదాయం — దీనివల్ల ఊపిరితిత్తులు గట్టిపడి ఆక్సిజన్‌ను తరలించే శక్తి తగ్గుతుంది. సాధారణ తీరు: నెలల తరబడి పెరిగే ఊపిరి ఇబ్బంది, తగ్గని పొడి దగ్గు.",
+      "Stopping smoking is the single change with the largest effect on lung health, at any age and after any number of years. Carbon monoxide clears from the blood within a day, the airways start to relax within a few days, and lung function measurably improves over the following months.":
+        "పొగ మానేయడమే ఊపిరితిత్తుల ఆరోగ్యంపై అత్యధిక ప్రభావం చూపే ఒకే ఒక మార్పు — ఏ వయసులోనైనా, ఎన్ని సంవత్సరాల తరువాతైనా. కార్బన్ మోనాక్సైడ్ ఒక్క రోజులో రక్తం నుండి తొలగిపోతుంది, కొన్ని రోజుల్లో శ్వాసనాళాలు వదులవడం మొదలవుతుంది, తరువాతి నెలల్లో ఊపిరితిత్తుల పనితీరు స్పష్టంగా మెరుగవుతుంది.",
+      "A persistent cough has several common causes: asthma, post-nasal drip from allergies, acid reflux, a lingering infection, the after-effects of smoking, and in some cases tuberculosis, which is still common in India. Less often it points to something in the lung that needs finding early.":
+        "నిరంతర దగ్గుకు అనేక సాధారణ కారణాలు ఉన్నాయి: ఆస్తమా, అలర్జీల వల్ల ముక్కు నుండి గొంతులోకి కారడం, ఆమ్ల రిఫ్లక్స్, తగ్గని ఇన్ఫెక్షన్, పొగ అలవాటు ప్రభావాలు, కొన్ని సందర్భాల్లో క్షయ (టీబీ) — ఇది భారతదేశంలో ఇప్పటికీ సాధారణం. అరుదుగా ఇది ఊపిరితిత్తులలో ముందుగా కనుగొనవలసిన దానిని సూచిస్తుంది.",
+      "The two questions that matter most are when it happens and how fast it changed. Breathlessness that only comes on when you climb stairs or walk uphill, and has crept up over months, points in a different direction from breathlessness that arrived suddenly or happens while you are sitting still.":
+        "అత్యంత ముఖ్యమైన రెండు ప్రశ్నలు — ఇది ఎప్పుడు వస్తుంది, ఎంత వేగంగా మారింది. మెట్లు ఎక్కినప్పుడు లేదా ఎత్తుకు నడిచినప్పుడు మాత్రమే వచ్చి, నెలల తరబడి నెమ్మదిగా పెరిగిన ఊపిరి ఇబ్బంది — అకస్మాత్తుగా వచ్చిన లేదా కూర్చున్నప్పుడే వచ్చే ఊపిరి ఇబ్బంది కంటే వేరే దిశను సూచిస్తుంది.",
+      "Well-controlled asthma should mean almost no daytime symptoms, no waking at night because of it, and rarely needing a reliever inhaler. Needing the reliever several times a week is the clearest sign the treatment needs revisiting — it is not a sign of failure, and it usually has a straightforward fix.":
+        "బాగా నియంత్రణలో ఉన్న ఆస్తమా అంటే — పగటిపూట దాదాపు లక్షణాలు ఉండవు, రాత్రి దానివల్ల మెలకువ రాదు, రిలీవర్ ఇన్‌హేలర్ అరుదుగా మాత్రమే అవసరమవుతుంది. వారానికి చాలాసార్లు రిలీవర్ అవసరమవడం అంటే చికిత్సను మళ్లీ చూడాల్సి ఉందని స్పష్టమైన సూచన — ఇది వైఫల్యం కాదు, దీనికి సాధారణంగా సులభమైన పరిష్కారం ఉంటుంది.",
       /* navigation */
       'Doctors': 'వైద్యులు', 'Knowledge Hub': 'నాలెడ్జ్ హబ్',
       'Book': 'బుక్ చేయండి',

@@ -523,6 +523,49 @@ describe('Uppi speaks the reader\'s language, in a young man\'s voice');
   });
   eq(covered, 5, 'his offers, questions, actions and the emergency line are all translated');
 
+  /*
+   * Drill every option: real conversations, end to end, in Telugu.
+   *
+   * The first pass translated his questions and stopped there, and the result
+   * looked bilingual — a Telugu question above English chips, an English
+   * verdict and an English Book button. Counting the leftovers is the only
+   * check that catches that, because each individual piece looks fine.
+   *
+   * ACT and CAT are excluded on purpose: they are validated instruments and
+   * CLAUDE.md forbids translating them.
+   */
+  const flows = [
+    ["I've been coughing", 'Three weeks or more', "It's dry", 'Worse at night', 'I smoke'],
+    ['I hear a wheeze', 'About two weeks', 'Yes, this has happened before', 'Dust'],
+    ['I cough up blood sometimes'],
+    ['breathless even sitting still', 'Even when I sit still', 'I struggle around the house'],
+    ['my child wheezes at night', 'Under 5', 'A few days']
+  ];
+  await page.goto(base + '/?lang=te', { waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.__uppi, null, { timeout: 25000 });
+  await page.waitForTimeout(4200);
+  await page.evaluate(() => { window.__uppi.dismissBubble(); window.__uppi.openPanel(); });
+  await page.waitForTimeout(500);
+
+  const leftovers = [];
+  for (const flow of flows) {
+    await page.evaluate(() => window.__uppi.clearConversation && window.__uppi.clearConversation());
+    await page.waitForTimeout(200);
+    for (const msg of flow) {
+      await page.evaluate((m) => window.__uppi.submit(m, 'test'), msg);
+      await page.waitForTimeout(1100);
+    }
+    const seen = await page.evaluate(() => [...document.querySelectorAll(
+      '.uppi-msg--uppi p, .uppi-msg--uppi li, .uppi-chip, .uppi-act span, .uppi-alert-head span, .uppi-band')]
+      .map((e) => (e.textContent || '').trim()).filter(Boolean));
+    for (const t of seen) {
+      if (!/[\u0C00-\u0C7F]/.test(t) && /[a-zA-Z]{4}/.test(t) && !/\((ACT|CAT)\)/.test(t)) leftovers.push(t);
+    }
+  }
+  eq([...new Set(leftovers)].length, 0,
+    'nothing he shows a Telugu reader is left in English'
+    + (leftovers.length ? ' — ' + [...new Set(leftovers)].slice(0, 3).join(' | ') : ''));
+
   /* and a mid-session switch is picked up without a reload */
   const back = await page.evaluate(async () => {
     document.documentElement.lang = 'en';
