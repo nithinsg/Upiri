@@ -252,6 +252,31 @@ for a warm young man. Pitch was 1.04, which lifted every voice towards boyish
 and undid the point of picking a male one. `SpeechInput.setLanguage` moves the
 recogniser too, so a Telugu speaker can use the microphone in Telugu.
 
+**Three things make the voice arrive WITH the reply rather than seconds after
+it.** All three were live bugs, and all three were silent:
+
+1. **Never hand the engine a cached `SpeechSynthesisVoice`.** Chrome loads the
+   list asynchronously and repopulates it on `voiceschanged`; an object from an
+   earlier list throws `Failed to convert value to 'SpeechSynthesisVoice'` when
+   assigned to `utterance.voice` — *before* `speak()` is reached. Nothing is
+   spoken and nothing errors visibly. `_liveVoice()` re-resolves it by name and
+   language, and the assignment is wrapped so a failure falls back to the
+   language alone rather than to silence.
+2. **The hosted-voice probe must not gate the browser voice.** `_serverReady`
+   is a GET to a serverless function; awaiting it outright meant a cold start
+   held the greeting with the text already on screen. It is raced against
+   300ms — an already-resolved probe costs nothing.
+3. **Prefer a LOCAL voice over a better-sounding network one.** Chrome's
+   "Google …" and "… network" voices fetch their audio before speaking.
+   `scoreVoice` gives `localService` 25 against `GOOD_ENGINE`'s 12, so local
+   wins; gender still outranks both.
+
+Also: `tts.speak()` is called with a `.catch()`, and the whole utterance setup
+is guarded. A rejected speak used to leave `isTalking` true and the Stop button
+showing until the watchdog expired **four to twenty seconds later** — silence
+with the mouth still moving. `pages.test.mjs` measures the gap between the
+reply landing and `speechSynthesis.speak()` firing.
+
 **The Telugu for Uppi's lines is in `I18N.te`, flagged `TODO(yashoda)`: it has
 not been reviewed by a Telugu-speaking clinician.** ACT, CAT and mMRC stay in
 English — they are validated instruments, and `pages.test.mjs` excludes them
@@ -384,7 +409,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 487 assertions across five suites (~15min)
+npm test              # 492 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -426,7 +451,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (487 assertions)
+2. `npm test` — must report `all suites passed` (492 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:

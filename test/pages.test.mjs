@@ -580,6 +580,102 @@ describe('Uppi speaks the reader\'s language, in a young man\'s voice');
   await ctx.close();
 }
 
+/* ------------------------------------------------------ voice, and its timing */
+
+describe('The voice starts with the text, not seconds after it');
+
+{
+  /*
+   * The desktop symptom was "text instantly, voice much later". Three separate
+   * causes, each of which is pinned below:
+   *
+   *   1. `utterance.voice = <stale object>` THREW before speechSynthesis.speak()
+   *      was reached. Chrome repopulates its voice list asynchronously and an
+   *      object from the previous list is rejected — so nothing was spoken, and
+   *      nothing reported an error. Recovery came only from the watchdog, four
+   *      to twenty seconds later.
+   *   2. the hosted-voice probe (a GET to a serverless function) was awaited
+   *      outright, so a cold start held the greeting with the text on screen.
+   *   3. voice scoring PREFERRED network-backed voices, which fetch their audio
+   *      before saying a word.
+   */
+  const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await ctx2.addInitScript(() => {
+    /* plain objects, exactly like the stale ones Chrome rejects */
+    const V = [
+      { name: 'Google UK English Male', lang: 'en-GB', localService: false },
+      { name: 'Microsoft Ravi - English (India)', lang: 'en-IN', localService: true },
+      { name: 'Microsoft Heera - English (India)', lang: 'en-IN', localService: true }
+    ];
+    const ss = window.speechSynthesis;
+    ss.getVoices = () => V;
+    ss.cancel = () => {}; ss.resume = () => {}; ss.pause = () => {};
+    window.__spokeAt = null;
+    window.__spokeCount = 0;
+    ss.speak = (u) => {
+      window.__spokeAt = performance.now();
+      window.__spokeCount++;
+      setTimeout(() => u.onend && u.onend({}), 150);
+    };
+  });
+  const page2 = await ctx2.newPage();
+  await page2.route('**/*', (r) => (r.request().url().startsWith(base) ? r.continue() : r.abort()));
+  await page2.goto(base + '/', { waitUntil: 'load' });
+  await page2.waitForFunction(() => !!window.__uppi, null, { timeout: 25000 });
+  await page2.waitForTimeout(4500);
+
+  eq(await page2.evaluate(() => window.__uppi.tts.voice && window.__uppi.tts.voice.name),
+    'Microsoft Ravi - English (India)',
+    'a local male voice is chosen over a network one that merely sounds better');
+
+  ok(await page2.evaluate(() => window.__spokeCount > 0),
+    'the greeting is actually spoken — a voice object it cannot use is not a reason to say nothing');
+
+  /* a hosted-voice probe that never answers must not hold the browser voice */
+  const hung = await page2.evaluate(async () => {
+    const u = window.__uppi;
+    u.tts._serverReady = new Promise(() => {});
+    u.tts.mode = 'browser';
+    window.__spokeAt = null;
+    const t0 = performance.now();
+    u.tts.speak('A reply that should be heard promptly.', {}).catch(() => {});
+    for (let i = 0; i < 300; i++) {
+      if (window.__spokeAt !== null) return Math.round(window.__spokeAt - t0);
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    return -1;
+  });
+  ok(hung >= 0 && hung < 1200,
+    'a cold-starting speech endpoint cannot stall the voice (' + hung + 'ms)');
+
+  /* and end to end: the voice starts with the reply, not seconds behind it */
+  await page2.evaluate(() => { window.__uppi.dismissBubble(); window.__uppi.openPanel(); });
+  await page2.waitForTimeout(400);
+  const gaps = [];
+  for (const msg of ["I'm having trouble breathing", 'About two weeks', "It's getting worse"]) {
+    const gap = await page2.evaluate(async (m) => {
+      const u = window.__uppi;
+      window.__spokeAt = null;
+      let textAt = null;
+      const before = document.querySelectorAll('.uppi-msg--uppi').length;
+      u.submit(m, 'test');
+      for (let i = 0; i < 600; i++) {
+        if (textAt === null && document.querySelectorAll('.uppi-msg--uppi').length > before) textAt = performance.now();
+        if (textAt !== null && window.__spokeAt !== null) break;
+        await new Promise((r) => setTimeout(r, 10));
+      }
+      return (textAt !== null && window.__spokeAt !== null) ? Math.round(window.__spokeAt - textAt) : null;
+    }, msg);
+    gaps.push(gap);
+    await page2.waitForTimeout(300);
+  }
+  eq(gaps.filter((g) => g === null).length, 0, 'every reply is spoken, not just written');
+  ok(gaps.every((g) => g !== null && g < 600),
+    'the voice starts with the reply rather than seconds later (' + gaps.join('ms, ') + 'ms)');
+
+  await ctx2.close();
+}
+
 eq(errors.length, 0, 'no console or page errors anywhere' + (errors.length ? ': ' + errors.join(' | ') : ''));
 
 await browser.close();

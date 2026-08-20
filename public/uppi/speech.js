@@ -70,7 +70,19 @@ function scoreVoice(v, locale, wantMale) {
   if (wantMale && MALE_NAME.test(name)) s += 30;
   if (wantMale && FEMALE_NAME.test(name)) s -= 20;
   if (GOOD_ENGINE.test(name)) s += 12;
-  if (v.localService) s += 3;              /* no network round trip on a slow line */
+  /*
+   * A local voice outranks a nicer-sounding remote one.
+   *
+   * Chrome's best desktop voices — the "Google …" and "… network" ones — fetch
+   * their audio from a server before a word is heard. That is the gap between
+   * the reply appearing instantly and Uppi starting to talk a second or two
+   * later, and it was being actively PREFERRED here: `GOOD_ENGINE` scored 12
+   * while `localService` scored 3, so the remote voice won every time. For a
+   * companion that answers you, starting promptly matters more than timbre, so
+   * local now outweighs engine quality. Gender still outranks both, since that
+   * is a character decision rather than a latency one.
+   */
+  if (v.localService) s += 25;
   return s;
 }
 
@@ -95,6 +107,7 @@ export class TextToSpeech {
     this.schedule = null;
     this._scheduleAt = 0;
     this._unlocked = false;
+    this._keepAlive = null;
     this.supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
     if (this.supported) this._loadVoices();
     /* Asked once, in the background, so the first thing Uppi says is not
@@ -148,6 +161,23 @@ export class TextToSpeech {
    * Called whenever the reader changes language, so the change is immediate
    * rather than waiting for a reload.
    */
+  /**
+   * The live voice object matching the one we picked, or null.
+   *
+   * Never hand the engine a voice object it did not just give us: see the note
+   * in `_speakBrowser` for what a stale one costs.
+   */
+  _liveVoice() {
+    if (!this.voice || !this.supported) return null;
+    try {
+      const voices = window.speechSynthesis.getVoices() || [];
+      if (voices.indexOf(this.voice) !== -1) return this.voice;
+      const same = voices.find((v) => v.name === this.voice.name && v.lang === this.voice.lang);
+      if (same) { this.voice = same; return same; }
+      return null;
+    } catch { return null; }
+  }
+
   setLanguage(code) {
     const next = String(code || 'en').slice(0, 2).toLowerCase();
     if (next === this.lang) return this.spokenLang;
@@ -193,13 +223,45 @@ export class TextToSpeech {
    */
   async speak(text, opts) {
     const o = opts || {};
+    /* Was anything actually in flight? `cancel()` on an idle engine is free;
+       on a busy one it needs the settling tick below. */
+    let busy = false;
+    try { busy = this.supported && (window.speechSynthesis.speaking || window.speechSynthesis.pending); }
+    catch { busy = false; }
     this.stop();
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
     if (!clean) { if (o.onEnd) o.onEnd(); return; }
 
-    /* A hosted voice, when one is configured, gives real amplitude to animate
-       the mouth against. */
-    if (o.server !== false && this.mode !== 'browser-only' && await this._serverReady) {
+    /*
+     * Let `cancel()` land before speaking again.
+     *
+     * Chrome's `cancel()` is asynchronous inside the engine even though it
+     * returns immediately. Calling `speak()` in the same task after it queues
+     * the new utterance behind a teardown that has not finished, and the voice
+     * arrives seconds after the text — or never. One macrotask is enough for
+     * the engine to settle, and it is only paid when something was actually
+     * speaking.
+     */
+    if (busy) await new Promise((r) => setTimeout(r, 0));
+
+    /*
+     * The hosted-voice probe must never delay the browser voice.
+     *
+     * `_serverReady` is a GET to a serverless function issued once at
+     * construction. On a cold start that can take seconds, and awaiting it
+     * outright meant the FIRST thing Uppi says — the greeting — waited for it
+     * with the text already on screen. Race it: if the probe has not answered
+     * promptly, use the browser voice now and let the hosted one take over on
+     * the next utterance.
+     */
+    let hosted = false;
+    if (o.server !== false && this.mode !== 'browser-only') {
+      hosted = await Promise.race([
+        Promise.resolve(this._serverReady).catch(() => false),
+        new Promise((r) => setTimeout(() => r(false), 300))
+      ]);
+    }
+    if (hosted) {
       const ok = await this._speakServer(clean, o);
       if (ok) return;
     }
@@ -274,8 +336,29 @@ export class TextToSpeech {
     if (!this.supported) { if (o.onEnd) o.onEnd(); return Promise.resolve(); }
     return new Promise((resolve) => {
       const u = new SpeechSynthesisUtterance(text);
-      if (this.voice) { u.voice = this.voice; u.lang = this.voice.lang; }
-      else u.lang = this.lang === 'en' ? 'en-IN' : this.lang + '-IN';
+      /*
+       * A voice we cannot set is not a reason to say nothing.
+       *
+       * Chrome hands out `SpeechSynthesisVoice` objects that go stale — the
+       * list loads asynchronously and is repopulated on `voiceschanged` — and
+       * assigning one from an earlier list throws "Failed to convert value to
+       * 'SpeechSynthesisVoice'". That throw happened BEFORE
+       * `speechSynthesis.speak()` was ever reached, so nothing was spoken and
+       * nothing reported an error: the reply sat on screen in silence until the
+       * watchdog gave up, four to twenty seconds later. That is the "text now,
+       * voice much later" the desktop was showing.
+       *
+       * So: look the voice up again by identity, and if it still will not take,
+       * fall back to the language alone and let the engine pick. A default
+       * voice reading the reply beats silence.
+       */
+      const live = this._liveVoice();
+      try {
+        if (live) { u.voice = live; u.lang = live.lang; }
+        else u.lang = this.lang === 'en' ? 'en-IN' : this.lang + '-IN';
+      } catch {
+        u.lang = this.lang === 'en' ? 'en-IN' : this.lang + '-IN';
+      }
       /*
        * §16: a warm young man, around twenty, not a cartoon and not a newsreader.
        *
@@ -295,6 +378,7 @@ export class TextToSpeech {
       /* the character currently being spoken drives the viseme */
       u.onboundary = (e) => { this._char = text.charAt(e.charIndex) || null; };
       const done = () => {
+        this._stopKeepAlive();
         if (this.utterance === u) { this.utterance = null; this._char = null; }
         if (o.onEnd) o.onEnd();
         resolve();
@@ -302,12 +386,48 @@ export class TextToSpeech {
       u.onend = done;
       u.onerror = done;
 
-      try { window.speechSynthesis.speak(u); }
-      catch { done(); }
+      try {
+        /*
+         * An engine left paused by a previous cancel never starts the next
+         * utterance — it queues it and waits, which is the "text now, voice
+         * much later" the desktop was showing.
+         */
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        window.speechSynthesis.speak(u);
+        this._startKeepAlive();
+      } catch { done(); }
     });
   }
 
+  /*
+   * Chrome stops speaking after about fifteen seconds and waits.
+   *
+   * It is a long-standing engine bug, not a spec behaviour: a single utterance
+   * longer than roughly fifteen seconds is silently suspended part-way. Uppi's
+   * replies are several sentences, so this bites on ordinary answers — the
+   * voice starts, then trails off while the text sits there complete. Pumping
+   * `resume()` on a timer keeps the queue moving. It is a no-op on engines
+   * that do not need it.
+   */
+  _startKeepAlive() {
+    this._stopKeepAlive();
+    this._keepAlive = setInterval(() => {
+      try {
+        const ss = window.speechSynthesis;
+        if (!ss.speaking) { this._stopKeepAlive(); return; }
+        if (ss.paused) ss.resume();
+        else { ss.pause(); ss.resume(); }
+      } catch { this._stopKeepAlive(); }
+    }, 5000);
+  }
+
+  _stopKeepAlive() {
+    if (this._keepAlive) clearInterval(this._keepAlive);
+    this._keepAlive = null;
+  }
+
   stop() {
+    this._stopKeepAlive();
     try { if (this.supported) window.speechSynthesis.cancel(); } catch { /* ignore */ }
     if (this.audio) { try { this.audio.pause(); } catch { /* ignore */ } this.audio = null; }
     this.utterance = null;
