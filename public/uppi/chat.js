@@ -1200,7 +1200,15 @@ export class UppiChat {
     const watchdog = setTimeout(finish, Math.min(90_000, 4_000 + (words / 2.3) * 1000));
 
     this.motion.onSpeechEnded = finish;
-    this.tts.speak(text, { onEnd: finish });
+    /*
+     * A rejected speak() must end the turn NOW, not on the watchdog.
+     *
+     * Without this catch, anything that threw on the way to the voice left the
+     * promise rejected, `onEnd` unfired, `isTalking` stuck true and the Stop
+     * button showing — with recovery only when the watchdog expired seconds
+     * later. Silence is bad; silence plus a mouth still moving is worse.
+     */
+    this.tts.speak(text, { onEnd: finish }).catch(() => finish());
   }
 
   stopSpeaking() {
