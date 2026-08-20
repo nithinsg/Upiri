@@ -355,6 +355,42 @@ one rule: **a card that opens nothing is worse than no card.**
 - **Videos carry `also`**, the other topics a video belongs on, so one video
   serves two subjects without appearing twice in the hub's own list.
 
+### Who performs a procedure — the specialist mapping
+
+Each procedure page carries a rail of the consultants who perform it, and each
+condition page carries the same rail for that condition. Both are governed by
+one rule: **a consultant may only be credited with a capability their own
+Yashoda profile states.**
+
+- **`DOCTORS[].procs` is derived from that doctor's `expertise` / `services` /
+  `about` text**, which is transcribed from their Yashoda profile. It is a
+  normalised vocabulary, not a quotation — Yugaveer Goud's profile says "Sleep
+  Medicine" and Hari Kishan's says "Advanced Endoscopy Services" — which is why
+  the card says *From their Yashoda profile* and links straight to it.
+- **`pages.test.mjs` pins the derivation in BOTH directions**, with a regex per
+  capability saying what counts as evidence in the profiles' own words. Forwards
+  it catches a tag nobody wrote down (one consultant carried *Airway stenting*
+  on the strength of nothing at all). Backwards it catches the bug that actually
+  hid people: the department's Director of Interventional Pulmonology was
+  missing `Bronchoscopy` and so was absent from the busiest procedure page in
+  the site, and two consultants whose profiles say "Advanced Sleep Diagnostics"
+  in as many words were missing from the sleep study.
+- **Watch the word boundary.** `/stent/` matches *persistent*, and `/ards/`
+  matches *towards*. The first of those silently passed a phantom tag through
+  the very test written to catch it.
+- **A procedure's `dp` must DISCRIMINATE.** Listing `Bronchoscopy` alongside the
+  specific tag on the nodule-biopsy and airway pages matched fourteen of fifteen
+  consultants, which is the same as not mapping at all. CPET was reached through
+  `Critical care`, so an exercise test listed every intensivist.
+- **Nothing is capped.** The block was `.slice(0, 3)` of an alphabetical array,
+  so the same three names led six of the nine pages while eleven other
+  consultants who perform the procedure went unmentioned. Order is now
+  specificity of match, then stated experience, then name.
+
+`phrase()` and `docCountLine()` exist because "6 specialists across 3 branches"
+cannot itself be a dictionary key — one entry per combination, and Telugu puts
+the branch count first anyway. Translate the FRAME, substitute afterwards.
+
 ### ECMO & the air ambulance (`/ecmo-and-air-ambulance`)
 
 Written only from Yashoda's published pages, listed in `ECMO_SRC`. The 24×7
@@ -409,7 +445,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 492 assertions across five suites (~15min)
+npm test              # 566 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -420,7 +456,7 @@ npm test conversation # one suite by name
 | `core.test.mjs` | Red flags with their negation and hypothetical guards, duration parsing, extraction including denials, every triage band, retrieval, the safety gate. |
 | `conversation.test.mjs` | The six conversations in §30 of the brief, plus the properties that must hold across all of them: no repeated question, no repeated paragraph, nothing forgotten, one question per reply. |
 | `rig.test.mjs` | The ten visemes, the digraph mapping, the schedule, and the approved palette. |
-| `pages.test.mjs` | Real Chromium: the voice is male and follows the reader's language in both directions, every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, the branch selector filters, every service chip resolves, and the whole airlift choreography. |
+| `pages.test.mjs` | Real Chromium: the voice is male and follows the reader's language in both directions, every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, **no consultant is credited with a procedure their own profile never claims and none who evidences one is left off it**, both specialist rails advance and filter by branch, every service chip resolves, and the whole airlift choreography. |
 | `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, **that his mouth is CLOSED at rest**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, **the idle and reading popups on the real clock**, **the whole call-back flow against a stub destination including what does NOT leave with it**, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
 
 `test/_server.mjs` mounts the real `api/uppi/*` handlers next to `public/`, so the
@@ -451,7 +487,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (492 assertions)
+2. `npm test` — must report `all suites passed` (566 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:
