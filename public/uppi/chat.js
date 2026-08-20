@@ -87,6 +87,120 @@ function renderText(host, text, tr) {
   }
 }
 
+
+/*
+ * The sentences Uppi assembles rather than writes, and how they read in
+ * Telugu. Each rule owns its frame; the pieces inside it go back through the
+ * dictionary, so a duration, a trigger or a combination of triage reasons is
+ * translated by the same table as everything else.
+ *
+ * Only reached when an exact dictionary lookup misses, and a rule that cannot
+ * fill itself in returns nothing so the English sentence survives intact.
+ */
+const TE_UNITS = {
+  day: 'రోజు', days: 'రోజులు', week: 'వారం', weeks: 'వారాలు',
+  month: 'నెల', months: 'నెలలు', year: 'సంవత్సరం', years: 'సంవత్సరాలు'
+};
+const teNum = (n, unit) => n + ' ' + (TE_UNITS[unit] || unit);
+const isTe = () => {
+  try { return String(document.documentElement.lang || '').slice(0, 2) === 'te'; }
+  catch { return false; }
+};
+
+export const UPPI_PATTERNS = [
+  /* the two verdicts, each wrapped around a combining list of triage reasons */
+  {
+    re: /^Because of (.+?), I think it would be worth speaking with a pulmonologist about this\. I can help you take the next step\.$/,
+    build: (m, d, reasons) => isTe()
+      ? reasons(m[1], 'మరియు') + ' కారణంగా, దీని గురించి పల్మనాలజిస్ట్‌తో మాట్లాడటం మంచిదని నేను అనుకుంటున్నాను. తదుపరి అడుగు వేయడంలో నేను సహాయం చేస్తాను.'
+      : null
+  },
+  {
+    re: /^Because of (.+?), I wouldn.t leave this for next week — please arrange to be seen today, or tomorrow morning at the latest\.$/,
+    build: (m, d, reasons) => isTe()
+      ? reasons(m[1], 'మరియు') + ' కారణంగా, దీనిని వచ్చే వారానికి వాయిదా వేయవద్దు — దయచేసి ఈ రోజే, లేదా ఆలస్యంగా రేపు ఉదయమైనా వైద్యులను కలవండి.'
+      : null
+  },
+  /* durations, which arrive as a number and a unit */
+  {
+    re: /^(\d+) (day|days|week|weeks|month|months|year|years) — thanks, that helps me place it\.$/,
+    build: (m) => isTe() ? teNum(m[1], m[2]) + ' — ధన్యవాదాలు, అది నాకు స్పష్టత ఇస్తుంది.' : null
+  },
+  {
+    re: /^A (day|week|month|year) — thanks, that helps me place it\.$/,
+    build: (m) => isTe() ? 'ఒక ' + (TE_UNITS[m[1]] || m[1]) + ' — ధన్యవాదాలు, అది నాకు స్పష్టత ఇస్తుంది.' : null
+  },
+  {
+    re: /^(\d+) (day|days|week|weeks|month|months|year|years) is long enough that I wouldn.t just wait it out, especially if it isn.t improving\.$/,
+    build: (m) => isTe()
+      ? teNum(m[1], m[2]) + ' అంటే ఊరికే ఎదురుచూడాల్సిన సమయం కాదు — ముఖ్యంగా తగ్గకపోతే.'
+      : null
+  },
+  {
+    re: /^Only (a day or so|\d+ days), then\. That.s worth knowing\.$/,
+    build: (m) => isTe()
+      ? (m[1] === 'a day or so' ? 'ఒక రోజు మాత్రమే' : m[1].replace(/(\d+) days/, '$1 రోజులు')) + ', అయితే. అది తెలుసుకోవడం ముఖ్యం.'
+      : null
+  },
+  /* the symptom and trigger frames */
+  {
+    re: /^Adding (.+) to the picture is useful\.$/,
+    build: (m, d) => isTe() ? d(m[1]) + 'ను కూడా చెప్పడం ఉపయోగపడుతుంది.' : null
+  },
+  {
+    re: /^So (.+) sets it off — that.s exactly the kind of detail worth taking to a pulmonologist\.$/,
+    build: (m, d) => isTe()
+      ? d(m[1]) + ' దీనిని మొదలుపెడుతుంది — ఇలాంటి వివరమే పల్మనాలజిస్ట్‌కు చెప్పాల్సినది.'
+      : null
+  },
+  {
+    re: /^Thanks for telling me — (.+) a day is still worth counting, and knowing it genuinely helps\.$/,
+    build: (m) => isTe()
+      ? 'చెప్పినందుకు ధన్యవాదాలు — రోజుకు ' + m[1] + ' అయినా లెక్కించదగినదే, అది తెలియడం నిజంగా సహాయపడుతుంది.'
+      : null
+  },
+  /*
+   * The emergency opening, which wraps the red flags that fired.
+   *
+   * This is the single most important sentence Uppi ever says, so it is
+   * translated frame-and-atoms like the verdicts rather than left to chance:
+   * each flag has its own dictionary entry and they combine here.
+   */
+  {
+    re: /^I.m concerned about (.+?)\. This may need urgent medical attention\. Please seek emergency care now rather than waiting for an online assessment\.$/,
+    build: (m, d, reasons) => isTe()
+      ? reasons(m[1], 'మరియు') + ' గురించి నేను ఆందోళన చెందుతున్నాను. దీనికి వెంటనే వైద్య సహాయం అవసరం కావచ్చు. ఆన్‌లైన్ అంచనా కోసం ఎదురుచూడకుండా ఇప్పుడే అత్యవసర చికిత్స తీసుకోండి.'
+      : null
+  },
+  /* the emergency button, whose label is assembled from the 108 number */
+  {
+    re: /^Call (\d{3}) — emergency$/,
+    build: (m) => isTe() ? m[1] + ' — అత్యవసరం' : null
+  },
+  /* the call-centre button, whose label carries the number */
+  {
+    re: /^Call ([\d\s+()-]{6,})$/,
+    build: (m) => isTe() ? m[1].trim() + ' నంబర్‌కు కాల్ చేయండి' : null
+  },
+  /* the two closing paragraphs that carry a number in them */
+  {
+    re: /^If it gets worse before you are seen — if speaking becomes hard, or your lips or fingertips change colour — treat that as an emergency and call (\d+)\.$/,
+    build: (m) => isTe()
+      ? 'వైద్యులను కలిసేలోపు ఇది ఎక్కువైతే — మాట్లాడటం కష్టమైతే, లేదా పెదవులు, వేళ్ల చివర్ల రంగు మారితే — దానిని అత్యవసరంగా భావించి ' + m[1] + 'కి కాల్ చేయండి.'
+      : null
+  },
+  {
+    re: /^You can book a Yashoda pulmonology appointment with the button below, or call the team on (.+) if you.d rather arrange it by phone\.$/,
+    build: (m) => isTe()
+      ? 'కింది బటన్‌తో యశోద పల్మనాలజీ అపాయింట్‌మెంట్ బుక్ చేసుకోవచ్చు, లేదా ఫోన్‌లో ఏర్పాటు చేసుకోవాలంటే ' + m[1] + ' నంబర్‌కు కాల్ చేయండి.'
+      : null
+  }
+];
+
+/* One literal, used by build() and by retranslateChrome(), so the dictionary
+   key can never drift from the string actually rendered. */
+const FINE_PRINT = 'Uppi is a guide, not a doctor, and cannot diagnose. This conversation stays on your device and is cleared when you close the tab. In an emergency call {n}. ';
+
 export class UppiChat {
   constructor() {
     this.conversation = new Conversation();
@@ -114,7 +228,7 @@ export class UppiChat {
 
     this.launcher = elem('button', 'uppi-launcher');
     this.launcher.type = 'button';
-    this.launcher.setAttribute('aria-label', 'Talk to Uppi, your lung partner');
+    this.launcher.setAttribute('aria-label', this.t('Talk to Uppi, your lung partner'));
     this.launcher.setAttribute('aria-haspopup', 'dialog');
     this.launcher.setAttribute('aria-expanded', 'false');
 
@@ -128,13 +242,13 @@ export class UppiChat {
     this.panel = elem('div', 'uppi-panel');
     this.panel.hidden = true;
     this.panel.setAttribute('role', 'dialog');
-    this.panel.setAttribute('aria-label', 'Uppi, your lung partner');
+    this.panel.setAttribute('aria-label', this.t('Uppi, your lung partner'));
     this.panel.setAttribute('aria-modal', 'false');
     this.panel.tabIndex = -1;
 
     const head = elem('div', 'uppi-head');
     head.appendChild(elem('span', 'uppi-head-name', 'Uppi'));
-    head.appendChild(elem('span', 'uppi-head-role', 'your lung partner'));
+    head.appendChild(elem('span', 'uppi-head-role', this.t('your lung partner')));
     head.appendChild(elem('span', 'uppi-head-spacer'));
     this.clearBtn = elem('button', 'uppi-iconbtn', icon('trash'));
     this.clearBtn.type = 'button';
@@ -174,7 +288,7 @@ export class UppiChat {
     this.form = elem('form', 'uppi-form');
     this.field = elem('textarea', 'uppi-field');
     this.field.rows = 1;
-    this.field.placeholder = 'Tell Uppi what’s bothering you…';
+    this.field.placeholder = this.t('Tell Uppi what’s bothering you…');
     this.field.setAttribute('aria-label', 'Your message to Uppi');
     this.micBtn = elem('button', 'uppi-round uppi-mic', icon('mic', 20));
     this.micBtn.type = 'button';
@@ -190,12 +304,12 @@ export class UppiChat {
 
     this.fine = elem('p', 'uppi-fine');
     this.fine.appendChild(document.createTextNode(
-      'Uppi is a guide, not a doctor, and cannot diagnose. This conversation stays on your device and is cleared when you close the tab. In an emergency call ' + EMERGENCY_DISPLAY + '. '
+      this.t(FINE_PRINT).replace('{n}', EMERGENCY_DISPLAY)
     ));
-    this.micNote = elem('span', null, 'Your microphone is only on while you are speaking to Uppi. ');
+    this.micNote = elem('span', null, this.t('Your microphone is only on while you are speaking to Uppi. '));
     this.micNote.hidden = true;
     this.fine.appendChild(this.micNote);
-    const wipe = elem('button', null, 'Clear it now');
+    const wipe = elem('button', null, this.t('Clear it now'));
     wipe.type = 'button';
     this.fine.appendChild(wipe);
     this.wipeBtn = wipe;
@@ -400,7 +514,7 @@ export class UppiChat {
   /* the persistent, elegant access point of §24 — Uppi, with his name on it */
   showHint() {
     if (this.hint || this.open) return;
-    this.hint = elem('span', 'uppi-hint', 'Ask Uppi');
+    this.hint = elem('span', 'uppi-hint', this.t('Ask Uppi'));
     this.launcher.style.position = 'relative';
     this.launcher.appendChild(this.hint);
   }
@@ -511,7 +625,10 @@ export class UppiChat {
 
   addYou(text) {
     const m = elem('div', 'uppi-msg uppi-msg--you');
-    m.textContent = text;
+    /* A tapped chip is SUBMITTED in English so the extractor can read it, but
+       the visitor tapped a Telugu label — echoing the English back at them
+       reads as if Uppi misheard. Show them what they tapped. */
+    m.textContent = this.t(text);
     this.log.appendChild(m);
     this.scroll();
     return m;
@@ -544,16 +661,20 @@ export class UppiChat {
 
     if (result && result.emergency_recommended) {
       const alert = elem('div', 'uppi-alert');
-      const head = elem('div', 'uppi-alert-head', icon('alert', 17) + '<span>' + (result.crisis ? 'Please talk to someone now' : 'This needs urgent attention') + '</span>');
+      const head = elem('div', 'uppi-alert-head', icon('alert', 17) + '<span>'
+        + this.t(result.crisis ? 'Please talk to someone now' : 'This needs urgent attention') + '</span>');
       alert.appendChild(head);
-      renderText(alert, text, (x) => this.t(x));
+      renderText(alert, text, (x) => this.tBlock(x));
       wrap.appendChild(alert);
     } else {
-      renderText(wrap, text, (x) => this.t(x));
+      renderText(wrap, text, (x) => this.tBlock(x));
     }
 
     if (result && result.band && result.band.label && result.urgency !== 'routine' && result.urgency !== 'insufficient' && !result.emergency_recommended) {
-      const band = elem('span', 'uppi-band', result.band.label + (result.band.when ? ' · ' + result.band.when : ''));
+      /* label and timing are separate dictionary entries: joined first, they
+         would form a string no dictionary could ever contain */
+      const band = elem('span', 'uppi-band', this.t(result.band.label)
+        + (result.band.when ? ' · ' + this.t(result.band.when) : ''));
       band.style.background = result.band.soft;
       band.style.color = result.band.color;
       wrap.appendChild(band);
@@ -592,7 +713,7 @@ export class UppiChat {
       const a = elem('a', 'uppi-act' + (cls ? ' ' + cls : ''));
       if (!trailing) a.insertAdjacentHTML('afterbegin', icon(iconName, cls ? 17 : 16));
       const span = document.createElement('span');
-      span.textContent = label;
+      span.textContent = this.t(label);
       a.appendChild(span);
       if (trailing) a.insertAdjacentHTML('beforeend', icon(iconName, 15));
       return a;
@@ -779,7 +900,15 @@ export class UppiChat {
     for (const text of list) {
       const chip = elem('button', 'uppi-chip', '');
       chip.type = 'button';
-      chip.textContent = text;
+      /*
+       * Shown translated, SUBMITTED in English.
+       *
+       * The extractor's patterns are English, so sending the Telugu label would
+       * hand the pipeline a string it cannot read and the whole turn would be
+       * understood as "no symptoms". The reader sees their own language; the
+       * engine keeps getting the words it was built for.
+       */
+      chip.textContent = this.t(text);
       chip.addEventListener('click', () => {
         track('uppi_symptom_category_selected', { category: text.slice(0, 40) });
         this.submit(text, 'chip');
@@ -860,6 +989,31 @@ export class UppiChat {
    * global, and it survives a reload because the page restores it on boot.
    */
 
+  /**
+   * Re-labels the parts of the panel that are built once.
+   *
+   * The header, the placeholder and the fine print are created in the
+   * constructor — which runs before the page has installed its translator, and
+   * long before anyone changes language. Everything else is rebuilt per turn
+   * and picks the language up for free; these do not, so they are relabelled
+   * whenever the language settles or changes.
+   */
+  retranslateChrome() {
+    const set = (el, text) => { if (el) el.textContent = this.t(text); };
+    try {
+      set(this.panel && this.panel.querySelector('.uppi-head-role'), 'your lung partner');
+      set(this.wipeBtn, 'Clear it now');
+      set(this.micNote, 'Your microphone is only on while you are speaking to Uppi. ');
+      set(this.hint, 'Ask Uppi');
+      if (this.field) this.field.placeholder = this.t('Tell Uppi what’s bothering you…');
+      if (this.fine && this.fine.firstChild) {
+        this.fine.firstChild.nodeValue = this.t(FINE_PRINT).replace('{n}', EMERGENCY_DISPLAY);
+      }
+      if (this.launcher) this.launcher.setAttribute('aria-label', this.t('Talk to Uppi, your lung partner'));
+      if (this.panel) this.panel.setAttribute('aria-label', this.t('Uppi, your lung partner'));
+    } catch { /* the panel is not built yet; build() will use the same lookups */ }
+  }
+
   /** The reader's language, two letters. */
   lang() {
     try { return String(document.documentElement.lang || 'en').slice(0, 2).toLowerCase(); }
@@ -873,10 +1027,71 @@ export class UppiChat {
    */
   t(text) {
     const s = String(text == null ? '' : text);
+    let out = s;
     try {
       const fn = window.__dcTranslate;
-      return typeof fn === 'function' ? fn(s) : s;
+      if (typeof fn === 'function') out = fn(s);
     } catch { return s; }
+    if (out !== s) return out;
+    return this.pattern(s);
+  }
+
+  /*
+   * The sentences that are assembled rather than written.
+   *
+   * Uppi's verdict is a template around a LIST of reasons that combine —
+   * "Because of A, B and C, ..." — so enumerating them as dictionary keys would
+   * mean one entry per combination, which is both enormous and incomplete the
+   * moment a new triage rule lands. These rules translate the frame and then
+   * translate each reason through the dictionary, so a combination nobody has
+   * ever seen still comes out whole.
+   *
+   * Order matters: the first rule that matches wins, so the longer frames are
+   * listed before the shorter ones they contain.
+   */
+  pattern(s) {
+    const dict = (x) => {
+      try {
+        const fn = window.__dcTranslate;
+        return typeof fn === 'function' ? fn(x) : x;
+      } catch { return x; }
+    };
+    /* "A, B and C" -> each translated, rejoined with the Telugu conjunction */
+    const reasons = (list, joiner) => {
+      const parts = String(list).split(/,\s*|\s+and\s+/).filter(Boolean);
+      const done = parts.map((r) => dict(r.trim()));
+      if (done.length === 1) return done[0];
+      return done.slice(0, -1).join(', ') + ' ' + joiner + ' ' + done[done.length - 1];
+    };
+    for (const rule of UPPI_PATTERNS) {
+      const m = rule.re.exec(s);
+      if (m) {
+        const built = rule.build(m, dict, reasons);
+        /* a rule that cannot fill itself in leaves the sentence alone rather
+           than emitting a half-translated one */
+        if (built && built !== s) return built;
+      }
+    }
+    return s;
+  }
+
+  /**
+   * One paragraph, translated as a whole where possible and sentence by
+   * sentence where not.
+   *
+   * compose.js glues acknowledgements together — "Thanks for being straight
+   * with me about that … Thanks — that's useful to know." arrives as ONE
+   * paragraph built from two sentences that each have their own dictionary
+   * entry, so a whole-string lookup misses and the reader gets English.
+   */
+  tBlock(text) {
+    const s = String(text == null ? '' : text);
+    const whole = this.t(s);
+    if (whole !== s) return whole;
+    const parts = s.split(/(?<=[.!?]) +(?=[A-Z“"])/);
+    if (parts.length < 2) return s;
+    const done = parts.map((x) => this.t(x));
+    return done.some((x, i) => x !== parts[i]) ? done.join(' ') : s;
   }
 
   /**
@@ -891,7 +1106,7 @@ export class UppiChat {
     const whole = this.t(text);
     if (whole !== text) return whole;
     return String(text == null ? '' : text)
-      .split(/\n{2,}/).map((b) => this.t(b)).join('\n\n');
+      .split(/\n{2,}/).map((b) => this.tBlock(b)).join('\n\n');
   }
 
   /**
@@ -908,6 +1123,7 @@ export class UppiChat {
       try { this.tts.setLanguage(code); } catch { /* no synthesis */ }
       try { if (this.speech && this.speech.setLanguage) this.speech.setLanguage(code); }
       catch { /* no recogniser */ }
+      this.retranslateChrome();
     };
     apply();
     try {
