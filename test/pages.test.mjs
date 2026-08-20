@@ -15,7 +15,10 @@
  *   - a teaching case says on its face that it is not a real patient;
  *   - the video rail advances on its own, holds still under a resting pointer,
  *     and wraps rather than sticking at the end;
- *   - the branch selector actually filters the specialists;
+ *   - the branch selector actually filters the specialists, on a condition page
+ *     and on a procedure page alike;
+ *   - no consultant is credited with a procedure their own profile never claims,
+ *     and no procedure page is a tag that matches the whole department;
  *   - every "Relevant Yashoda services" chip resolves to a page;
  *   - the airlift runs the full choreography and puts Uppi back;
  *   - the console stays clean throughout.
@@ -296,6 +299,187 @@ describe('Meet the specialists: every consultant, filtered by branch');
     [...document.querySelectorAll('[data-rail="topic-docs"] > *')].map((el) => el.textContent));
   ok(units.length > 0 && units.length < all, 'choosing a branch narrows the list');
   ok(units.every((t) => t.includes(branches[1])), 'every consultant shown is at the chosen branch');
+
+  await ctx.close();
+}
+
+/* ------------------------------------------- who performs a procedure */
+
+/*
+ * The procedure pages' specialists block, which had two independent faults.
+ *
+ * It rendered `.slice(0, 3)` of an alphabetical array, so fourteen consultants
+ * who perform a bronchoscopy became the same first three names — and those
+ * three led six of the nine pages. And two of the mappings matched on a tag so
+ * broad it caught nearly the whole department, which is the same thing as not
+ * mapping at all.
+ *
+ * Underneath both is one rule worth pinning permanently: a consultant may only
+ * be credited with a capability their OWN Yashoda profile states. One was
+ * listed for airway stenting on the strength of nothing at all.
+ */
+
+describe('Procedures: who performs it, and why they are on that page');
+
+{
+  const { ctx, page } = await open(1280, 950);
+  await page.addInitScript(() => { window.__UPIRI_NO_UPPI = 1; });
+  await page.goto(base + '/', { waitUntil: 'load' });
+  await page.waitForFunction(() => window.__dc && window.__dc.app, null, { timeout: 20000 });
+
+  const data = await page.evaluate(() => {
+    const app = window.__dc.app;
+    return {
+      doctors: app.DOCTORS.map((d) => ({
+        name: d.name, procs: d.procs,
+        /* the transcribed profile, and nothing derived from it */
+        profile: [d.expertise, d.services, d.about].join(' ')
+      })),
+      procs: app.PROCEDURES.map((p) => ({ id: p.id, n: p.n, dp: p.dp }))
+    };
+  });
+
+  /*
+   * What counts as evidence for each capability, in the profiles' own words.
+   * Deliberately generous — Yashoda's pages write the same procedure five ways
+   * ("Cryobiopsy", "Cryo Biopsy", "cryo-lung biopsy") — because the failure this
+   * guards against is not a loose match, it is a tag with NO basis at all.
+   */
+  const EVIDENCE = {
+    Bronchoscopy: /bronchoscop|endoscopy service|thoracic endoscopy/i,
+    EBUS: /\bebus\b|endobronchial ultraso/i,
+    Cryobiopsy: /cryo\s*-?\s*(lung\s*)?biops/i,
+    Thoracoscopy: /thoracoscop|pleurosc/i,
+    /* \b matters: "persistent" ends in "stent", and without the boundary this
+       rule quietly passed a consultant whose profile never mentions stenting */
+    'Airway stenting': /\bstent/i,
+    'Bronchial thermoplasty': /thermoplasty/i,
+    'Pulmonary function testing': /pulmonary function|spirometry/i,
+    /* a sleep SERVICE, not sleep-related conditions: "Pediatric Sleep Breathing
+       Disorders" is something a consultant manages, not a lab they run */
+    'Sleep study': /sleep (stud|diagnostic|lab|medicine)|polysomnograph/i,
+    'Pleural procedures': /pleurodesis|pleural (biops|catheter)|thoracostomy|pleurosc/i,
+    'Allergy testing': /allergy (testing|management)|skin prick|skin allergy/i,
+    'Critical care': /critical (care|respiratory)|\bards\b|intensive care|\bicu\b/i
+  };
+
+  const claimed = new Set();
+  data.doctors.forEach((d) => d.procs.forEach((c) => claimed.add(c)));
+  for (const cap of [...claimed].sort()) {
+    const re = EVIDENCE[cap];
+    ok(re, 'the capability "' + cap + '" has a rule for what counts as evidence');
+    if (!re) continue;
+    const unsourced = data.doctors
+      .filter((d) => d.procs.includes(cap) && !re.test(d.profile))
+      .map((d) => d.name);
+    ok(unsourced.length === 0,
+      '"' + cap + '" is only claimed where the profile says so'
+      + (unsourced.length ? ' — not for ' + unsourced.join(', ') : ''));
+  }
+
+  /*
+   * And the other direction, which is the one that actually hid people.
+   *
+   * The department's Director of Interventional Pulmonology was missing the
+   * Bronchoscopy tag and therefore absent from the busiest procedure page in the
+   * site, while two consultants whose profiles say "Advanced Sleep Diagnostics"
+   * in as many words were missing from the sleep study. Nothing errored; they
+   * were simply not there.
+   */
+  for (const cap of Object.keys(EVIDENCE)) {
+    const re = EVIDENCE[cap];
+    const untagged = data.doctors
+      .filter((d) => re.test(d.profile) && !d.procs.includes(cap))
+      .map((d) => d.name);
+    ok(untagged.length === 0,
+      'everyone whose profile evidences "' + cap + '" is credited with it'
+      + (untagged.length ? ' — missing for ' + untagged.join(', ') : ''));
+  }
+
+  /* Every procedure must reach someone, and no procedure may be a tag that
+     matches the whole department. */
+  const roster = {};
+  for (const pr of data.procs) {
+    const who = data.doctors.filter((d) => d.procs.some((c) => pr.dp.includes(c)));
+    roster[pr.id] = who.map((d) => d.name);
+    ok(who.length > 0, pr.id + ' names someone who performs it');
+  }
+  const distinct = new Set(Object.values(roster).map((r) => [...r].sort().join('|')));
+  ok(distinct.size >= 4,
+    'the procedure pages do not all show the same roster (' + distinct.size + ' distinct lists)');
+  ok(roster['airway-procedures'].length < roster.bronchoscopy.length - 2,
+    'the airway page is the interventional list, not everyone who owns a bronchoscope ('
+    + roster['airway-procedures'].length + ' of ' + roster.bronchoscopy.length + ')');
+  ok(roster.cpet.length < roster.bronchoscopy.length,
+    'an exercise test is not mapped through critical care (' + roster.cpet.length + ')');
+
+  /* ---- and what the page actually renders ---- */
+  const shown = {};
+  for (const pr of data.procs) {
+    await page.goto(base + '/tests-and-procedures/' + pr.id, { waitUntil: 'load' });
+    await page.waitForSelector('[data-rail="proc-docs"]', { timeout: 20000 });
+    const seen = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-rail="proc-docs"] > *')].map((el) => ({
+        name: el.querySelector('h3').textContent.trim(),
+        caps: [...el.querySelectorAll('li')].map((li) => li.textContent.trim())
+      })));
+    shown[pr.id] = seen;
+    eq(seen.length, roster[pr.id].length,
+      pr.id + ' shows every consultant who performs it, not the first three');
+    ok(seen.every((c) => c.caps.length > 0),
+      pr.id + ': every card carries the capability that put them there');
+  }
+  ok(shown.bronchoscopy.length > 3,
+    'the bronchoscopy page is no longer capped at three (' + shown.bronchoscopy.length + ')');
+  ok(shown['lung-nodule-biopsy'][0].caps.length >= 2,
+    'the nodule page leads with someone who lists more than one route to it');
+
+  /* ---- the rail: it has somewhere to go, and it goes there by itself ---- */
+  await page.goto(base + '/tests-and-procedures/bronchoscopy', { waitUntil: 'load' });
+  await page.waitForSelector('[data-rail="proc-docs"]', { timeout: 20000 });
+  await page.evaluate(() => document.querySelector('[data-rail="proc-docs"]')
+    .scrollIntoView({ block: 'center' }));
+  /* park the pointer away from the rail — a rail under the cursor holds still,
+     which is the behaviour the video rail's own test pins */
+  await page.mouse.move(4, 4);
+  const over = await page.evaluate(() => {
+    const el = document.querySelector('[data-rail="proc-docs"]');
+    return el.scrollWidth - el.clientWidth;
+  });
+  ok(over > 100, 'the specialists overflow the rail, so there is something to scroll (' + over + 'px)');
+  const advanced = await page
+    .waitForFunction(() => document.querySelector('[data-rail="proc-docs"]').scrollLeft > 20,
+      null, { timeout: 9000 })
+    .then(() => true).catch(() => false);
+  ok(advanced, 'the specialists rail advances on its own');
+
+  const branches = await page.locator('#pc-branch option').allTextContents();
+  ok(branches.length >= 4, 'the branch selector lists the branches (' + branches.join(', ') + ')');
+  eq(branches[0], 'All branches', 'the selector opens on all branches');
+  await page.selectOption('#pc-branch', branches[1]);
+  await page.waitForTimeout(400);
+  const atBranch = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-rail="proc-docs"] > *')].map((el) => el.textContent));
+  ok(atBranch.length > 0 && atBranch.length < shown.bronchoscopy.length,
+    'choosing a branch narrows the list');
+  ok(atBranch.every((t) => t.includes(branches[1])),
+    'every consultant shown is at the chosen branch');
+
+  /* ---- and it speaks Telugu, count line included ---- */
+  await page.goto(base + '/tests-and-procedures/cryobiopsy?lang=te', { waitUntil: 'load' });
+  await page.waitForSelector('[data-rail="proc-docs"]', { timeout: 20000 });
+  const te = await page.evaluate(() => {
+    const head = document.querySelector('[data-rail="proc-docs"]').closest('section');
+    return {
+      count: head.querySelector('p').textContent.trim(),
+      label: head.querySelector('label').textContent.trim(),
+      all: head.querySelector('#pc-branch option').textContent.trim()
+    };
+  });
+  const telugu = (s) => /[ఀ-౿]/.test(s);
+  ok(telugu(te.count), 'the count line is assembled in Telugu, not left in English (' + te.count + ')');
+  ok(telugu(te.label), 'the branch control is in Telugu');
+  ok(telugu(te.all), 'and so is "All branches"');
 
   await ctx.close();
 }
