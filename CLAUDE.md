@@ -252,6 +252,39 @@ for a warm young man. Pitch was 1.04, which lifted every voice towards boyish
 and undid the point of picking a male one. `SpeechInput.setLanguage` moves the
 recogniser too, so a Telugu speaker can use the microphone in Telugu.
 
+**The browser decides when he is allowed to speak, and it does not tell you.**
+Chrome gates speech synthesis behind user activation. Before the visitor has
+clicked anything, `speechSynthesis.speak()` returns normally, fires no error,
+and the engine simply **holds** the utterance — then plays it at the first
+gesture, however stale. That is one bug wearing two faces: Uppi arrived silent,
+and then read out a greeting from minutes earlier over the top of a live answer.
+
+- **`tts.blocked`** is true only when the page can positively see there has been
+  no activation (`navigator.userActivation.hasBeenActive === false`), or when an
+  utterance came back `not-allowed`. A browser without the API gets the benefit
+  of the doubt — Firefox has no such gate and must not be muted by guesswork.
+- **`speakAs` HOLDS the line rather than queueing it**, leaves `isTalking` false
+  so his mouth is not miming a voice nobody can hear, and hands it to the
+  gesture listener.
+- **The first gesture flushes the engine before priming it** (`unlock()` calls
+  `cancel()` first), then says the held line *if it is still current* —
+  `_heldStillCurrent()`: the dock bubble is still presented, or the panel has
+  just opened with the greeting as its only message. Anything else and the
+  moment has passed; a greeting read out ten minutes late is worse than one
+  never read at all.
+- **Listen on `pointerup`/`touchend`/`click`, never `pointerdown`.** On a touch
+  screen activation is not granted until the finger lifts, so asking at
+  `pointerdown` gets exactly the silence it was meant to fix.
+
+**The suite could not see any of this**, which is the real lesson. Playwright's
+Chromium reports activation from the first frame, and the stub answered
+`speak()` immediately — so `pages.test.mjs` cheerfully asserted "the greeting is
+actually spoken" while the deployed site said nothing at all. The section
+*Speaking waits for the browser to allow it* now models the policy: no voice
+until a gesture, and a queue that holds and then floods. Every assertion in it
+failed before the fix. **A green test against a stub that does not model the
+browser's rules is not evidence.**
+
 **Three things make the voice arrive WITH the reply rather than seconds after
 it.** All three were live bugs, and all three were silent:
 
@@ -264,8 +297,12 @@ it.** All three were live bugs, and all three were silent:
    language alone rather than to silence.
 2. **The hosted-voice probe must not gate the browser voice.** `_serverReady`
    is a GET to a serverless function; awaiting it outright meant a cold start
-   held the greeting with the text already on screen. It is raced against
-   300ms — an already-resolved probe costs nothing.
+   held the greeting with the text already on screen. Racing it against 300ms
+   still charged every utterance up to 300ms for a feature that is switched off
+   here, so it is now a synchronous flag (`_hosted`): the hosted voice pre-empts
+   the browser one only once the probe has positively answered yes. The first
+   line always uses the browser voice; the hosted one takes over from the
+   second.
 3. **Prefer a LOCAL voice over a better-sounding network one.** Chrome's
    "Google …" and "… network" voices fetch their audio before speaking.
    `scoreVoice` gives `localService` 25 against `GOOD_ENGINE`'s 12, so local
@@ -445,7 +482,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 566 assertions across five suites (~15min)
+npm test              # 575 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -456,7 +493,7 @@ npm test conversation # one suite by name
 | `core.test.mjs` | Red flags with their negation and hypothetical guards, duration parsing, extraction including denials, every triage band, retrieval, the safety gate. |
 | `conversation.test.mjs` | The six conversations in §30 of the brief, plus the properties that must hold across all of them: no repeated question, no repeated paragraph, nothing forgotten, one question per reply. |
 | `rig.test.mjs` | The ten visemes, the digraph mapping, the schedule, and the approved palette. |
-| `pages.test.mjs` | Real Chromium: the voice is male and follows the reader's language in both directions, every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, **no consultant is credited with a procedure their own profile never claims and none who evidences one is left off it**, both specialist rails advance and filter by branch, every service chip resolves, and the whole airlift choreography. |
+| `pages.test.mjs` | Real Chromium: the voice is male and follows the reader's language in both directions, every route renders with its own title and canonical, every guide and teaching case has a body and sources, a case says on its face it is not a real patient, the video rail advances/holds/wraps, **nothing reaches the speech engine before the browser allows it and no line is read out after its moment has passed**, **no consultant is credited with a procedure their own profile never claims and none who evidences one is left off it**, both specialist rails advance and filter by branch, every service chip resolves, and the whole airlift choreography. |
 | `browser.test.mjs` | Real Chromium: entrance, **that he stops waving**, **that his mouth is CLOSED at rest**, blinking, scroll, the curious→tired→sleeping ladder, waking, the nudge cooldown, **the idle and reading popups on the real clock**, **the whole call-back flow against a stub destination including what does NOT leave with it**, a two-turn conversation, the offline emergency path, all seven widths, reduced motion, and zero console errors. |
 
 `test/_server.mjs` mounts the real `api/uppi/*` handlers next to `public/`, so the
@@ -487,7 +524,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (566 assertions)
+2. `npm test` — must report `all suites passed` (575 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:

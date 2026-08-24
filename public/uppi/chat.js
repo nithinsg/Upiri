@@ -388,10 +388,30 @@ export class UppiChat {
       if (this.open) this.closePanel();
     });
 
-    /* iOS will not speak until the page has had a gesture; take the first one. */
-    const unlock = () => { this.tts.unlock(); document.removeEventListener('pointerdown', unlock); document.removeEventListener('keydown', unlock); };
-    document.addEventListener('pointerdown', unlock, { once: true });
-    document.addEventListener('keydown', unlock, { once: true });
+    /*
+     * The first gesture is the earliest moment any browser will let Uppi speak.
+     *
+     * `unlock` flushes whatever the engine was holding and primes it; then, one
+     * frame later, he says the line he was not allowed to say — but only if it
+     * is still what the visitor is looking at. The frame matters: if this
+     * gesture was the click that opens the panel, the greeting belongs to the
+     * panel, and `_heldStillCurrent` can only tell once that click has run.
+     *
+     * `pointerup`/`touchend`/`click` rather than `pointerdown`, because on a
+     * touch screen activation is not granted until the finger lifts — asking
+     * too early gets the same silence as not asking at all.
+     */
+    const EVENTS = ['pointerup', 'touchend', 'click', 'keydown'];
+    const unlock = () => {
+      for (const e of EVENTS) document.removeEventListener(e, unlock, true);
+      this.tts.unlock();
+      requestAnimationFrame(() => {
+        const held = this._held;
+        this._held = null;
+        if (held && this._heldStillCurrent()) this.speakAs(held);
+      });
+    };
+    for (const e of EVENTS) document.addEventListener(e, unlock, true);
 
     /* §23: the on-screen keyboard must not cover the input. It changes both the
        height and the offset of the visual viewport, and pinching changes the
@@ -1132,10 +1152,39 @@ export class UppiChat {
     } catch { /* no MutationObserver: the boot-time language still applies */ }
   }
 
+  /**
+   * Is the line Uppi was not allowed to say still the thing on screen?
+   *
+   * A greeting read out ten minutes late, over the top of an answer, is worse
+   * than one never read at all — that is exactly what the browser's own queue
+   * was doing. So: the dock bubble is still up, or the panel has just opened
+   * with the greeting as its only message. Anything else and the moment passed.
+   */
+  _heldStillCurrent() {
+    /* `is-in` rather than `hidden`: dismissing the bubble fades it for 260ms
+       before hiding it, and a bubble on its way out is already past. */
+    if (!this.bubble.hidden && this.bubble.classList.contains('is-in')) return true;
+    if (this.open && this.log.children.length === 1) return true;
+    return false;
+  }
+
   speakAs(text) {
     if (!this.tts.supported) {
       /* §27: no voice available — the text is already on screen, so nothing is
          lost; Uppi just does not read it out. */
+      this.states.resolve();
+      return;
+    }
+    /*
+     * The browser will not speak before the visitor has interacted with the
+     * page, and handing it the line anyway is what made Uppi silent on arrival
+     * and then startlingly late. Hold it instead: the text is already on
+     * screen, his face stays at rest rather than miming a voice nobody can
+     * hear, and the gesture listener says it at the first legal moment.
+     */
+    if (this.tts.blocked) {
+      this._held = text;
+      this.stopBtn.hidden = true;
       this.states.resolve();
       return;
     }
