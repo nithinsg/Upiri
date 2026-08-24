@@ -108,14 +108,49 @@ export class TextToSpeech {
     this._scheduleAt = 0;
     this._unlocked = false;
     this._keepAlive = null;
+    /* set when the engine tells us outright that it will not speak yet */
+    this._denied = false;
     this.supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
     if (this.supported) this._loadVoices();
-    /* Asked once, in the background, so the first thing Uppi says is not
-       delayed by finding out whether there is a hosted voice to say it with. */
+    /*
+     * Asked once, in the background, and read SYNCHRONOUSLY afterwards.
+     *
+     * `_hosted` stays null until the probe answers, and `speak()` only prefers
+     * the hosted voice once it is positively true. Awaiting the promise — even
+     * racing it against a timeout — put a delay in front of every utterance for
+     * a feature that is switched off in this deployment. The cost of reading a
+     * flag instead is that the very first line always uses the browser voice;
+     * the hosted one takes over from the second.
+     */
+    this._hosted = null;
     this._serverReady = fetch('/api/uppi/speak', { method: 'GET' })
       .then((r) => r.json())
-      .then((d) => !!(d && d.configured))
-      .catch(() => false);
+      .then((d) => { this._hosted = !!(d && d.configured); return this._hosted; })
+      .catch(() => { this._hosted = false; return false; });
+  }
+
+  /**
+   * Will the browser refuse to speak right now?
+   *
+   * Chrome gates speech synthesis behind user activation, and it does not tell
+   * the page so. `speak()` returns normally, no error fires, and the engine
+   * simply HOLDS the utterance until the visitor clicks something — at which
+   * point it plays, however stale it has become. That is the whole bug: Uppi
+   * arrived silent, and then read out a greeting from several minutes earlier
+   * over the top of whatever he was actually saying by then.
+   *
+   * Only claim to be blocked when the page can positively see there has been no
+   * activation. Firefox has no such gate, and a browser that does not expose
+   * the flag gets the benefit of the doubt rather than being muted.
+   */
+  get blocked() {
+    if (!this.supported) return false;
+    if (this._denied) return true;
+    try {
+      const ua = navigator.userActivation;
+      if (ua && typeof ua.hasBeenActive === 'boolean') return !ua.hasBeenActive;
+    } catch { /* no such API */ }
+    return false;
   }
 
   _loadVoices() {
@@ -203,11 +238,19 @@ export class TextToSpeech {
   }
 
   /**
-   * iOS will not speak until the page has had a real gesture. Call this from
-   * the first tap or key press so the greeting can be heard on a phone.
+   * The first gesture: flush whatever the engine was holding, then prime it.
+   *
+   * iOS will not speak until the page has had a real gesture, hence the silent
+   * priming utterance. The `cancel()` in front of it matters just as much on
+   * the desktop: anything handed to Chrome while it was blocked is still in its
+   * queue, and this gesture is precisely the moment it would start playing.
+   * Uppi says what is current or he says nothing.
    */
   unlock() {
-    if (this._unlocked || !this.supported) return;
+    if (!this.supported) return;
+    try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+    this._denied = false;
+    if (this._unlocked) return;
     try {
       const u = new SpeechSynthesisUtterance('');
       u.volume = 0;
@@ -245,23 +288,19 @@ export class TextToSpeech {
     if (busy) await new Promise((r) => setTimeout(r, 0));
 
     /*
-     * The hosted-voice probe must never delay the browser voice.
+     * Never hand the engine a line it is not allowed to say yet.
      *
-     * `_serverReady` is a GET to a serverless function issued once at
-     * construction. On a cold start that can take seconds, and awaiting it
-     * outright meant the FIRST thing Uppi says — the greeting — waited for it
-     * with the text already on screen. Race it: if the probe has not answered
-     * promptly, use the browser voice now and let the hosted one take over on
-     * the next utterance.
+     * See `blocked`. A queued utterance is not a delayed utterance — it is a
+     * time bomb that goes off on the visitor's first click. The caller has
+     * already put the text on screen, which is where it belongs; holding the
+     * VOICE until there is a gesture is `chat.js`'s job, and it speaks whatever
+     * is still current at that point rather than whatever was current then.
      */
-    let hosted = false;
-    if (o.server !== false && this.mode !== 'browser-only') {
-      hosted = await Promise.race([
-        Promise.resolve(this._serverReady).catch(() => false),
-        new Promise((r) => setTimeout(() => r(false), 300))
-      ]);
-    }
-    if (hosted) {
+    if (this.blocked) { if (o.onEnd) o.onEnd(); return; }
+
+    /* the hosted voice only pre-empts the browser one once we already know it
+       is there — see `_hosted` in the constructor */
+    if (o.server !== false && this.mode !== 'browser-only' && this._hosted === true) {
       const ok = await this._speakServer(clean, o);
       if (ok) return;
     }
@@ -384,7 +423,12 @@ export class TextToSpeech {
         resolve();
       };
       u.onend = done;
-      u.onerror = done;
+      /* Some builds report the activation gate rather than silently holding the
+         utterance. Same situation, so record it and take the same path. */
+      u.onerror = (e) => {
+        if (e && e.error === 'not-allowed') this._denied = true;
+        done();
+      };
 
       try {
         /*

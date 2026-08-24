@@ -19,6 +19,8 @@
  *     and on a procedure page alike;
  *   - no consultant is credited with a procedure their own profile never claims,
  *     and no procedure page is a tag that matches the whole department;
+ *   - nothing is handed to the speech engine before the browser will allow it,
+ *     and no line is ever read out after its moment has passed;
  *   - every "Relevant Yashoda services" chip resolves to a page;
  *   - the airlift runs the full choreography and puts Uppi back;
  *   - the console stays clean throughout.
@@ -858,6 +860,126 @@ describe('The voice starts with the text, not seconds after it');
     'the voice starts with the reply rather than seconds later (' + gaps.join('ms, ') + 'ms)');
 
   await ctx2.close();
+}
+
+/* -------------------------------------- the browser's own gate on speaking */
+
+/*
+ * Why Uppi arrived silent, and then spoke far too late.
+ *
+ * Chrome gates speech synthesis behind user activation and does not say so:
+ * `speak()` returns, no error fires, and the engine HOLDS the utterance until
+ * the visitor clicks something — then plays it, however stale. So the greeting
+ * was never heard on arrival, and turned up minutes later over the top of a
+ * live answer.
+ *
+ * The suite could not see any of this, because the stub above answers `speak()`
+ * immediately and Playwright's Chromium reports activation from the first
+ * frame. This section models the real policy instead: no voice until a gesture,
+ * and a queue that holds and then floods. Every assertion here failed before the
+ * fix.
+ */
+
+describe('Speaking waits for the browser to allow it, and never says a stale line');
+
+/* the policy, as an init script: activation, and an engine that holds */
+const POLICY = () => {
+  let active = false;
+  const held = [];
+  window.__spoken = [];
+  window.__queued = [];
+  Object.defineProperty(navigator, 'userActivation', {
+    configurable: true,
+    get: () => ({ get hasBeenActive() { return active; }, get isActive() { return active; } })
+  });
+  const ss = window.speechSynthesis;
+  ss.getVoices = () => [{ name: 'Microsoft Ravi - English (India)', lang: 'en-IN', localService: true }];
+  const play = (u) => {
+    window.__spoken.push({ text: u.text, at: performance.now() });
+    setTimeout(() => { if (u.onstart) u.onstart(new Event('start')); }, 0);
+    setTimeout(() => { if (u.onend) u.onend(new Event('end')); }, 30);
+  };
+  ss.speak = (u) => {
+    window.__queued.push({ text: u.text, activation: active });
+    if (!active) { held.push(u); return; }        /* Chrome holds it */
+    play(u);
+  };
+  ss.cancel = () => { held.length = 0; };
+  ss.pause = () => {}; ss.resume = () => {};
+  const wake = () => { if (active) return; active = true; while (held.length) play(held.shift()); };
+  for (const e of ['pointerup', 'touchend', 'click', 'keydown']) addEventListener(e, wake, true);
+};
+
+async function arrive() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await ctx.addInitScript(POLICY);
+  const page = await ctx.newPage();
+  await page.route('**/*', (r) => (r.request().url().startsWith(base) ? r.continue() : r.abort()));
+  page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  await page.goto(base + '/', { waitUntil: 'load' });
+  await page.waitForFunction(() => !!window.__uppi, null, { timeout: 25000 });
+  await page.waitForTimeout(4000);
+  return { ctx, page };
+}
+/* the priming utterance is empty and silent; only real lines count */
+const heard = (page) => page.evaluate(() => window.__spoken.map((s) => s.text).filter(Boolean));
+
+{
+  const { ctx, page } = await arrive();
+  eq(await page.evaluate(() => window.__queued.length), 0,
+    'nothing is handed to the engine before the visitor has interacted — a queued line is a time bomb, not a delayed one');
+  eq((await heard(page)).length, 0, 'and so nothing is voiced yet');
+  ok(await page.evaluate(() => !window.__uppi.states.inputs.isTalking),
+    'his mouth is not miming a voice nobody can hear');
+
+  /* the first gesture is the moment it becomes legal */
+  await page.mouse.click(640, 760);
+  await page.waitForTimeout(900);
+  const after = await heard(page);
+  eq(after.length, 1, 'at the first gesture he says the greeting, once');
+  ok(/Uppi/.test(after[0]), 'and it is the greeting (' + after[0].slice(0, 40) + '…)');
+  await ctx.close();
+}
+
+{
+  /* a line whose moment has passed is not worth saying */
+  const { ctx, page } = await arrive();
+  await page.evaluate(() => window.__uppi.dismissBubble());
+  await page.waitForTimeout(500);                 /* the fade-out is 260ms */
+  await page.mouse.click(640, 760);
+  await page.waitForTimeout(900);
+  eq((await heard(page)).length, 0,
+    'a greeting the visitor has already scrolled past is never read out late');
+  await ctx.close();
+}
+
+{
+  /* when the first gesture is the one that opens the panel, the greeting
+     belongs to the panel — said once, not once per surface */
+  const { ctx, page } = await arrive();
+  await page.click('.uppi-launcher');
+  await page.waitForTimeout(900);
+  eq((await heard(page)).length, 1, 'opening the panel greets him aloud, exactly once');
+
+  /* and from here on activation exists, so a reply must land with its text */
+  await page.evaluate(() => { window.__spoken.length = 0; });
+  await page.fill('.uppi-field', 'I have had a dry cough for three weeks');
+  const gap = await page.evaluate(async () => {
+    const log = document.querySelector('.uppi-log');
+    const before = log.children.length;
+    document.querySelector('.uppi-send').click();
+    let textAt = null;
+    for (let i = 0; i < 600; i++) {
+      if (textAt === null && log.children.length > before + 1) textAt = performance.now();
+      if (textAt !== null && window.__spoken.length) return Math.round(window.__spoken[0].at - textAt);
+      await new Promise((r) => setTimeout(r, 20));
+    }
+    return null;
+  });
+  ok(gap !== null, 'the reply is spoken');
+  ok(gap !== null && gap < 400,
+    'and the voice arrives with the text rather than seconds after it (' + gap + 'ms)');
+  await ctx.close();
 }
 
 eq(errors.length, 0, 'no console or page errors anywhere' + (errors.length ? ': ' + errors.join(' | ') : ''));
