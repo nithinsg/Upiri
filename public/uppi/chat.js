@@ -392,10 +392,10 @@ export class UppiChat {
      * The first gesture is the earliest moment any browser will let Uppi speak.
      *
      * `unlock` flushes whatever the engine was holding and primes it; then, one
-     * frame later, he says the line he was not allowed to say — but only if it
-     * is still what the visitor is looking at. The frame matters: if this
-     * gesture was the click that opens the panel, the greeting belongs to the
-     * panel, and `_heldStillCurrent` can only tell once that click has run.
+     * frame later, `deliverHeld` says the line he was not allowed to say. The
+     * frame matters: if this gesture was the click that opens the panel, the
+     * greeting belongs to the panel, and `deliverHeld` can only tell which
+     * surface it is once that click has run.
      *
      * `pointerup`/`touchend`/`click` rather than `pointerdown`, because on a
      * touch screen activation is not granted until the finger lifts — asking
