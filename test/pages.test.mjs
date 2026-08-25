@@ -21,6 +21,8 @@
  *     and no procedure page is a tag that matches the whole department;
  *   - nothing is handed to the speech engine before the browser will allow it,
  *     and no line is ever read out after its moment has passed;
+ *   - LungScan is served as its own page, its expertise layer changes with the
+ *     finding, and no unverified figure reaches a patient;
  *   - every "Relevant Yashoda services" chip resolves to a page;
  *   - the airlift runs the full choreography and puts Uppi back;
  *   - the console stays clean throughout.
@@ -1007,6 +1009,91 @@ const heard = (page) => page.evaluate(() => window.__spoken.map((s) => s.text).f
   ok(gap !== null, 'the reply is spoken');
   ok(gap !== null && gap < 400,
     'and the voice arrives with the text rather than seconds after it (' + gap + 'ms)');
+  await ctx.close();
+}
+
+/* ------------------------------------------------------------- LungScan */
+
+/*
+ * The LungScan subpage.
+ *
+ * It is a real file under `public/lungscan/`, not a dc route, so Vercel serves
+ * it from the filesystem before the SPA rewrite runs. That distinction is the
+ * first thing pinned here: if the fallback ever swallows it, every assertion
+ * below fails rather than the page quietly becoming the homepage.
+ */
+
+describe('LungScan: its own page, and an expertise layer that changes with the finding');
+
+{
+  const { ctx, page } = await open(1280, 950);
+  const res = await page.goto(base + '/lungscan', { waitUntil: 'load' });
+  eq(res.status(), 200, '/lungscan responds');
+  eq(await page.title(), 'ŪPIRI LungScan', 'it is served as its own page, not the SPA fallback');
+  eq(await page.locator('x-dc').count(), 0, 'and the dc runtime is not involved in it at all');
+  eq(await page.locator('link[rel=canonical]').getAttribute('href'),
+    'https://upiri.vercel.app/lungscan', 'it declares its own canonical');
+  eq(await page.locator('#s-home .entry').count(), 4, 'the four entry points are there');
+  ok(await page.locator('.why .claim').count() === 1, 'and the positioning section that separates Uppi from a general chatbot');
+
+  /* the module has to be different per condition — one generic hospital block
+     for every disease is exactly what this replaces */
+  const seen = [];
+  for (const nth of [0, 2, 5, 9]) {
+    await page.goto(base + '/lungscan', { waitUntil: 'load' });
+    await page.locator('.entry[data-go="finding"]').click();
+    await page.locator('#finding-opts .opt').nth(nth).click();
+    await page.locator('#up-sample').click();
+    await page.locator('#up-go').click();
+    await page.waitForSelector('#rev-out .exp', { timeout: 20000 });
+    seen.push({
+      headline: await page.locator('.exp .cond').textContent(),
+      team: (await page.locator('.exp .team b').allTextContents()).join('|'),
+      cta: (await page.locator('.exp .foot .btn-primary').textContent()).trim(),
+      ask: await page.locator('.screen.on .convert h2').textContent()
+    });
+  }
+  eq(new Set(seen.map((x) => x.headline)).size, seen.length, 'every finding gets its own headline');
+  eq(new Set(seen.map((x) => x.team)).size, seen.length, 'and its own set of relevant disciplines');
+  eq(new Set(seen.map((x) => x.cta)).size, seen.length, 'and its own call to action');
+  eq(new Set(seen.map((x) => x.ask)).size, seen.length, 'the booking question continues Uppi answer rather than repeating one line');
+
+  /* the layer sits between the explanation and the booking options (§1) */
+  const order = await page.evaluate(() =>
+    [...document.querySelector('#rev-out').children].map((n) => n.className));
+  eq(order.join(' '), 'says result exp convert',
+    'the expertise layer sits between the answer and the booking options');
+
+  /*
+   * No unverified figure may reach a patient. The proof block is wired for
+   * hospital data and switched off until Yashoda supplies it, so a placeholder
+   * must never render — "[N]+ cases reviewed" on a hospital page reads either
+   * as a broken build or as a number nobody checked.
+   */
+  const body = await page.locator('body').innerText();
+  ok(!/\[N\]/.test(body), 'no placeholder metric is ever shown to a patient');
+  ok(!/\b\d+\s*%|success rate|No\.\s*1|world[- ]class/i.test(body),
+    'and no outcome rate, ranking or superlative is claimed');
+
+  /* a potentially urgent situation still stops the funnel */
+  await page.goto(base + '/lungscan', { waitUntil: 'load' });
+  await page.locator('.entry[data-go="symptoms"]').click();
+  await page.locator('#sym-opts .opt').first().click();
+  await page.locator('#q-why').fill('sudden severe breathlessness since last night');
+  await page.locator('#sym-next').click();
+  await page.locator('#up-sample').click();
+  await page.locator('#up-go').click();
+  await page.waitForSelector('#rev-out .urgent', { timeout: 20000 });
+  eq(await page.locator('.screen.on .convert').count(), 0,
+    'an urgent finding is never routed into the booking funnel');
+  eq(await page.locator('.screen.on .exp').count(), 0, 'nor into the expertise pitch');
+
+  /* and the site has to lead there, or nobody arrives */
+  await page.goto(base + '/tests-and-procedures', { waitUntil: 'load' });
+  await page.waitForSelector('a[href="/lungscan"]', { timeout: 20000 });
+  ok(await page.locator('a[href="/lungscan"]').count() >= 2,
+    'the site links to LungScan from the tests page and the footer');
+
   await ctx.close();
 }
 

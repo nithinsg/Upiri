@@ -129,6 +129,16 @@ await writeFile(join(OUT, 'prerender-manifest.json'),
  * is not in the sitemap, and a route that is, is.
  */
 const ORIGIN = 'https://upiri.vercel.app';
+/*
+ * Pages that are real files rather than app routes.
+ *
+ * `/lungscan` is a self-contained page under public/, so Vercel serves it from
+ * the filesystem before the SPA rewrite ever runs and the dc runtime never sees
+ * it. It must NOT join the prerender list — this script would load it, re-insert
+ * the app's template into it and write the result back over itself. It only
+ * needs to be findable, which means the sitemap.
+ */
+const STATIC_PAGES = ['/lungscan'];
 const today = new Date().toISOString().slice(0, 10);
 const priority = (r) =>
   r === '/' ? '1.0'
@@ -137,7 +147,7 @@ const priority = (r) =>
 await writeFile(join(OUT, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n'
   + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-  + [...new Set(routes)].map((r) =>
+  + [...new Set([...routes, ...STATIC_PAGES])].map((r) =>
     '  <url>\n'
     + `    <loc>${ORIGIN}${r === '/' ? '/' : r}</loc>\n`
     + `    <lastmod>${today}</lastmod>\n`

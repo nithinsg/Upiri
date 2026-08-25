@@ -455,6 +455,46 @@ exactly one seam, `__uppi.airlift(phase)` in `chat.js`, which sets the
 `isAppointment` INPUT rather than touching `motion` or the rig. The page owns the
 helicopter; Uppi owns Uppi. Keep it that way.
 
+### ŪPIRI LungScan (`/lungscan`)
+
+A patient uploads a chest report, Uppi explains what it says, and the page then
+names the Yashoda disciplines relevant to **that finding** before offering a
+consultation. Built from the two product briefs in this session.
+
+- **It is a FILE, not a dc route.** `public/lungscan/index.html` is a complete
+  standalone document. Vercel checks the filesystem before applying the SPA
+  rewrite, so `/lungscan` is served directly and the dc runtime never sees it.
+  Keep it out of `ROUTES` and out of the prerender list — `prerender.mjs` would
+  load it, re-insert the app's `<template>` into it and write the result back
+  over itself. `STATIC_PAGES` in that script puts it in the sitemap instead.
+- **`test/_server.mjs` now resolves a directory's own `index.html`**, because
+  Vercel does. Collapsing every directory into the SPA fallback made the harness
+  disagree with production about a page that exists.
+- **`prototypes/lungscan.html` is GENERATED**, not edited:
+  `node scripts/lungscan-artifact.mjs` lifts the `<!--ARTIFACT-HEAD-->` and
+  `<!--ARTIFACT-BODY-->` regions out of the live page for the preview artifact.
+  Edit the page under `public/`.
+- **The navigation level is decided by rules, not the model.** Each finding
+  carries a default level and the urgent check runs first; "getting worse" may
+  raise a level and nothing may lower it. The second brief asks the LLM to
+  choose it — this codebase does not let a model make a medical decision, and
+  this is no exception.
+- **An urgent finding stops the funnel dead.** No expertise pitch, no pricing,
+  no callback — the emergency number and the hospital line. Structural, not
+  advisory: neither block is rendered on that branch, and the suite asserts it.
+- **`VERIFIED_PROOF.published` is false and stays false** until Yashoda supplies
+  figures. A patient must never see `[N]+ cases reviewed` — a placeholder on a
+  hospital page reads as a broken build or, worse, as a number nobody checked.
+  Until then the block shows only what upiri.vercel.app already publishes: the
+  consultant count, the branch count, and counts derived from the page's own
+  content. `pages.test.mjs` fails on any `[N]`, any percentage, any ranking.
+- **Uppi is the approved rig, serialised, not redrawn.** `prototypes/uppi-rig.svg`
+  came out of `public/uppi/avatar.js` at rest; ids are re-namespaced per mount
+  because two copies sharing gradient ids make the second paint with the first
+  one's definitions.
+- **No hospital phone number is invented.** The WhatsApp link carries the same
+  placeholder the main site does.
+
 ## Standing instructions from the product owner
 
 These override your own judgement about what would be nice to write.
@@ -495,7 +535,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 579 assertions across five suites (~15min)
+npm test              # 595 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -537,9 +577,10 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (579 assertions)
+2. `npm test` — must report `all suites passed` (595 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
+4b. If `public/lungscan/` changed, run `node scripts/lungscan-artifact.mjs` so the preview copy keeps up
 5. Confirm no Uppi markup is baked into `dist/index.html`:
    `grep -c "uppi-root" dist/index.html` → `0`
 

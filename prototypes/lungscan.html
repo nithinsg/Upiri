@@ -1,0 +1,1450 @@
+<title>ŪPIRI LungScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600;700&display=swap">
+
+<style>
+/* ---------------------------------------------------------------------------
+   ŪPIRI LungScan — concept prototype.
+
+   The palette, the faces, the glass cards and the radial ground are lifted from
+   public/index.html rather than invented, because the brief is to match the live
+   site. One committed light world, painted explicitly so it holds on any host
+   background: upiri.vercel.app has no dark mode and this has to read as the
+   same product.
+   --------------------------------------------------------------------------- */
+:root{
+  --ground:#EDF2F8;
+  --ink:#1D1B4B;          /* display */
+  --ink-2:#2C2A6B;        /* headings, controls */
+  --body:#4A4880;         /* running text */
+  --muted:#69679C;        /* captions */
+  --muted-2:#6966A4;
+  --line:rgba(44,42,107,0.12);
+  --card:rgba(255,255,255,0.78);
+  --card-solid:#fff;
+  --card-edge:rgba(255,255,255,0.9);
+  --card-shadow:0 24px 56px -28px rgba(29,27,75,0.3);
+  --chip:#E7E7F4;
+  --chip-hover:#DAD9EE;
+  --accent:#F5821F;       /* conversion, and only conversion */
+  --accent-2:#FFA452;
+  --accent-ink:#A95508;
+  --accent-wash:#FDEBD9;
+  --ai:#5E82E8;           /* every surface where Uppi is speaking */
+  --ai-wash:#EAF2FB;
+  --ai-ink:#2C4C9B;
+  --ok:#27784C; --ok-wash:#E3F2E9;
+  --alert:#BE3A2F; --alert-ink:#8A2E26; --alert-wash:#FBE7E5; --alert-edge:rgba(206,68,56,0.28);
+  --r-card:26px; --r-pill:999px;
+  --step:clamp(16px,2vw,22px);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1000px 640px at 88% -8%, rgba(245,130,31,0.10), transparent 60%),
+    radial-gradient(1100px 760px at -12% 34%, rgba(94,130,232,0.13), transparent 62%),
+    radial-gradient(900px 640px at 60% 112%, rgba(44,42,107,0.09), transparent 60%),
+    var(--ground);
+  background-attachment:fixed;
+}
+h1,h2,h3,.display{font-family:'Bricolage Grotesque','Inter',system-ui,sans-serif;letter-spacing:-0.025em;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:var(--ink-2);text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+.tnum{font-variant-numeric:tabular-nums}
+.short-cta{display:none}
+
+/* ---- shell ---- */
+.wrap{max-width:1150px;margin:0 auto;padding:0 24px}
+header.bar{position:sticky;top:0;z-index:60;padding:14px 0 10px;
+  background:linear-gradient(180deg,rgba(237,242,248,0.94) 62%,rgba(237,242,248,0));backdrop-filter:blur(10px)}
+.pill{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.74);
+  backdrop-filter:blur(22px);border:1px solid var(--card-edge);border-radius:var(--r-pill);
+  padding:8px 10px 8px 16px;box-shadow:0 18px 50px -18px rgba(29,27,75,0.38)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .word{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;
+  letter-spacing:-0.02em;white-space:nowrap;color:var(--ink)}
+.brand .te{font-family:'Noto Sans Telugu',sans-serif;font-size:13px;font-weight:600;color:var(--accent)}
+.brand .unit{display:flex;flex-direction:column;justify-content:center;gap:2px;line-height:1.15;
+  padding-left:9px;margin-left:2px;border-left:1px solid rgba(44,42,107,0.16)}
+.brand .unit b{font-size:11.5px;font-weight:800;color:var(--ink-2);white-space:nowrap}
+.brand .unit span{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted-2)}
+.bar .spacer{flex:1}
+.tag{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:var(--r-pill);
+  background:var(--ai-wash);color:var(--ai-ink);font-size:11.5px;font-weight:800;
+  letter-spacing:0.07em;text-transform:uppercase;white-space:nowrap}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 24px;
+  border-radius:var(--r-pill);font-size:14.5px;font-weight:700;transition:transform .16s ease,background .16s ease;
+  min-height:46px}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:0 12px 30px -10px rgba(245,130,31,0.65)}
+.btn-primary:hover{color:#fff}
+.btn-ghost{color:var(--ink-2);background:rgba(255,255,255,0.9);border:1.5px solid rgba(44,42,107,0.14)}
+.btn-ghost:hover{background:var(--chip)}
+.btn-quiet{color:var(--ink-2);background:rgba(44,42,107,0.06);border:1px solid var(--line);
+  padding:10px 18px;font-size:13px;min-height:40px}
+.btn-link{color:var(--ink-2);text-decoration:underline;font-weight:700;font-size:13.5px;padding:6px 2px}
+.btn-sm{padding:9px 17px;font-size:13px;min-height:40px}
+
+/* ---- cards ---- */
+.card{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--card-edge);
+  border-radius:var(--r-card);box-shadow:var(--card-shadow)}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+
+/* ---- screens ---- */
+main{padding:8px 0 96px}
+.screen{display:none;animation:rise .4s cubic-bezier(.16,1,.3,1) both}
+.screen.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ---- hero ---- */
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:center;padding:34px 0 12px}
+.hero h1{font-weight:800;font-size:clamp(31px,4.6vw,54px);line-height:1.04;color:var(--ink);margin:16px 0 0}
+.hero .sub{font-size:clamp(16px,1.5vw,18.5px);line-height:1.62;color:var(--body);margin:18px 0 0;max-width:60ch}
+.trust{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.trust span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--ink-2);
+  background:rgba(255,255,255,0.72);border:1px solid var(--card-edge);padding:8px 14px;border-radius:var(--r-pill)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex:none}
+.stage{display:flex;justify-content:center;align-items:flex-end}
+.stage svg{width:min(240px,52vw);height:auto;display:block;filter:drop-shadow(0 28px 40px rgba(29,27,75,0.22))}
+@media (prefers-reduced-motion:no-preference){
+  .stage svg{animation:bob 5.4s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+}
+
+/* ---- entry cards ---- */
+.entries{margin-top:34px}
+.entry{display:flex;flex-direction:column;gap:12px;text-align:left;padding:26px;border-radius:var(--r-card);
+  background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--card-edge);
+  box-shadow:var(--card-shadow);transition:transform .18s ease,box-shadow .18s ease;height:100%}
+.entry:hover{transform:translateY(-4px);box-shadow:0 30px 64px -30px rgba(29,27,75,0.42)}
+.entry .ico{width:52px;height:52px;border-radius:17px;display:flex;align-items:center;justify-content:center;flex:none}
+.entry h3{font-weight:800;font-size:18.5px;line-height:1.25;color:var(--ink-2)}
+.entry p{font-size:13.5px;line-height:1.6;color:var(--body);flex:1}
+.entry .go{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:800;color:var(--accent-ink)}
+.entry:hover .go{gap:11px}
+.e1 .ico{background:var(--ai-wash);color:var(--ai-ink)}
+.e2 .ico{background:var(--chip);color:var(--ink-2)}
+.e3 .ico{background:var(--ok-wash);color:var(--ok)}
+.e4 .ico{background:var(--accent-wash);color:var(--accent-ink)}
+
+/* ---- section furniture ---- */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--muted-2)}
+.h-lead{font-weight:800;font-size:clamp(25px,3.4vw,38px);line-height:1.1;color:var(--ink);margin:12px 0 0}
+.lead-sub{font-size:16px;line-height:1.65;color:var(--body);margin:14px 0 0;max-width:64ch}
+.back{display:flex;width:fit-content;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--muted);
+  padding:8px 2px;margin-bottom:6px}
+.back:hover{color:var(--ink-2)}
+.step-rail{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:26px 0 0}
+.step-rail i{font-style:normal;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;
+  color:var(--muted);padding:6px 12px;border-radius:var(--r-pill);background:rgba(255,255,255,0.6);
+  border:1px solid var(--card-edge)}
+.step-rail i.now{color:var(--ai-ink);background:var(--ai-wash);border-color:transparent}
+.step-rail i.done{color:var(--ok);background:var(--ok-wash);border-color:transparent}
+.step-rail b{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:10.5px;background:rgba(44,42,107,0.1)}
+.step-rail i.now b{background:var(--ai);color:#fff}
+.step-rail i.done b{background:var(--ok);color:#fff}
+
+/* ---- option pills (findings / procedures / symptoms) ---- */
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px}
+.opt{text-align:left;padding:17px 19px;border-radius:20px;background:rgba(255,255,255,0.8);
+  border:1.5px solid var(--line);transition:border-color .15s ease,transform .15s ease,background .15s ease}
+.opt:hover{border-color:var(--ai);transform:translateY(-2px);background:#fff}
+.opt[aria-pressed="true"]{border-color:var(--ai);background:var(--ai-wash);box-shadow:0 0 0 3px rgba(94,130,232,0.16)}
+.opt b{display:block;font-size:14.5px;font-weight:700;color:var(--ink-2);line-height:1.3}
+.opt span{display:block;font-size:12.5px;line-height:1.5;color:var(--muted);margin-top:5px}
+.opts.compact{grid-template-columns:repeat(4,1fr)}
+.opts.compact .opt{padding:14px 16px}
+
+/* ---- upload ---- */
+.drop{margin-top:24px;padding:36px 28px;border-radius:var(--r-card);border:2px dashed rgba(94,130,232,0.42);
+  background:rgba(255,255,255,0.62);text-align:center;transition:background .15s ease,border-color .15s ease}
+.drop.hot{border-color:var(--ai);background:var(--ai-wash)}
+.methods{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.method{padding:22px 18px;border-radius:20px;background:var(--card-solid);border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;transition:transform .16s ease}
+.method:hover{transform:translateY(-3px)}
+.method b{font-size:14.5px;font-weight:700;color:var(--ink-2)}
+.method span{font-size:11.5px;line-height:1.5;color:var(--muted)}
+.filelist{margin-top:18px;display:flex;flex-direction:column;gap:9px}
+.file{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:16px;background:#fff;
+  border:1px solid var(--line)}
+.file .nm{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--ink-2);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.file .st{font-size:11.5px;font-weight:800;color:var(--ok);letter-spacing:0.04em;text-transform:uppercase}
+.privacy{margin-top:16px;font-size:12.5px;line-height:1.6;color:var(--muted);max-width:62ch}
+
+/* ---- Uppi speaking ---- */
+.says{display:flex;gap:16px;align-items:flex-start;margin-top:26px}
+.says .mini{width:74px;flex:none}
+.says .mini svg{width:100%;height:auto;display:block}
+.bubble{flex:1;background:var(--ai-wash);border:1px solid rgba(94,130,232,0.24);border-radius:22px;
+  border-top-left-radius:6px;padding:20px 22px}
+.bubble .who{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
+.bubble .who b{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:var(--ink-2)}
+.bubble .who span{font-size:11px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--ai-ink)}
+.bubble p{font-size:14.5px;line-height:1.7;color:var(--body)}
+.bubble p+p{margin-top:11px}
+
+/* ---- working ---- */
+.working{display:flex;align-items:center;gap:14px;margin-top:22px;padding:18px 22px;border-radius:20px;
+  background:var(--ai-wash);border:1px solid rgba(94,130,232,0.24)}
+.working .txt{font-size:14.5px;font-weight:600;color:var(--ai-ink)}
+.pulse{display:flex;gap:5px}
+.pulse i{width:8px;height:8px;border-radius:50%;background:var(--ai);opacity:.35}
+@media (prefers-reduced-motion:no-preference){
+  .pulse i{animation:blip 1.1s ease-in-out infinite}
+  .pulse i:nth-child(2){animation-delay:.16s}.pulse i:nth-child(3){animation-delay:.32s}
+  @keyframes blip{0%,100%{opacity:.28;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}
+}
+
+/* ---- result ---- */
+.result{margin-top:26px;padding:30px 32px;border-radius:var(--r-card);background:var(--card-solid);
+  border:1px solid var(--card-edge);box-shadow:var(--card-shadow)}
+.finding{margin-top:18px;padding:22px 24px;border-radius:20px;background:var(--ai-wash);
+  border-left:4px solid var(--ai)}
+.finding .lbl{font-size:11.5px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--ai-ink)}
+.finding p{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(18px,2.2vw,23px);
+  line-height:1.32;color:var(--ink);margin-top:9px}
+details.fold{margin-top:12px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,0.7);
+  overflow:hidden}
+details.fold summary{list-style:none;cursor:pointer;padding:17px 20px;display:flex;align-items:center;gap:12px;
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:var(--ink-2)}
+details.fold summary::-webkit-details-marker{display:none}
+details.fold summary::after{content:"";margin-left:auto;width:9px;height:9px;flex:none;
+  border-right:2.4px solid var(--muted);border-bottom:2.4px solid var(--muted);transform:rotate(45deg);
+  transition:transform .18s ease}
+details.fold[open] summary::after{transform:rotate(-135deg)}
+details.fold .in{padding:0 20px 20px 20px;font-size:14px;line-height:1.72;color:var(--body)}
+details.fold .in ul{margin:0;padding-left:20px}
+details.fold .in li+li{margin-top:7px}
+.level{display:inline-flex;align-items:center;gap:9px;margin-top:20px;padding:11px 18px;border-radius:var(--r-pill);
+  font-size:13.5px;font-weight:700}
+.level.reassuring{background:var(--ok-wash);color:var(--ok)}
+.level.worth_discussing{background:var(--chip);color:var(--ink-2)}
+.level.specialist_review{background:var(--accent-wash);color:var(--accent-ink)}
+.level.urgent_assessment{background:var(--alert-wash);color:var(--alert)}
+.note{margin-top:18px;padding:15px 18px;border-radius:16px;background:rgba(44,42,107,0.045);
+  border:1px solid var(--line);font-size:12.5px;line-height:1.65;color:var(--muted)}
+
+/* ---- urgent ---- */
+.urgent{margin-top:26px;padding:30px 32px;border-radius:var(--r-card);background:linear-gradient(135deg,#FBE7E5,#FDF1EC);
+  border:1px solid var(--alert-edge)}
+.urgent h2{font-weight:800;font-size:clamp(22px,2.8vw,29px);color:var(--ink);margin-top:10px}
+.urgent p{font-size:15px;line-height:1.66;color:var(--alert-ink);margin-top:12px;max-width:60ch}
+.urgent .row{display:flex;flex-wrap:wrap;gap:11px;margin-top:20px}
+.btn-alert{color:#fff;background:var(--alert);box-shadow:0 12px 30px -10px rgba(190,58,47,0.6)}
+.btn-alert:hover{color:#fff}
+
+/* ---- conversion ---- */
+.convert{margin-top:30px;padding:32px;border-radius:var(--r-card);background:var(--card);
+  backdrop-filter:blur(16px);border:1px solid var(--card-edge);box-shadow:var(--card-shadow)}
+.offers{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:22px}
+.offer{padding:24px;border-radius:22px;background:#fff;border:1px solid var(--line);display:flex;
+  flex-direction:column;gap:10px}
+.offer.lead{border-color:rgba(245,130,31,0.4);box-shadow:0 0 0 3px rgba(245,130,31,0.09)}
+.offer h4{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:var(--ink-2);margin:0}
+.offer p{font-size:13.5px;line-height:1.6;color:var(--body);flex:1}
+.price{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.price .now{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:27px;color:var(--ink)}
+.price .was{font-size:13px;color:var(--muted);text-decoration:line-through}
+.price .save{font-size:11.5px;font-weight:800;color:var(--ok);background:var(--ok-wash);
+  padding:4px 10px;border-radius:var(--r-pill)}
+.free{font-size:11.5px;font-weight:800;color:var(--ok);background:var(--ok-wash);padding:4px 10px;
+  border-radius:var(--r-pill)}
+
+/* ---- form ---- */
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:22px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.wide{grid-column:1/-1}
+.field label{font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.field input,.field select,.field textarea{padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);
+  background:#fff;font-size:14px;min-height:46px}
+.field textarea{min-height:92px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ai);outline:none;
+  box-shadow:0 0 0 3px rgba(94,130,232,0.16)}
+.consent{grid-column:1/-1;font-size:12.5px;line-height:1.6;color:var(--muted)}
+.done{margin-top:24px;padding:28px 30px;border-radius:var(--r-card);background:var(--ok-wash);
+  border:1px solid rgba(39,120,76,0.22)}
+.done h3{font-weight:800;font-size:22px;color:#1E5C3B}
+.done p{font-size:14.5px;line-height:1.66;color:#2E5A44;margin-top:9px}
+
+/* ---- footer ---- */
+footer{border-top:1px solid var(--line);margin-top:60px;padding:30px 0 40px}
+footer p{font-size:12.5px;line-height:1.7;color:var(--muted);max-width:78ch}
+footer p+p{margin-top:11px}
+.proto{display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:var(--r-pill);
+  background:var(--chip);color:var(--ink-2);font-size:12px;font-weight:800;letter-spacing:0.05em;
+  text-transform:uppercase;margin-bottom:18px}
+
+
+/* ---------------------------------------------------------------------------
+   Phase 2 — the expertise layer.
+
+   This sits BETWEEN Uppi's explanation and the booking options, and it is the
+   whole point of the phase: a patient should reach the CTA already knowing
+   which team handles this particular finding and what that team can do. It is
+   built from the same tokens as everything above it so it reads as part of the
+   answer rather than an advert bolted onto the end of one.
+   --------------------------------------------------------------------------- */
+.why{margin-top:44px;padding:38px 34px;border-radius:var(--r-card);background:var(--card);
+  backdrop-filter:blur(16px);border:1px solid var(--card-edge);box-shadow:var(--card-shadow)}
+.why .claim{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+  font-size:clamp(19px,2.2vw,25px);line-height:1.28;color:var(--ai-ink);margin:14px 0 0;max-width:34ch}
+.why .claim em{font-style:normal;color:var(--ink)}
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+.pillar{padding:22px;border-radius:20px;background:#fff;border:1px solid var(--line)}
+.pillar .ico{width:40px;height:40px;border-radius:13px;background:var(--ai-wash);color:var(--ai-ink);
+  display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.pillar b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px;
+  color:var(--ink-2)}
+.pillar span{display:block;font-size:13px;line-height:1.6;color:var(--body);margin-top:7px}
+.chain{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:26px;padding-top:22px;
+  border-top:1px solid var(--line)}
+.chain i{font-style:normal;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;
+  color:var(--ink-2)}
+.chain s{text-decoration:none;color:var(--ai);font-weight:800}
+
+/* the condition-specific module */
+.exp{margin-top:30px;padding:32px;border-radius:var(--r-card);background:var(--card-solid);
+  border:1px solid var(--card-edge);box-shadow:var(--card-shadow)}
+.exp .cond{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(20px,2.4vw,27px);
+  line-height:1.25;color:var(--ink);margin:12px 0 0;max-width:26ch}
+.exp h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:var(--ink-2);
+  margin:30px 0 0}
+.exp h3+.hint{font-size:12.5px;line-height:1.55;color:var(--muted);margin-top:5px;max-width:60ch}
+.rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:14px 2px 6px;margin:0 -2px;
+  scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.rail>*{scroll-snap-align:start}
+.team{flex:0 0 232px;padding:18px 20px;border-radius:18px;background:rgba(255,255,255,0.85);
+  border:1px solid var(--line);display:flex;flex-direction:column;gap:7px}
+.team b{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink-2)}
+.team span{font-size:12.5px;line-height:1.55;color:var(--body)}
+.team .tick{width:26px;height:26px;border-radius:9px;background:var(--ai-wash);color:var(--ai-ink);
+  display:flex;align-items:center;justify-content:center;margin-bottom:3px}
+.caps{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.cap{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--r-pill);
+  background:var(--chip);color:var(--ink-2);font-size:13px;font-weight:700;border:1px solid transparent;
+  transition:background .15s ease,transform .15s ease}
+.cap:hover{background:var(--chip-hover);transform:translateY(-1px)}
+.cap svg{color:var(--ai)}
+.proof{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.stat{padding:18px;border-radius:18px;background:var(--ai-wash);border:1px solid rgba(94,130,232,0.2)}
+.stat b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;
+  color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+.stat span{display:block;font-size:12px;line-height:1.5;color:var(--ai-ink);margin-top:7px;font-weight:600}
+.exp .foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:28px;padding-top:24px;
+  border-top:1px solid var(--line)}
+.empower{margin-top:16px;font-size:12.5px;line-height:1.65;color:var(--muted);max-width:66ch}
+
+@media (max-width:980px){
+  .pillars{grid-template-columns:repeat(2,1fr)}
+  .proof{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .why{padding:26px 20px}
+  .exp{padding:24px 20px}
+  .pillars{grid-template-columns:1fr}
+  .team{flex-basis:78vw}
+  /* the CTA follows the reader down the expertise module on a phone, so the
+     way out is never a scroll away */
+  .exp .foot{position:sticky;bottom:12px;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);
+    padding:14px;margin-left:-6px;margin-right:-6px;border-radius:18px;border:1px solid var(--card-edge);
+    box-shadow:0 -8px 30px -18px rgba(29,27,75,0.5)}
+}
+
+/* ---- responsive ---- */
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;gap:18px}
+  /* the headline leads on a phone; Uppi follows it rather than pushing the
+     whole proposition below the fold */
+  .stage{justify-content:center}
+  .stage svg{width:min(148px,34vw)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .opts{grid-template-columns:repeat(2,1fr)}
+  .opts.compact{grid-template-columns:repeat(2,1fr)}
+  .offers{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  .pill{padding:8px 8px 8px 13px;gap:8px}
+  .bar .tag{display:none}
+  .brand .word{font-size:17px}
+  .full-cta{display:none}
+  .short-cta{display:inline}
+  .g4,.g3,.g2{grid-template-columns:1fr}
+  .opts,.opts.compact{grid-template-columns:1fr}
+  .methods{grid-template-columns:1fr}
+  .form{grid-template-columns:1fr}
+  .result,.convert,.urgent{padding:24px 20px}
+  .brand .unit{display:none}
+  .says .mini{width:50px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+
+<script>window.__UPPI_RIG = "<svg viewBox=\"0 0 372 660\" xmlns=\"http://www.w3.org/2000/svg\" data-uppi=\"avatar\" role=\"img\" focusable=\"false\" aria-label=\"Uppi, a friendly pair of lungs in a navy Yashoda hoodie\"><title>Uppi, your lung partner</title><defs><radialGradient id=\"RIGID-lobeL\" cx=\"0.34\" cy=\"0.3\" r=\"0.84\"><stop offset=\"0\" stop-color=\"#F8C7B9\" stop-opacity=\"1\"></stop><stop offset=\"0.3\" stop-color=\"#F7C4B7\" stop-opacity=\"1\"></stop><stop offset=\"0.66\" stop-color=\"#EFA294\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#C9705F\" stop-opacity=\"1\"></stop></radialGradient><radialGradient id=\"RIGID-lobeR\" cx=\"0.44\" cy=\"0.28\" r=\"0.88\"><stop offset=\"0\" stop-color=\"#F8C6B9\" stop-opacity=\"1\"></stop><stop offset=\"0.36\" stop-color=\"#F7C4B7\" stop-opacity=\"1\"></stop><stop offset=\"0.74\" stop-color=\"#EFA294\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#C9705F\" stop-opacity=\"1\"></stop></radialGradient><linearGradient id=\"RIGID-trachea\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#FBDDD4\" stop-opacity=\"1\"></stop><stop offset=\"0.28\" stop-color=\"#EDA396\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#DC8877\" stop-opacity=\"1\"></stop></linearGradient><linearGradient id=\"RIGID-hood\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#2E3F78\" stop-opacity=\"1\"></stop><stop offset=\"0.42\" stop-color=\"#22305F\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#19224A\" stop-opacity=\"1\"></stop></linearGradient><linearGradient id=\"RIGID-sleeve\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#2E3F78\" stop-opacity=\"1\"></stop><stop offset=\"0.55\" stop-color=\"#22305F\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#121A38\" stop-opacity=\"1\"></stop></linearGradient><linearGradient id=\"RIGID-trouser\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#DCBB8A\" stop-opacity=\"1\"></stop><stop offset=\"0.4\" stop-color=\"#C9A26B\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#AC8751\" stop-opacity=\"1\"></stop></linearGradient><linearGradient id=\"RIGID-shoe\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#2E3F78\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#121A38\" stop-opacity=\"1\"></stop></linearGradient><linearGradient id=\"RIGID-sole\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#FFFAF2\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#DCCBB4\" stop-opacity=\"1\"></stop></linearGradient><radialGradient id=\"RIGID-hand\" cx=\"0.36\" cy=\"0.3\" r=\"0.85\"><stop offset=\"0\" stop-color=\"#F7C4B7\" stop-opacity=\"1\"></stop><stop offset=\"0.6\" stop-color=\"#EFA294\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#E08877\" stop-opacity=\"1\"></stop></radialGradient><radialGradient id=\"RIGID-iris\" cx=\"0.38\" cy=\"0.32\" r=\"0.78\"><stop offset=\"0\" stop-color=\"#9A5C2E\" stop-opacity=\"1\"></stop><stop offset=\"0.55\" stop-color=\"#6E3B1C\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#4A2510\" stop-opacity=\"1\"></stop></radialGradient><radialGradient id=\"RIGID-blush\" cx=\"0.5\" cy=\"0.5\" r=\"0.5\"><stop offset=\"0\" stop-color=\"#E98879\" stop-opacity=\"0.55\"></stop><stop offset=\"1\" stop-color=\"#E98879\" stop-opacity=\"0\"></stop></radialGradient><radialGradient id=\"RIGID-shadow\" cx=\"0.5\" cy=\"0.5\" r=\"0.5\"><stop offset=\"0\" stop-color=\"#1D1B4B\" stop-opacity=\"0.34\"></stop><stop offset=\"0.6\" stop-color=\"#1D1B4B\" stop-opacity=\"0.15\"></stop><stop offset=\"1\" stop-color=\"#1D1B4B\" stop-opacity=\"0\"></stop></radialGradient><radialGradient id=\"RIGID-mouthDepth\" cx=\"0.5\" cy=\"0.26\" r=\"0.82\"><stop offset=\"0\" stop-color=\"#5E1D25\" stop-opacity=\"1\"></stop><stop offset=\"1\" stop-color=\"#7C2A33\" stop-opacity=\"1\"></stop></radialGradient><clipPath id=\"RIGID-lobeL\"><path d=\"M186 148 C184 122 172 104 148 101 C110 98 74 134 72 184 C70 226 82 262 104 284 C126 304 156 312 186 312 Z\"></path></clipPath><clipPath id=\"RIGID-lobeR\"><path d=\"M186 148 C188 122 200 104 224 101 C262 98 298 134 300 184 C302 226 290 262 268 284 C246 304 216 312 186 312 Z\"></path></clipPath><clipPath id=\"RIGID-head\"><path d=\"M186 148 C184 122 172 104 148 101 C110 98 74 134 72 184 C70 226 82 262 104 284 C126 304 156 312 186 312 C216 312 246 304 268 284 C290 262 302 226 300 184 C298 134 262 98 224 101 C200 104 188 122 186 148 Z\"></path></clipPath><clipPath id=\"RIGID-torso\"><path d=\"M186 330 C224 330 254 340 264 358 C272 374 274 420 272 466 C271 484 264 494 250 494 H122 C108 494 101 484 100 466 C98 420 100 374 108 358 C118 340 148 330 186 330 Z\"></path></clipPath></defs><ellipse data-part=\"shadow\" cx=\"186\" cy=\"648\" rx=\"112\" ry=\"16\" fill=\"url(#RIGID-shadow)\"></ellipse><g data-part=\"legs\"><g data-part=\"leg-left\" style=\"transform-origin:148px 490px;will-change:transform\"><path d=\"M114 486 h68 v106 a12 12 0 0 1 -12 12 h-44 a12 12 0 0 1 -12 -12 Z\" fill=\"url(#RIGID-trouser)\"></path><rect x=\"117\" y=\"524\" width=\"30\" height=\"34\" rx=\"5\" fill=\"#AC8751\" opacity=\"0.42\"></rect><rect x=\"116\" y=\"520\" width=\"32\" height=\"10\" rx=\"4\" fill=\"#AC8751\" opacity=\"0.85\"></rect><path d=\"M118 572 q29 7 58 0\" fill=\"none\" stroke=\"#AC8751\" stroke-width=\"2.2\" opacity=\"0.3\" stroke-linecap=\"round\"></path><path d=\"M120 500 q27 6 54 0\" fill=\"none\" stroke=\"#AC8751\" stroke-width=\"2\" opacity=\"0.22\" stroke-linecap=\"round\"></path><path d=\"M118 596 h44 c12 0 20 9 20 19 v7 h-70 v-8 c0 -10 2 -18 6 -18 Z\" fill=\"url(#RIGID-shoe)\"></path><path d=\"M166 600 c12 2 18 10 18 16 v6 h-22 Z\" fill=\"#F1E5D3\" opacity=\"0.95\"></path><rect x=\"114\" y=\"620\" width=\"68\" height=\"24\" rx=\"12\" fill=\"url(#RIGID-sole)\"></rect><rect x=\"122\" y=\"602\" width=\"34\" height=\"6\" rx=\"3\" fill=\"#F5821F\"></rect><path d=\"M126 611 h26 M130 617 h20\" stroke=\"#F1E5D3\" stroke-width=\"2.4\" stroke-linecap=\"round\" opacity=\"0.8\"></path></g><g data-part=\"leg-right\" style=\"transform-origin:224px 490px;will-change:transform\"><path d=\"M190 486 h68 v106 a12 12 0 0 1 -12 12 h-44 a12 12 0 0 1 -12 -12 Z\" fill=\"url(#RIGID-trouser)\"></path><rect x=\"227\" y=\"524\" width=\"30\" height=\"34\" rx=\"5\" fill=\"#AC8751\" opacity=\"0.42\"></rect><rect x=\"226\" y=\"520\" width=\"32\" height=\"10\" rx=\"4\" fill=\"#AC8751\" opacity=\"0.85\"></rect><path d=\"M194 572 q29 7 58 0\" fill=\"none\" stroke=\"#AC8751\" stroke-width=\"2.2\" opacity=\"0.3\" stroke-linecap=\"round\"></path><path d=\"M196 500 q27 6 54 0\" fill=\"none\" stroke=\"#AC8751\" stroke-width=\"2\" opacity=\"0.22\" stroke-linecap=\"round\"></path><path d=\"M194 596 h44 c12 0 20 9 20 19 v7 h-70 v-8 c0 -10 2 -18 6 -18 Z\" fill=\"url(#RIGID-shoe)\"></path><path d=\"M242 600 c12 2 18 10 18 16 v6 h-22 Z\" fill=\"#F1E5D3\" opacity=\"0.95\"></path><rect x=\"190\" y=\"620\" width=\"68\" height=\"24\" rx=\"12\" fill=\"url(#RIGID-sole)\"></rect><rect x=\"198\" y=\"602\" width=\"34\" height=\"6\" rx=\"3\" fill=\"#F5821F\"></rect><path d=\"M202 611 h26 M206 617 h20\" stroke=\"#F1E5D3\" stroke-width=\"2.4\" stroke-linecap=\"round\" opacity=\"0.8\"></path></g></g><g data-part=\"body\" style=\"transform-origin:186px 494px;will-change:transform\"><path d=\"M126 350 C130 322 156 310 186 310 C216 310 242 322 246 350 C228 364 144 364 126 350 Z\" fill=\"#121A38\"></path><path d=\"M186 330 C224 330 254 340 264 358 C272 374 274 420 272 466 C271 484 264 494 250 494 H122 C108 494 101 484 100 466 C98 420 100 374 108 358 C118 340 148 330 186 330 Z\" fill=\"url(#RIGID-hood)\"></path><g clip-path=\"url(#RIGID-torso)\"><ellipse cx=\"186\" cy=\"336\" rx=\"96\" ry=\"34\" fill=\"#121A38\" opacity=\"0.6\"></ellipse><path d=\"M100 358 C110 340 148 330 186 330 L186 494 H122 C108 494 101 484 100 466 Z\" fill=\"#2E3F78\" opacity=\"0.16\"></path><path d=\"M272 358 C262 340 224 330 186 330 L186 494 H250 C264 494 271 484 272 466 Z\" fill=\"#121A38\" opacity=\"0.24\"></path><rect x=\"96\" y=\"478\" width=\"180\" height=\"18\" fill=\"#121A38\" opacity=\"0.42\"></rect></g><path d=\"M154 330 C164 350 208 350 218 330 C208 322 164 322 154 330 Z\" fill=\"#2E3F78\"></path><path d=\"M168 338 C166 352 165 364 166 376 M204 338 C206 352 207 364 206 376\" fill=\"none\" stroke=\"#F5821F\" stroke-width=\"4.6\" stroke-linecap=\"round\"></path><circle cx=\"166\" cy=\"380\" r=\"4.2\" fill=\"#D96C11\"></circle><circle cx=\"206\" cy=\"380\" r=\"4.2\" fill=\"#D96C11\"></circle><path d=\"M114 444 C140 438 232 438 258 444 L252 488 H120 Z\" fill=\"#2E3F78\" opacity=\"0.42\"></path><path d=\"M114 444 C140 438 232 438 258 444\" fill=\"none\" stroke=\"#121A38\" stroke-width=\"2.4\" opacity=\"0.5\"></path><g fill=\"#F5821F\"><ellipse cx=\"200.04\" cy=\"420\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(0 200.04 420)\"></ellipse><ellipse cx=\"195.92777920785912\" cy=\"429.92777920785915\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(45 195.92777920785912 429.92777920785915)\"></ellipse><ellipse cx=\"186\" cy=\"434.04\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(90 186 434.04)\"></ellipse><ellipse cx=\"176.07222079214088\" cy=\"429.92777920785915\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(135 176.07222079214088 429.92777920785915)\"></ellipse><ellipse cx=\"171.96\" cy=\"420\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(180 171.96 420)\"></ellipse><ellipse cx=\"176.07222079214088\" cy=\"410.07222079214085\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(225 176.07222079214088 410.07222079214085)\"></ellipse><ellipse cx=\"186\" cy=\"405.96\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(270 186 405.96)\"></ellipse><ellipse cx=\"195.92777920785912\" cy=\"410.07222079214085\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(315 195.92777920785912 410.07222079214085)\"></ellipse><ellipse cx=\"200.04\" cy=\"420\" rx=\"13.5\" ry=\"7.0200000000000005\" transform=\"rotate(360 200.04 420)\"></ellipse><circle cx=\"186\" cy=\"420\" r=\"5.13\" fill=\"#fff\" opacity=\"0.92\"></circle></g></g><rect x=\"168\" y=\"300\" width=\"36\" height=\"26\" rx=\"13\" fill=\"#E08877\"></rect><g data-part=\"head\" style=\"transform-origin:186px 320px;will-change:transform\"><g><rect x=\"166.9\" y=\"40\" width=\"38.2\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"170.9\" y=\"41.8\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"166.9\" y=\"48.8\" width=\"38.2\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"166.2\" y=\"52.4\" width=\"39.6\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"170.2\" y=\"54.199999999999996\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"166.2\" y=\"61.2\" width=\"39.6\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"165.5\" y=\"64.8\" width=\"41\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"169.5\" y=\"66.6\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"165.5\" y=\"73.6\" width=\"41\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"164.8\" y=\"77.2\" width=\"42.4\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"168.8\" y=\"79\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"164.8\" y=\"86\" width=\"42.4\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"164.1\" y=\"89.6\" width=\"43.8\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"168.1\" y=\"91.39999999999999\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"164.1\" y=\"98.39999999999999\" width=\"43.8\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"163.4\" y=\"102\" width=\"45.2\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"167.4\" y=\"103.8\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"163.4\" y=\"110.8\" width=\"45.2\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"162.7\" y=\"114.4\" width=\"46.6\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"166.7\" y=\"116.2\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"162.7\" y=\"123.2\" width=\"46.6\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"162\" y=\"126.8\" width=\"48\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"166\" y=\"128.6\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"162\" y=\"135.6\" width=\"48\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect><rect x=\"161.3\" y=\"139.2\" width=\"49.4\" height=\"9.6\" rx=\"4.8\" fill=\"url(#RIGID-trachea)\"></rect><rect x=\"165.3\" y=\"141\" width=\"7.5\" height=\"6\" rx=\"3\" fill=\"#FBDDD4\" opacity=\"0.6\"></rect><rect x=\"161.3\" y=\"148\" width=\"49.4\" height=\"2.4\" rx=\"1.2\" fill=\"#C9705F\" opacity=\"0.26\"></rect></g><path d=\"M186 148 C184 122 172 104 148 101 C110 98 74 134 72 184 C70 226 82 262 104 284 C126 304 156 312 186 312 C216 312 246 304 268 284 C290 262 302 226 300 184 C298 134 262 98 224 101 C200 104 188 122 186 148 Z\" fill=\"url(#RIGID-lobeL)\"></path><g clip-path=\"url(#RIGID-head)\"><ellipse cx=\"118\" cy=\"158\" rx=\"44\" ry=\"30\" fill=\"#FFF3ED\" opacity=\"0.3\" transform=\"rotate(-24 118 158)\"></ellipse><ellipse cx=\"252\" cy=\"156\" rx=\"40\" ry=\"26\" fill=\"#FFF3ED\" opacity=\"0.22\" transform=\"rotate(20 252 156)\"></ellipse><path d=\"M72 184 C70 226 82 262 104 284 C92 244 88 208 92 170 Z\" fill=\"#C9705F\" opacity=\"0.16\"></path><path d=\"M300 184 C302 226 290 262 268 284 C280 244 284 208 280 170 Z\" fill=\"#C9705F\" opacity=\"0.2\"></path><path d=\"M186 150 C184 164 183 176 184 190\" fill=\"none\" stroke=\"#C9705F\" stroke-width=\"3.4\" stroke-linecap=\"round\" opacity=\"0.3\"></path><path d=\"M187 148 C190 162 191 174 190 188\" fill=\"none\" stroke=\"#FFEDE5\" stroke-width=\"2.6\" stroke-linecap=\"round\" opacity=\"0.5\"></path><ellipse cx=\"186\" cy=\"324\" rx=\"116\" ry=\"24\" fill=\"#C9705F\" opacity=\"0.22\"></ellipse><g fill=\"none\" stroke=\"#FBDDD4\" stroke-linecap=\"round\" opacity=\"0.62\"><g stroke-width=\"4.6\"><path d=\"M186 134 L186 160\"></path><path d=\"M186 158 C166 168 146 178 128 192\"></path><path d=\"M186 158 C206 168 226 178 244 192\"></path></g><g stroke-width=\"2.4\"><path d=\"M128 192 C112 176 100 160 92 144\"></path><path d=\"M128 192 C118 212 110 234 106 254\"></path><path d=\"M106 254 C100 268 96 280 96 292\"></path><path d=\"M106 254 C112 268 116 280 118 290\"></path><path d=\"M92 144 C86 134 82 126 80 118\"></path><path d=\"M92 144 C86 150 80 158 78 166\"></path><path d=\"M118 192 C108 182 98 174 86 168\"></path><path d=\"M244 192 C260 176 272 160 280 144\"></path><path d=\"M244 192 C254 212 262 234 266 254\"></path><path d=\"M266 254 C272 268 276 280 276 292\"></path><path d=\"M266 254 C260 268 256 280 254 290\"></path><path d=\"M280 144 C286 134 290 126 292 118\"></path><path d=\"M280 144 C286 150 292 158 294 166\"></path><path d=\"M254 192 C264 182 274 174 286 168\"></path></g></g></g><ellipse cx=\"108\" cy=\"258\" rx=\"26\" ry=\"16\" fill=\"url(#RIGID-blush)\"></ellipse><ellipse cx=\"264\" cy=\"258\" rx=\"26\" ry=\"16\" fill=\"url(#RIGID-blush)\"></ellipse><g data-part=\"brow-left\" style=\"transform-box: fill-box; transform-origin: center center; will-change: transform; transform: translateY(0px) rotate(-2deg);\"><path d=\"M114 166 C122 146 148 138 174 148 C177 149 178 153 175 155 C170 152 158 150 147 152 C133 155 123 162 118 172 C116 176 112 173 114 166 Z\" fill=\"#16130F\"></path></g><g data-part=\"brow-right\" style=\"transform-box: fill-box; transform-origin: center center; will-change: transform; transform: translateY(0px) rotate(2deg);\"><path d=\"M258 166 C250 146 224 138 198 148 C195 149 194 153 197 155 C202 152 214 150 225 152 C239 155 249 162 254 172 C256 176 260 173 258 166 Z\" fill=\"#16130F\"></path></g><g transform=\"translate(146 214)\"><g data-part=\"eye\" style=\"transform-box: fill-box; transform-origin: center center; will-change: transform; transform: scaleY(1);\"><ellipse cx=\"0\" cy=\"0\" rx=\"30.5\" ry=\"33.5\" fill=\"#FFFFFF\"></ellipse><ellipse cx=\"0\" cy=\"-19\" rx=\"28\" ry=\"13\" fill=\"#E8DCE2\" opacity=\"0.5\"></ellipse><g data-part=\"look\" style=\"transform: translate(0px, 0px);\"><circle cx=\"0\" cy=\"2\" r=\"21.5\" fill=\"url(#RIGID-iris)\"></circle><circle cx=\"0\" cy=\"3\" r=\"10.5\" fill=\"#2B1408\"></circle><circle cx=\"-8\" cy=\"-9\" r=\"8\" fill=\"#fff\"></circle><circle cx=\"9\" cy=\"11\" r=\"3.8\" fill=\"#fff\" opacity=\"0.8\"></circle></g><g data-part=\"lid\" style=\"transform-box: fill-box; transform-origin: center top; will-change: transform; transform: scaleY(0);\"><ellipse cx=\"0\" cy=\"0\" rx=\"31.4\" ry=\"34.4\" fill=\"#EFA294\"></ellipse><ellipse cx=\"0\" cy=\"-7\" rx=\"31.4\" ry=\"26\" fill=\"#E08877\" opacity=\"0.32\"></ellipse><path d=\"M-22 25 q22 12 44 0\" fill=\"none\" stroke=\"#16130F\" stroke-width=\"3.2\" stroke-linecap=\"round\" opacity=\"0.85\"></path></g></g></g><g transform=\"translate(226 214)\"><g data-part=\"eye\" style=\"transform-box: fill-box; transform-origin: center center; will-change: transform; transform: scaleY(1);\"><ellipse cx=\"0\" cy=\"0\" rx=\"30.5\" ry=\"33.5\" fill=\"#FFFFFF\"></ellipse><ellipse cx=\"0\" cy=\"-19\" rx=\"28\" ry=\"13\" fill=\"#E8DCE2\" opacity=\"0.5\"></ellipse><g data-part=\"look\" style=\"transform: translate(0px, 0px);\"><circle cx=\"0\" cy=\"2\" r=\"21.5\" fill=\"url(#RIGID-iris)\"></circle><circle cx=\"0\" cy=\"3\" r=\"10.5\" fill=\"#2B1408\"></circle><circle cx=\"-8\" cy=\"-9\" r=\"8\" fill=\"#fff\"></circle><circle cx=\"9\" cy=\"11\" r=\"3.8\" fill=\"#fff\" opacity=\"0.8\"></circle></g><g data-part=\"lid\" style=\"transform-box: fill-box; transform-origin: center top; will-change: transform; transform: scaleY(0);\"><ellipse cx=\"0\" cy=\"0\" rx=\"31.4\" ry=\"34.4\" fill=\"#EFA294\"></ellipse><ellipse cx=\"0\" cy=\"-7\" rx=\"31.4\" ry=\"26\" fill=\"#E08877\" opacity=\"0.32\"></ellipse><path d=\"M-22 25 q22 12 44 0\" fill=\"none\" stroke=\"#16130F\" stroke-width=\"3.2\" stroke-linecap=\"round\" opacity=\"0.85\"></path></g></g></g><g transform=\"translate(-2.8 -38.1) scale(1.18)\"><g data-part=\"mouth\" style=\"transform-box: fill-box; transform-origin: center center; will-change: transform; transform: scale(1.04, 1);\"><path d=\"M128 253 Q160 276 192 253 Q189 277 160 284 Q131 277 128 253 Z\" data-part=\"mouth-shape\" fill=\"url(#RIGID-mouthDepth)\"></path><path d=\"\" data-part=\"mouth-tongue\" fill=\"#E4737E\"></path><path d=\"\" data-part=\"mouth-teeth\" fill=\"#FFF7F2\"></path></g></g></g><g data-part=\"arm-left\" style=\"transform-origin:112px 356px;will-change:transform\"><g data-pose=\"hip\" style=\"will-change:transform\"><path d=\"M112 356 C90 380 86 420 104 446\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"41\" stroke-linecap=\"round\"></path><rect x=\"85\" y=\"434\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(-16 104 442)\"></rect><g transform=\"translate(100 464) rotate(16) scale(0.84)\"><g><path d=\"M-20 -16 C-5 -25 13 -22 22 -11 C29 -2 28 13 20 21 C9 32 -13 31 -20 20 C-27 9 -27 -7 -20 -16 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-15 -13 C-20 -2 -20 11 -14 21\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"2.2\" stroke-linecap=\"round\" opacity=\"0.45\"></path><path d=\"M-2 -20 C7 -13 10 -2 8 9\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.8\" stroke-linecap=\"round\" opacity=\"0.32\"></path></g></g></g><g data-pose=\"rest\" style=\"will-change: transform; display: none;\"><path d=\"M112 356 C96 388 92 424 96 456\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"40\" stroke-linecap=\"round\"></path><rect x=\"77\" y=\"444\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(-4 96 452)\"></rect><g transform=\"translate(95 480) rotate(-4) scale(1)\"><g><path d=\"M-19 -14 C-7 -23 9 -23 19 -14 C27 -7 28 11 22 22 C16 34 -13 34 -20 22 C-26 11 -26 -7 -19 -14 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-16 -5 C-4 -10 7 -10 17 -5\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.42\"></path><path d=\"M-13 7 h26 M-11 17 h22\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.7\" stroke-linecap=\"round\" opacity=\"0.3\"></path></g></g></g><g data-pose=\"chin\" style=\"will-change: transform; display: none;\"><path d=\"M112 356 C96 332 90 298 98 274\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"40\" stroke-linecap=\"round\"></path><rect x=\"80\" y=\"262\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(8 99 270)\"></rect><g transform=\"translate(101 250) rotate(-12) scale(0.9)\"><g><path d=\"M-19 -14 C-7 -23 9 -23 19 -14 C27 -7 28 11 22 22 C16 34 -13 34 -20 22 C-26 11 -26 -7 -19 -14 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-16 -5 C-4 -10 7 -10 17 -5\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.42\"></path><path d=\"M-13 7 h26 M-11 17 h22\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.7\" stroke-linecap=\"round\" opacity=\"0.3\"></path></g></g></g></g><g data-part=\"arm-right\" style=\"transform-origin:262px 356px;will-change:transform\"><g data-pose=\"rest\" style=\"will-change:transform\"><path d=\"M262 356 C278 388 282 424 278 456\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"41\" stroke-linecap=\"round\"></path><rect x=\"259\" y=\"444\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(4 278 452)\"></rect><g transform=\"translate(279 480) rotate(4) scale(1)\"><g><path d=\"M-19 -14 C-7 -23 9 -23 19 -14 C27 -7 28 11 22 22 C16 34 -13 34 -20 22 C-26 11 -26 -7 -19 -14 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-16 -5 C-4 -10 7 -10 17 -5\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.42\"></path><path d=\"M-13 7 h26 M-11 17 h22\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.7\" stroke-linecap=\"round\" opacity=\"0.3\"></path></g></g></g><g data-pose=\"wave\" style=\"will-change: transform; display: none;\"><path d=\"M262 356 C302 350 324 320 328 276\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"42\" stroke-linecap=\"round\"></path><rect x=\"310\" y=\"258\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(-6 329 266)\"></rect><g transform=\"translate(331 214) rotate(8) scale(0.95)\"><g><rect x=\"-23\" y=\"-36\" width=\"14\" height=\"42\" rx=\"7\" fill=\"url(#RIGID-hand)\" transform=\"rotate(-15 -16 6)\"></rect><rect x=\"-7\" y=\"-47\" width=\"14\" height=\"53\" rx=\"7\" fill=\"url(#RIGID-hand)\" transform=\"rotate(-4 0 6)\"></rect><rect x=\"8\" y=\"-44\" width=\"14\" height=\"50\" rx=\"7\" fill=\"url(#RIGID-hand)\" transform=\"rotate(6 15 6)\"></rect><rect x=\"22\" y=\"-30\" width=\"13\" height=\"40\" rx=\"6.5\" fill=\"url(#RIGID-hand)\" transform=\"rotate(15 28.5 10)\"></rect><path d=\"M-27 22 C-40 18 -50 27 -49 40 C-48 53 -36 60 -26 54 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-28 34 C-30 17 -25 1 -17 -6 L20 -6 C29 1 32 17 30 34 C27 55 15 66 1 66 C-13 66 -25 55 -28 34 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-15 -2 v12 M0 -6 v14 M15 -3 v13\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.9\" stroke-linecap=\"round\" opacity=\"0.38\"></path><ellipse cx=\"-4\" cy=\"22\" rx=\"16\" ry=\"12\" fill=\"#F7C4B7\" opacity=\"0.3\"></ellipse></g></g></g><g data-pose=\"hip\" style=\"will-change: transform; display: none;\"><path d=\"M260 356 C288 378 292 418 262 444\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"41\" stroke-linecap=\"round\"></path><rect x=\"247\" y=\"426\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(26 266 434)\"></rect><g transform=\"translate(258 458) rotate(-20) scale(-1)\"><g><path d=\"M-20 -16 C-5 -25 13 -22 22 -11 C29 -2 28 13 20 21 C9 32 -13 31 -20 20 C-27 9 -27 -7 -20 -16 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-15 -13 C-20 -2 -20 11 -14 21\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"2.2\" stroke-linecap=\"round\" opacity=\"0.45\"></path><path d=\"M-2 -20 C7 -13 10 -2 8 9\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.8\" stroke-linecap=\"round\" opacity=\"0.32\"></path></g></g></g><g data-pose=\"point\" style=\"will-change: transform; display: none;\"><path d=\"M262 356 C296 356 322 342 338 320\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"41\" stroke-linecap=\"round\"></path><rect x=\"321\" y=\"307\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(-34 340 315)\"></rect><g transform=\"translate(352 296) rotate(40) scale(0.95)\"><g><rect x=\"-23\" y=\"-36\" width=\"14\" height=\"42\" rx=\"7\" fill=\"url(#RIGID-hand)\" transform=\"rotate(-15 -16 6)\"></rect><rect x=\"-7\" y=\"-47\" width=\"14\" height=\"53\" rx=\"7\" fill=\"url(#RIGID-hand)\" transform=\"rotate(-4 0 6)\"></rect><rect x=\"8\" y=\"-44\" width=\"14\" height=\"50\" rx=\"7\" fill=\"url(#RIGID-hand)\" transform=\"rotate(6 15 6)\"></rect><rect x=\"22\" y=\"-30\" width=\"13\" height=\"40\" rx=\"6.5\" fill=\"url(#RIGID-hand)\" transform=\"rotate(15 28.5 10)\"></rect><path d=\"M-27 22 C-40 18 -50 27 -49 40 C-48 53 -36 60 -26 54 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-28 34 C-30 17 -25 1 -17 -6 L20 -6 C29 1 32 17 30 34 C27 55 15 66 1 66 C-13 66 -25 55 -28 34 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-15 -2 v12 M0 -6 v14 M15 -3 v13\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.9\" stroke-linecap=\"round\" opacity=\"0.38\"></path><ellipse cx=\"-4\" cy=\"22\" rx=\"16\" ry=\"12\" fill=\"#F7C4B7\" opacity=\"0.3\"></ellipse></g></g></g><g data-pose=\"phone\" style=\"will-change: transform; display: none;\"><path d=\"M262 356 C298 352 318 330 322 300\" fill=\"none\" stroke=\"url(#RIGID-sleeve)\" stroke-width=\"42\" stroke-linecap=\"round\"></path><rect x=\"304\" y=\"284\" width=\"38\" height=\"16\" rx=\"8\" fill=\"#2E3F78\" transform=\"rotate(-12 323 292)\"></rect><g transform=\"translate(325 268) rotate(-8) scale(0.95)\"><g><path d=\"M-19 -14 C-7 -23 9 -23 19 -14 C27 -7 28 11 22 22 C16 34 -13 34 -20 22 C-26 11 -26 -7 -19 -14 Z\" fill=\"url(#RIGID-hand)\"></path><path d=\"M-16 -5 C-4 -10 7 -10 17 -5\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.42\"></path><path d=\"M-13 7 h26 M-11 17 h22\" fill=\"none\" stroke=\"#E08877\" stroke-width=\"1.7\" stroke-linecap=\"round\" opacity=\"0.3\"></path></g></g><g transform=\"translate(330 250) rotate(8) scale(1)\"><g><rect x=\"-17\" y=\"-30\" width=\"34\" height=\"58\" rx=\"7\" fill=\"#121A38\"></rect><rect x=\"-14\" y=\"-26\" width=\"28\" height=\"46\" rx=\"4\" fill=\"#8FA6D8\"></rect><rect x=\"-14\" y=\"-26\" width=\"28\" height=\"20\" rx=\"4\" fill=\"#B9C9EC\" opacity=\"0.7\"></rect><circle cx=\"0\" cy=\"10\" r=\"6.4\" fill=\"#F5821F\"></circle><rect x=\"-5\" y=\"22\" width=\"10\" height=\"2.6\" rx=\"1.3\" fill=\"#8FA6D8\"></rect></g></g></g></g></svg>";</script>
+<meta name="description" content="Upload a chest report or scan and let Uppi, the ŪPIRI AI Lung Navigator, explain what it says in simple language — then reach the Yashoda pulmonology team relevant to that finding.">
+<link rel="canonical" href="https://upiri.vercel.app/lungscan">
+<meta name="theme-color" content="#2C2A6B">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:site_name" content="ŪPIRI · Yashoda Hospitals">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ŪPIRI LungScan — understand your lung scan">
+<meta property="og:description" content="Uppi explains what your chest report says. Specialists decide. ŪPIRI connects you to Yashoda pulmonology care.">
+<meta property="og:url" content="https://upiri.vercel.app/lungscan">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MedicalWebPage","name":"ŪPIRI LungScan",
+"description":"An AI-assisted explanation of a chest imaging report, and the Yashoda pulmonology pathway relevant to the finding.",
+"url":"https://upiri.vercel.app/lungscan","inLanguage":"en",
+"isPartOf":{"@type":"WebSite","name":"ŪPIRI","url":"https://upiri.vercel.app/"},
+"publisher":{"@type":"MedicalOrganization","name":"Yashoda Hospitals","url":"https://www.yashodahospitals.com/"}}
+</script>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="pill">
+      <div class="brand">
+        <svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true" style="color:#2C2A6B;flex:none">
+          <g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M46 5v18c0 6-3 9-7 12"></path><path d="M54 5v18c0 6 3 9 7 12"></path>
+            <path d="M44 40c-2-9-9-13-17-8C16 39 8 57 9 73c1 12 8 19 18 17 10-2 16-11 17-24v-26z"></path>
+            <path d="M56 40c2-9 9-13 17-8 11 7 19 25 18 41-1 12-8 19-18 17-10-2-16-11-17-24v-26z"></path>
+          </g>
+          <g fill="#F5821F">
+            <path d="M35 32c-2-5-1-9 3-12 2 5 1 9-3 12z"></path><path d="M27 49c-5 2-9 1-12-3 5-2 9-1 12 3z"></path>
+            <path d="M65 32c2-5 1-9-3-12-2 5-1 9 3 12z"></path><path d="M73 49c5 2 9 1 12-3-5-2-9-1-12 3z"></path>
+          </g>
+        </svg>
+        <span class="word">ŪPIRI <span class="te">ఊపిరి</span></span>
+        <span class="unit"><b>Yashoda Hospitals</b><span>Pulmonology</span></span>
+      </div>
+      <a class="btn-link" href="https://upiri.vercel.app/" style="font-size:12.5px;white-space:nowrap">&larr; ŪPIRI</a>
+      <span class="spacer"></span>
+      <span class="tag">LungScan</span>
+      <button class="btn btn-primary btn-sm" data-go="expert"><span class="full-cta">Get expert guidance</span><span class="short-cta">Expert review</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="ls-main">
+
+  <!-- ================= HOME ================= -->
+  <section class="screen on" id="s-home" aria-labelledby="home-h">
+    <div class="hero">
+      <div>
+        <span class="tag">ŪPIRI LungScan</span>
+        <h1 id="home-h">Understand your lung scan. Know what matters. Know what to do next.</h1>
+        <p class="sub">Upload your report or scan and let Uppi, your AI Lung Navigator, explain the findings in simple language and help you decide what kind of expert guidance may be useful.</p>
+        <div class="trust">
+          <span><i class="dot"></i>Free AI preliminary review</span>
+          <span><i class="dot"></i>Secure upload</span>
+          <span><i class="dot"></i>Specialist support available</span>
+        </div>
+      </div>
+      <div class="stage" id="hero-uppi" aria-hidden="true"></div>
+    </div>
+
+    <div class="entries">
+      <h2 class="h-lead" style="font-size:clamp(21px,2.4vw,27px)">Where would you like to start?</h2>
+      <div class="grid g4" style="margin-top:20px">
+        <button class="entry e1" data-go="finding">
+          <span class="ico" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path><circle cx="11" cy="11" r="2.4"></circle></svg></span>
+          <h3>My scan found something</h3>
+          <p>A nodule, mass, fibrosis, fluid, enlarged nodes, infection or another abnormal finding was mentioned.</p>
+          <span class="go">Understand my finding <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+        </button>
+        <button class="entry e2" data-go="procedure">
+          <span class="ico" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a4 4 0 0 0 8 0V3"></path><path d="M4 3h4M12 3h4"></path><path d="M10 13v3a5 5 0 0 0 10 0v-1"></path><circle cx="20" cy="10.5" r="2.2"></circle></svg></span>
+          <h3>I've been advised a procedure</h3>
+          <p>Biopsy, bronchoscopy, EBUS, surgery, PET-CT, another scan, or further evaluation has been suggested.</p>
+          <span class="go">Understand before I proceed <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+        </button>
+        <button class="entry e3" data-go="symptoms">
+          <span class="ico" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4v4c0 1.6-.8 2.4-1.8 3.2"></path><path d="M13 4v4c0 1.6.8 2.4 1.8 3.2"></path><path d="M10 10c-.6-2.4-2.4-3.4-4.4-2C3 9.8 1.9 14.4 2.2 18.4c.3 3 2 4.8 4.6 4.3 2.6-.5 3.2-3.8 3.2-6.6z"></path><path d="M14 10c.6-2.4 2.4-3.4 4.4-2 2.6 1.8 3.7 6.4 3.4 10.4-.3 3-2 4.8-4.6 4.3-2.6-.5-3.2-3.8-3.2-6.6z"></path></svg></span>
+          <h3>My symptoms don't match my report</h3>
+          <p>My scan says one thing, but I'm still coughing, breathless, unwell, or not improving.</p>
+          <span class="go">Put my scan in context <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+        </button>
+        <button class="entry e4" data-go="expert">
+          <span class="ico" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0"></path><path d="m16.5 13.5 1.6 1.6 3-3"></path></svg></span>
+          <h3>I want an expert review</h3>
+          <p>Get my chest imaging reviewed by a pulmonology or radiology specialist.</p>
+          <span class="go">Get expert guidance <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></span>
+        </button>
+      </div>
+    </div>
+
+    <div id="why-slot"></div>
+
+    <div class="says">
+      <div class="mini" id="home-mini" aria-hidden="true"></div>
+      <div class="bubble">
+        <div class="who"><b>Uppi</b><span>AI Lung Navigator</span></div>
+        <p>Hi, I'm Uppi — your AI Lung Navigator.</p>
+        <p>I'll help you understand what your lung report says in simple language, what information may still be missing, and whether specialist guidance could be useful.</p>
+        <p>I won't replace your doctor or give you a final diagnosis.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ENTRY 1 — FINDING ================= -->
+  <section class="screen" id="s-finding" aria-labelledby="finding-h">
+    <button class="back" data-go="home">&larr; Back</button>
+    <span class="eyebrow">My scan found something</span>
+    <h2 class="h-lead" id="finding-h">What did your report mention?</h2>
+    <p class="lead-sub">Choose the option that sounds closest to what you were told. You don't need to know the medical term exactly.</p>
+    <div class="opts" id="finding-opts"></div>
+  </section>
+
+  <!-- ================= ENTRY 2 — PROCEDURE ================= -->
+  <section class="screen" id="s-procedure" aria-labelledby="proc-h">
+    <button class="back" data-go="home">&larr; Back</button>
+    <span class="eyebrow">A procedure has been advised</span>
+    <h2 class="h-lead" id="proc-h">Before you proceed, understand why.</h2>
+    <p class="lead-sub">If you've been advised a biopsy, bronchoscopy, EBUS, surgery, PET-CT, repeat CT or another procedure, Uppi can help you understand what your report says and what questions you may want to ask your specialist.</p>
+    <div class="opts compact" id="proc-opts"></div>
+    <div style="margin-top:24px"><button class="btn btn-primary" id="proc-next" disabled style="opacity:.45">Continue &rarr;</button></div>
+  </section>
+
+  <!-- ================= ENTRY 3 — SYMPTOMS ================= -->
+  <section class="screen" id="s-symptoms" aria-labelledby="sym-h">
+    <button class="back" data-go="home">&larr; Back</button>
+    <span class="eyebrow">Symptoms and the report disagree</span>
+    <h2 class="h-lead" id="sym-h">Let's put your scan in context.</h2>
+    <p class="lead-sub">Sometimes the imaging report does not fully explain how a person feels. Uppi can help you understand the report and identify what information a pulmonologist may want to review.</p>
+    <div class="opts compact" id="sym-opts"></div>
+    <div class="card" style="margin-top:26px;padding:26px">
+      <h3 style="font-weight:800;font-size:18px;color:#2C2A6B">A few things that help Uppi read your report in context</h3>
+      <div class="form" id="sym-form"></div>
+    </div>
+    <div style="margin-top:24px"><button class="btn btn-primary" id="sym-next" disabled style="opacity:.45">Continue &rarr;</button></div>
+  </section>
+
+  <!-- ================= UPLOAD ================= -->
+  <section class="screen" id="s-upload" aria-labelledby="up-h">
+    <button class="back" id="up-back">&larr; Back</button>
+    <span class="eyebrow" id="up-eyebrow">Preliminary review</span>
+    <h2 class="h-lead" id="up-h">Let Uppi take a first look.</h2>
+    <p class="lead-sub">Upload your report, scan, or a clear photo of the report. Uppi will explain what the report is saying and highlight what may be worth discussing with a specialist.</p>
+    <div class="step-rail" aria-label="Progress">
+      <i class="done"><b>1</b>Chosen</i><i class="now"><b>2</b>Upload</i><i><b>3</b>Uppi's review</i><i><b>4</b>Expert guidance</i>
+    </div>
+
+    <div class="drop" id="drop">
+      <p style="font-size:14.5px;font-weight:600;color:#2C2A6B">Drag and drop your file here, or choose a method below</p>
+      <div class="methods">
+        <button class="method" data-pick="report">
+          <span class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2C4C9B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path><path d="M9 13h6M9 17h4"></path></svg></span>
+          <b>Upload Report</b><span>PDF · JPG · JPEG · PNG</span>
+        </button>
+        <button class="method" data-pick="scan">
+          <span class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2C4C9B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M7 12h10"></path></svg></span>
+          <b>Upload Scan</b><span>Chest X-ray · CT · HRCT · PET-CT</span>
+        </button>
+        <button class="method" data-pick="photo">
+          <span class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2C4C9B" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.4"></circle></svg></span>
+          <b>Take a photo of the report</b><span>Uses your device camera</span>
+        </button>
+      </div>
+    </div>
+    <input type="file" id="picker" accept=".pdf,.jpg,.jpeg,.png" multiple hidden>
+    <div class="filelist" id="files"></div>
+    <p class="privacy">Your files are used to generate your preliminary review and are handled securely. In this concept prototype nothing leaves your browser and no file is uploaded anywhere.</p>
+    <div style="margin-top:22px;display:flex;gap:11px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="up-go" disabled style="opacity:.45">Let Uppi take a first look</button>
+      <button class="btn btn-ghost" id="up-sample">Use a sample CT report</button>
+    </div>
+  </section>
+
+  <!-- ================= REVIEW ================= -->
+  <section class="screen" id="s-review" aria-labelledby="rev-h">
+    <button class="back" data-go="home">&larr; Start again</button>
+    <span class="eyebrow">Uppi's preliminary review</span>
+    <h2 class="h-lead" id="rev-h">Your scan in simple language</h2>
+    <div class="step-rail" aria-label="Progress">
+      <i class="done"><b>1</b>Chosen</i><i class="done"><b>2</b>Upload</i><i class="now"><b>3</b>Uppi's review</i><i><b>4</b>Expert guidance</i>
+    </div>
+    <div id="rev-working" class="working">
+      <span class="pulse" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="txt" id="rev-status">Reading your report…</span>
+    </div>
+    <div id="rev-out" hidden></div>
+  </section>
+
+  <!-- ================= EXPERT (ENTRY 4) ================= -->
+  <section class="screen" id="s-expert" aria-labelledby="exp-h">
+    <button class="back" data-go="home">&larr; Back</button>
+    <span class="eyebrow">Expert review</span>
+    <h2 class="h-lead" id="exp-h">Get Expert Guidance</h2>
+    <p class="lead-sub">Choose the kind of specialist review you need. You don't need an AI review first.</p>
+    <div class="grid g3" style="margin-top:24px">
+      <div class="card" style="padding:26px;display:flex;flex-direction:column;gap:11px">
+        <h3 style="font-weight:800;font-size:18px;color:#2C2A6B">Pulmonology Review</h3>
+        <p style="font-size:13.5px;line-height:1.6;color:#4A4880;flex:1">A pulmonologist reviews your case, report and relevant imaging.</p>
+        <button class="btn btn-ghost btn-sm" data-review="Pulmonology Review" style="align-self:flex-start">Book Pulmonology Review</button>
+      </div>
+      <div class="card" style="padding:26px;display:flex;flex-direction:column;gap:11px">
+        <h3 style="font-weight:800;font-size:18px;color:#2C2A6B">Radiology Review</h3>
+        <p style="font-size:13.5px;line-height:1.6;color:#4A4880;flex:1">A radiologist reviews the relevant chest imaging and report.</p>
+        <button class="btn btn-ghost btn-sm" data-review="Radiology Review" style="align-self:flex-start">Book Radiology Review</button>
+      </div>
+      <div class="card" style="padding:26px;display:flex;flex-direction:column;gap:11px">
+        <h3 style="font-weight:800;font-size:18px;color:#2C2A6B">Combined Review</h3>
+        <p style="font-size:13.5px;line-height:1.6;color:#4A4880;flex:1">For selected complex cases, request a pulmonology + radiology review.</p>
+        <button class="btn btn-ghost btn-sm" data-review="Combined Review" style="align-self:flex-start">Request Combined Review</button>
+      </div>
+    </div>
+    <div id="expert-convert"></div>
+  </section>
+
+  <!-- ================= CALLBACK ================= -->
+  <section class="screen" id="s-callback" aria-labelledby="cb-h">
+    <button class="back" id="cb-back">&larr; Back</button>
+    <span class="eyebrow">Care team</span>
+    <h2 class="h-lead" id="cb-h">Ask the care team to call you</h2>
+    <p class="lead-sub">Share your contact details and our care team can help you choose the right specialist or appointment.</p>
+    <form class="card" style="padding:28px;margin-top:24px" id="cb-form">
+      <div class="form" style="margin-top:0">
+        <div class="field"><label for="cb-name">Name</label><input id="cb-name" required autocomplete="name"></div>
+        <div class="field"><label for="cb-phone">Mobile number</label><input id="cb-phone" required inputmode="tel" autocomplete="tel"></div>
+        <div class="field"><label for="cb-lang">Preferred language</label><select id="cb-lang"><option>English</option><option>తెలుగు (Telugu)</option><option>हिन्दी (Hindi)</option><option>ಕನ್ನಡ (Kannada)</option><option>বাংলা (Bengali)</option></select></div>
+        <div class="field"><label for="cb-type">Preferred consultation type</label><select id="cb-type"><option>Video consultation</option><option>In-person consultation</option><option>Expert scan review</option><option>Not sure — please advise</option></select></div>
+        <div class="field"><label for="cb-time">Preferred time (optional)</label><input id="cb-time" placeholder="e.g. weekday mornings"></div>
+        <div class="field"><label for="cb-ref">Report / scan reference</label><input id="cb-ref" readonly></div>
+        <div class="field wide"><label for="cb-concern">Main concern</label><textarea id="cb-concern" placeholder="In a sentence or two, what would you most like help with?"></textarea></div>
+        <p class="consent">By submitting, you agree that the care team may contact you regarding your request.</p>
+      </div>
+      <div style="margin-top:20px"><button class="btn btn-primary" type="submit">Request Callback</button></div>
+    </form>
+    <div class="done" id="cb-done" hidden>
+      <h3>Request received</h3>
+      <p>Our care team will help you choose the right next step.</p>
+      <div style="margin-top:16px"><button class="btn btn-ghost btn-sm" data-go="home">Back to LungScan</button></div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="proto">Concept prototype · mocked AI responses</span>
+    <p><b style="color:#2C2A6B">AI-generated preliminary information is not a diagnosis or a substitute for professional medical advice.</b> Uppi explains what a report says and helps you decide whether specialist guidance may be useful. A second opinion is always a clinician service, never an AI output.</p>
+    <p>Uppi explains. Specialists decide. ŪPIRI connects the patient to care.</p>
+    <p><a href="https://upiri.vercel.app/" style="font-weight:700;text-decoration:underline">ŪPIRI home</a> · <a href="https://upiri.vercel.app/doctors" style="font-weight:700;text-decoration:underline">Find a lung specialist</a> · <a href="https://upiri.vercel.app/tests-and-procedures" style="font-weight:700;text-decoration:underline">Tests &amp; procedures</a> · <a href="https://upiri.vercel.app/knowledge-hub" style="font-weight:700;text-decoration:underline">Knowledge Hub</a></p>
+    <p id="foot-note"></p>
+  </footer>
+</main>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------------------------------------------------------------------------
+   Configuration.
+
+   Pricing, contact points and copy are constants so the hospital team can
+   change them in one place. The discount is COMPUTED, never written down, so
+   editing a price can never leave a stale "Save ₹201" behind it (§21).
+   --------------------------------------------------------------------------- */
+var CONFIG = {
+  currency: '₹',
+  regularConsult: 1000,
+  video: 799,
+  inPerson: 899,
+  scanReviewFrom: 499,
+  scanReviewTo: 599,
+  /* TODO(yashoda): the live site carries the same placeholder — no WhatsApp
+     number has been supplied, and inventing one would put a real patient
+     through to nobody. */
+  whatsapp: '91XXXXXXXXXX',
+  callCentreDisplay: '080 6590 6165',
+  emergency: '108'
+};
+var rupees = function (n) { return CONFIG.currency + n.toLocaleString('en-IN'); };
+var saving = CONFIG.regularConsult - CONFIG.video;
+
+/* ---------------------------------------------------------------------------
+   The findings library (§14).
+
+   `level` is the DEFAULT navigation level for that finding, decided here in
+   rules rather than by the model. That is deliberate and it matches how the
+   rest of ŪPIRI works: the language model phrases a decision, it never makes
+   one. `urgent_assessment` is reached only through the safety check below.
+   --------------------------------------------------------------------------- */
+var FINDINGS = [
+  { id:'nodule', name:'Pulmonary nodule / lung spot', help:'A small spot or nodule was seen in the lung.',
+    level:'worth_discussing', specialist:'pulmonologist',
+    says:'Your CT report mentions an 8 mm pulmonary nodule in the right upper lobe.',
+    means:'A pulmonary nodule is a small spot seen in the lung. Many nodules are not cancer, but what they mean depends on their appearance, size, location, previous scans, smoking history and other clinical information.',
+    next:['Whether an older scan exists for comparison','Whether the nodule has changed over time','Size and radiologic appearance','Relevant symptoms and risk factors'],
+    cannot:'A scan report by itself cannot confirm whether a nodule is benign or malignant. A specialist may need to consider the images together with your history and previous scans.',
+    review:'A pulmonologist would usually want the images themselves, any earlier chest imaging for comparison, and your smoking and exposure history.' },
+  { id:'mass', name:'Mass / suspicious lesion', help:'A mass, lesion or suspicious area was mentioned.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report describes a mass or a lesion that the radiologist considered suspicious.',
+    means:'A mass is a larger or more concerning abnormality that may require further assessment. Imaging alone does not establish a cancer diagnosis.',
+    next:['Comparison with any older scans','The size, margins and position described','Whether other areas of the chest are involved','Symptoms, weight change and smoking history'],
+    cannot:'Imaging alone cannot establish what a mass is made of. That requires clinical correlation and, in some situations, tissue sampling — a decision for your specialist.',
+    review:'Further evaluation may include review of the images, comparison with older scans, PET-CT, bronchoscopy or tissue sampling depending on the clinical situation.' },
+  { id:'ild', name:'Fibrosis / scarring / ILD', help:'Your report mentioned fibrosis, interstitial lung disease, scarring or fibrotic changes.',
+    level:'specialist_review', specialist:'combined_review',
+    says:'Your report describes interstitial changes — fibrosis, reticulation or scarring in the lung tissue.',
+    means:'ILD is a broad group of disorders affecting the lung tissue. CT patterns can suggest different possibilities, but diagnosis often requires clinical history and specialist interpretation.',
+    next:['The specific CT pattern the radiologist described','Occupational, drug and autoimmune history','Lung function testing','Whether the changes are new or long-standing'],
+    cannot:'A report alone cannot say which type of interstitial lung disease is present, or whether it is progressing. That usually needs the images, your history and lung function together.',
+    review:'ILD is often assessed by a pulmonologist and a radiologist together, because the CT pattern and the clinical history have to be read side by side.' },
+  { id:'ggo', name:'Ground-glass opacity', help:'Your report mentioned ground-glass change or haziness.',
+    level:'worth_discussing', specialist:'pulmonologist',
+    says:'Your report mentions ground-glass opacity — an area of hazy increased density in the lung.',
+    means:'Ground-glass opacity describes an imaging appearance and is not a diagnosis by itself.',
+    next:['Whether it is new, persistent or resolving','How extensive it is','Any recent infection or symptoms','Whether earlier imaging exists'],
+    cannot:'Ground-glass change can be seen with infection or inflammation, with some interstitial processes, and in some situations as a dependent or technical appearance. The report alone cannot select between them.',
+    review:'A specialist would usually want to know whether the change has persisted on a follow-up scan and what was happening clinically when the scan was taken.' },
+  { id:'nodes', name:'Enlarged lymph nodes', help:'Lymph nodes in the chest were enlarged or prominent.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report describes enlarged lymph nodes in the mediastinum or at the hila.',
+    means:'Enlarged chest lymph nodes can occur for multiple reasons including infection, inflammation and malignancy. Size, location, distribution, associated findings and clinical history matter.',
+    next:['Which node stations are involved and how large they are','Whether the lungs themselves look normal','Any fever, weight loss or cough','Any earlier imaging'],
+    cannot:'The report cannot say why the nodes are enlarged. Distribution and clinical context matter, and sampling is sometimes discussed — that is a specialist decision, not one to make from a report.',
+    review:'An interventional pulmonologist would consider the distribution of the nodes alongside your history before discussing whether sampling adds anything.' },
+  { id:'bronchiectasis', name:'Bronchiectasis', help:'Your airways are described as widened or damaged.',
+    level:'worth_discussing', specialist:'pulmonologist',
+    says:'Your report describes bronchiectasis — airways that are wider than they should be.',
+    means:'Bronchiectasis means the airways are abnormally widened or damaged and can be associated with recurrent infections, mucus and chronic cough.',
+    next:['How much of the lung is involved','Previous infections, including TB','Sputum, infections and how often they occur','Whether an underlying cause has been looked for'],
+    cannot:'The report describes the airway change but not its cause. Previous infection, TB, immune conditions and other chronic airway disease are among the things a specialist would consider.',
+    review:'A pulmonologist would usually look at airway clearance, sputum results and whether an underlying cause has been investigated.' },
+  { id:'effusion', name:'Fluid around the lung', help:'Pleural effusion or fluid around the lung was mentioned.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report mentions a pleural effusion — fluid collected in the space around the lung.',
+    means:'Pleural effusion means fluid has collected in the space around the lung. Causes vary and depend on the clinical context.',
+    next:['How much fluid there is, and on which side','Whether it is new','Breathlessness or chest discomfort','Any heart, kidney or liver conditions'],
+    cannot:'A report cannot say what the fluid is or why it is there. That depends on the clinical picture and sometimes on testing the fluid itself.',
+    review:'A pulmonologist would consider the volume, the side, your symptoms and your other medical history together.' },
+  { id:'copd', name:'Emphysema / COPD changes', help:'Your scan mentioned emphysema, air trapping or COPD-related changes.',
+    level:'worth_discussing', specialist:'pulmonologist',
+    says:'Your report describes emphysematous change — damage to the air spaces of the lung.',
+    means:'Emphysema is damage to lung air spaces. CT can show structural changes, but COPD diagnosis and severity are not established by CT alone.',
+    next:['Lung function testing such as spirometry','Smoking or biomass exposure history','Breathlessness on exertion','Whether treatment has been started'],
+    cannot:'A CT can show the structural change but cannot grade airflow obstruction. Lung function testing such as spirometry may be important.',
+    review:'A pulmonologist would usually pair the imaging with spirometry before drawing conclusions about severity.' },
+  { id:'tb', name:'TB / infection / old TB changes', help:'Your report mentioned TB, old TB, infection, cavities, scarring or related changes.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report mentions changes that can be seen with tuberculosis — which may be current or previous.',
+    means:'Imaging findings can be seen with current infection, previous or healed infection, and other diseases. Imaging alone does not confirm active TB.',
+    next:['Cough, fever, night sweats or weight loss','Any previous TB treatment','Sputum testing','Comparison with older films'],
+    cannot:'If active TB is suspected, your doctor may need additional testing. The scan itself cannot confirm whether TB is currently active.',
+    review:'A pulmonologist would look at the pattern alongside symptoms and sputum results before deciding anything.' },
+  { id:'pneumonia', name:'Pneumonia / persistent opacity', help:'Your report mentioned pneumonia, consolidation or an opacity that has not cleared.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report describes consolidation or an opacity that has not fully cleared.',
+    means:'Some lung opacities clear after infection while others persist for different reasons. A persistent or recurrent abnormality may need specialist assessment depending on the clinical context.',
+    next:['How long the opacity has been present','Whether antibiotics have already been given','Whether it is in the same place each time','Any earlier chest imaging'],
+    cannot:'A single report cannot tell whether an opacity is resolving. That needs a comparison over time and the clinical picture.',
+    review:'A pulmonologist would want the interval films and the treatment history to see whether it is settling as expected.' },
+  { id:'occupational', name:'Occupational lung changes', help:'Your report may relate to workplace dust or occupational exposure.',
+    level:'worth_discussing', specialist:'pulmonologist',
+    says:'Your report describes changes that can be associated with inhaled dust exposure at work.',
+    means:'Some long-term workplace exposures can cause lung abnormalities. The relevance depends on exposure history and imaging pattern.',
+    next:['Have you had regular exposure to dust, silica, asbestos, mining or industrial fumes?','How many years of exposure','What protection was used','Lung function testing'],
+    cannot:'An imaging pattern alone cannot establish an occupational cause. The exposure history carries as much weight as the scan.',
+    review:'A pulmonologist with an interest in occupational lung disease would take a detailed exposure history alongside the imaging.' },
+  { id:'sarcoid', name:'Sarcoidosis / granulomatous changes', help:'Your report mentioned sarcoidosis, granulomatous disease or similar findings.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report raises the possibility of a granulomatous process such as sarcoidosis.',
+    means:'Sarcoidosis is an inflammatory disease that can affect the lungs and lymph nodes. Imaging may suggest it, but diagnosis requires clinical correlation and sometimes additional tests.',
+    next:['Whether the lymph nodes are symmetrically enlarged','Any eye, skin or joint symptoms','Blood tests','Lung function testing'],
+    cannot:'Imaging can suggest the pattern but cannot confirm the diagnosis on its own.',
+    review:'A pulmonologist would correlate the imaging pattern with symptoms and blood tests before considering anything further.' },
+  { id:'pneumoconiosis', name:'Pneumoconiosis', help:'Your report mentioned dust-related lung disease such as silicosis.',
+    level:'specialist_review', specialist:'pulmonologist',
+    says:'Your report mentions changes described as dust-related lung disease.',
+    means:'Pneumoconiosis refers to a group of dust-related lung diseases. The term describes a pattern associated with inhaled dust, not a single condition.',
+    next:['A detailed occupational exposure history','How long the exposure lasted','Lung function testing','Comparison with older imaging'],
+    cannot:'A report cannot confirm the diagnosis or its stage from the imaging term alone.',
+    review:'A pulmonologist would want the full exposure history and lung function alongside the images.' },
+  { id:'unknown', name:"I don't know / something else", help:'Let Uppi read the report and figure out what it may be referring to.',
+    level:'worth_discussing', specialist:'pulmonologist',
+    says:'Uppi will read the report you upload and pick out the findings it describes.',
+    means:'Reports use technical language for findings that are often easier to understand once they are broken down. Uppi identifies the terms your report uses and explains each one.',
+    next:['The specific words the report uses','Whether a follow-up scan is suggested in the report','Whether an older scan exists','What your doctor said about the result'],
+    cannot:'A report describes what was seen, not what it means for you. That interpretation belongs with a clinician who knows your history.',
+    review:'A pulmonologist would read the report alongside your history and decide whether the images need reviewing.' }
+];
+
+
+/* ---------------------------------------------------------------------------
+   Phase 2 — the expertise layer, per condition.
+
+   `team` and `caps` are what a patient sees between Uppi's explanation and the
+   booking options. They are deliberately DIFFERENT per finding: showing one
+   generic hospital block for every disease is the thing this replaces, because
+   it tells the patient nothing about whether this hospital is equipped for
+   THEIR problem.
+
+   Nothing here is a claim about a named clinician or a volume. The disciplines
+   are the ones Yashoda's pulmonology department publishes; the capabilities are
+   procedure names the department already lists on the live site.
+   --------------------------------------------------------------------------- */
+var TEAMS = {
+  pulmonology:   { n:'Pulmonology', d:'Experts who interpret the finding alongside symptoms, history and next-step options.' },
+  radiology:     { n:'Chest / Thoracic Radiology', d:'Imaging specialists who can review the actual images and the report.' },
+  interventional:{ n:'Interventional Pulmonology', d:'Relevant when bronchoscopy, EBUS or tissue diagnosis becomes a consideration.' },
+  surgery:       { n:'Thoracic Surgery', d:'Relevant in selected cases where surgical evaluation is needed.' },
+  oncology:      { n:'Oncology', d:'Relevant where malignancy is confirmed or strongly suspected.' },
+  ild:           { n:'ILD expertise', d:'Clinicians who read fibrotic patterns alongside history and lung function.' },
+  rehab:         { n:'Pulmonary Rehabilitation', d:'Breathing, exercise and airway-clearance support alongside medical care.' },
+  infection:     { n:'TB & Infection expertise', d:'Clinicians who separate active infection from old, healed change.' },
+  occupational:  { n:'Occupational Lung expertise', d:'Clinicians who weigh an exposure history as carefully as the images.' },
+  sleep:         { n:'Sleep & Airway Medicine', d:'Where breathing during sleep is part of the picture.' }
+};
+
+var EXPERTISE = {
+  nodule: { headline:'A lung nodule can have many explanations. Context matters.',
+    team:['pulmonology','radiology','interventional','surgery','oncology'],
+    caps:['Detailed CT review','Compare previous scans','Nodule characterization','Follow-up planning','Biopsy pathway discussion','Multidisciplinary review where appropriate'],
+    cta:'Get my nodule reviewed', ask:'Want more certainty about this nodule?' },
+  mass: { headline:'When a scan shows a suspicious lesion, the next step matters.',
+    team:['pulmonology','radiology','interventional','surgery','oncology'],
+    caps:['CT / PET-CT review','Tissue-diagnosis pathway','Bronchoscopy','EBUS','Biopsy coordination','Staging support','Multidisciplinary review'],
+    cta:'Get expert guidance on my report', ask:'Would you like a specialist to review this finding with you?' },
+  ild: { headline:'Fibrotic lung disease needs more than a scan alone.',
+    team:['pulmonology','ild','radiology','rehab'],
+    caps:['HRCT review','Pattern interpretation','Previous-scan comparison','Multidisciplinary assessment','Lung-function correlation','Long-term follow-up'],
+    cta:'Request an ILD specialist review', ask:'Would you like an ILD specialist to review your scan?' },
+  ggo: { headline:'Ground-glass change is a finding, not a diagnosis.',
+    team:['pulmonology','radiology','ild'],
+    caps:['HRCT review','Clinical-context review','Previous-scan comparison','Persistent-opacity evaluation','Follow-up planning'],
+    cta:'Get my scan reviewed', ask:'Would you like this looked at alongside your history?' },
+  nodes: { headline:'Enlarged chest lymph nodes can have different causes.',
+    team:['pulmonology','radiology','interventional','oncology'],
+    caps:['CT review','Lymph-node assessment','PET-CT review','EBUS expertise','Tissue-diagnosis pathway'],
+    cta:'Get specialist guidance', ask:'Would specialist review help clarify what happens next?' },
+  bronchiectasis: { headline:'Bronchiectasis is often about more than what the scan shows.',
+    team:['pulmonology','radiology','rehab','infection'],
+    caps:['HRCT review','Recurrent infection assessment','Sputum / infection pathway','Airway-clearance planning','Pulmonary rehabilitation','Long-term management'],
+    cta:'Get a bronchiectasis review', ask:'Would you like a pulmonologist to review what this means for you?' },
+  effusion: { headline:'Fluid around the lung can have many causes.',
+    team:['pulmonology','radiology','interventional','surgery'],
+    caps:['Imaging review','Clinical-context assessment','Pleural evaluation','Procedure pathway','Specialist coordination'],
+    cta:'Get expert guidance', ask:'Would you like a specialist to look at this with you?' },
+  tb: { headline:'Imaging can suggest a pattern — but it cannot tell the whole TB story.',
+    team:['pulmonology','radiology','infection'],
+    caps:['Chest imaging review','Active-vs-prior-disease context','Testing pathway','Post-TB structural disease assessment','Bronchiectasis / fibrosis assessment'],
+    cta:'Discuss my report with a specialist', ask:'Would you like this discussed with a specialist?' },
+  copd: { headline:'CT can show structural changes, but lung health is bigger than the image.',
+    team:['pulmonology','radiology','rehab','sleep'],
+    caps:['CT review','Symptom assessment','Spirometry / lung-function pathway','Respiratory management'],
+    cta:'Get a pulmonology assessment', ask:'Would you like a pulmonology assessment?' },
+  sarcoid: { headline:'Some imaging patterns need clinical context to make sense.',
+    team:['pulmonology','radiology','interventional'],
+    caps:['Imaging review','Clinical context','Lymph-node assessment','Multidisciplinary referral'],
+    cta:'Discuss my scan with a specialist', ask:'Would you like this discussed with a specialist?' },
+  occupational: { headline:'Your work history can be as important as the scan.',
+    team:['pulmonology','radiology','occupational'],
+    caps:['Exposure-history review','Occupational disease assessment','X-ray / HRCT interpretation','Lung-function assessment','Long-term monitoring'],
+    cta:'Get an occupational lung review', ask:'Would you like your exposure history reviewed alongside the scan?' },
+  pneumoconiosis: { headline:'Dust-related lung disease requires imaging plus exposure history.',
+    team:['pulmonology','radiology','occupational'],
+    caps:['Chest X-ray review','HRCT review','Exposure assessment','Lung-function testing','Long-term respiratory care'],
+    cta:'Get specialist guidance', ask:'Would you like specialist guidance on this?' },
+  pneumonia: { headline:"When an opacity doesn't clear, the reason matters.",
+    team:['pulmonology','radiology','interventional'],
+    caps:['Previous-scan comparison','Imaging review','Recurrent infection assessment','Bronchoscopy pathway where clinically appropriate','Follow-up planning'],
+    cta:'Get my persistent finding reviewed', ask:'Would you like this persistent finding reviewed?' },
+  unknown: { headline:'Reading a report is easier with someone who reads them every day.',
+    team:['pulmonology','radiology'],
+    caps:['Report review','Imaging review','Clinical-context review','Follow-up planning'],
+    cta:'Get expert guidance', ask:'Would you like a specialist to read this with you?' },
+  /* the procedure entry is not a finding, so it carries its own module */
+  procedure: { headline:'Before you proceed, understand why.',
+    team:['pulmonology','interventional','radiology','surgery','oncology'],
+    caps:['Imaging review','Clarifying why the procedure may have been suggested','Bronchoscopy','EBUS','Biopsy pathway','Surgical pathway','Multidisciplinary review'],
+    cta:'Review my case before I proceed', ask:'Before you proceed, would you like a specialist to review your case?',
+    note:'A specialist can help you understand why it was suggested and what questions to ask before proceeding.' }
+};
+
+/*
+ * Institutional proof, as one object the hospital team can fill in (§8).
+ *
+ * `published` is false and stays false until Yashoda supplies verified figures.
+ * A patient must never be shown "[N]+ cases reviewed" — a placeholder on a
+ * hospital page reads either as a broken build or, worse, as a real number
+ * nobody has checked. The two lines below it ARE verified: the consultant count
+ * and the branch count are transcribed from Yashoda's own department listing
+ * and already published on upiri.vercel.app/doctors.
+ */
+var VERIFIED_PROOF = {
+  published: false,
+  relevantCases: '[N]+',
+  procedures: '[N]+',
+  specialists: '[N]',
+  disciplines: '[N]'
+};
+var PUBLISHED_FACTS = { consultants: 15, branches: 4 };
+
+var PROCEDURES = ['Lung biopsy','CT-guided biopsy','Bronchoscopy','EBUS','Lung surgery','PET-CT','Repeat CT / HRCT','Another procedure',"I'm not sure what I was advised"];
+
+var SYMPTOMS = ['Persistent cough','Breathlessness','Chest discomfort','Repeated chest infections','Sputum / mucus','Fever','Symptoms are getting worse','Symptoms continue despite treatment','My report was called "normal" but I still feel unwell','Something else'];
+
+var CONTEXT_Q = [
+  { id:'q-duration', label:'How long have you had these symptoms?', type:'select', opts:['Less than 2 weeks','2–4 weeks','1–3 months','More than 3 months'] },
+  { id:'q-trend', label:'Are they getting better, worse, or staying the same?', type:'select', opts:['Getting better','Staying the same','Getting worse'] },
+  { id:'q-why', label:'Why was the scan performed?', type:'text', ph:'e.g. a cough that would not settle' },
+  { id:'q-older', label:'Do you have an older scan or report?', type:'select', opts:['Yes','No','Not sure'] },
+  { id:'q-told', label:'What did your doctor tell you about the result?', type:'text', ph:'in your own words' }
+];
+
+/*
+ * The safety check (§16). Deliberately a rule, run before anything else, so a
+ * potentially time-sensitive situation can never be routed into an
+ * asynchronous review queue by a model's judgement.
+ */
+var URGENT = /(severe|sudden|worsening rapidly|can't breathe|cannot breathe|gasping)[^.]*\b(breath|breathless|short of breath)|severe chest pain|cough(ing)? up (a lot of |significant )?blood|massive haemoptysis|massive hemoptysis|oxygen (is |was )?(very )?low|collapsed lung|pneumothorax|pulmonary embolism/i;
+
+var LEVEL_COPY = {
+  reassuring: 'Nothing in the information you shared suggests an obvious urgent concern, but your treating clinician should interpret this in context.',
+  worth_discussing: 'This finding is not necessarily serious, but it may be worth discussing with a pulmonologist, especially if you have symptoms or previous imaging.',
+  specialist_review: 'Because this finding can affect the next step in care, a specialist review may be useful.',
+  urgent_assessment: 'Please seek urgent medical care rather than waiting for an online AI review.'
+};
+var LEVEL_LABEL = {
+  reassuring: 'Uppi suggests: no obvious urgent concern',
+  worth_discussing: 'Uppi suggests: worth discussing',
+  specialist_review: 'Uppi suggests: specialist review may help',
+  urgent_assessment: 'This may need prompt medical assessment'
+};
+
+/* ---------------------------------------------------------------------------
+   State and plumbing
+   --------------------------------------------------------------------------- */
+var S = { entry:null, finding:null, procedure:null, symptoms:[], context:{}, files:[], kind:null, level:null, from:'home' };
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+var el = function (tag, cls, html) { var n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]; }); };
+
+function show(id) {
+  $$('.screen').forEach(function (s) { s.classList.toggle('on', s.id === 's-' + id); });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  var h = $('#s-' + id + ' h1, #s-' + id + ' h2');
+  if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+}
+
+/* Uppi, mounted from the approved rig. Every instance gets its own gradient and
+   clip ids — two copies sharing them makes the second paint with the first
+   one's definitions. */
+var rigCount = 0;
+function mountUppi(host) {
+  if (!host) return;
+  var n = ++rigCount;
+  host.innerHTML = window.__UPPI_RIG.replace(/RIGID-/g, 'uppi' + n + '-');
+  var svg = host.querySelector('svg');
+  if (svg) { svg.removeAttribute('width'); svg.removeAttribute('height'); }
+}
+
+/* ---------------------------------------------------------------------------
+   Build the option lists
+   --------------------------------------------------------------------------- */
+function buildFindings() {
+  var box = $('#finding-opts');
+  FINDINGS.forEach(function (f) {
+    var b = el('button', 'opt');
+    b.type = 'button';
+    b.innerHTML = '<b>' + esc(f.name) + '</b><span>' + esc(f.help) + '</span>';
+    b.addEventListener('click', function () { S.finding = f; S.entry = 'finding'; S.from = 'finding'; goUpload(); });
+    box.appendChild(b);
+  });
+}
+function buildChoices(box, list, onPick, multi) {
+  list.forEach(function (t) {
+    var b = el('button', 'opt');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<b>' + esc(t) + '</b>';
+    b.addEventListener('click', function () {
+      if (multi) {
+        var on = b.getAttribute('aria-pressed') === 'true';
+        b.setAttribute('aria-pressed', on ? 'false' : 'true');
+      } else {
+        $$('.opt', box).forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+      }
+      onPick(t, b);
+    });
+    box.appendChild(b);
+  });
+}
+function buildContext() {
+  var f = $('#sym-form');
+  CONTEXT_Q.forEach(function (q) {
+    var w = el('div', 'field' + (q.type === 'text' ? ' wide' : ''));
+    var lab = el('label', null, esc(q.label));
+    lab.setAttribute('for', q.id);
+    w.appendChild(lab);
+    var input;
+    if (q.type === 'select') {
+      input = el('select');
+      input.appendChild(el('option', null, 'Select…'));
+      q.opts.forEach(function (o) { input.appendChild(el('option', null, esc(o))); });
+    } else {
+      input = el('input');
+      input.placeholder = q.ph || '';
+    }
+    input.id = q.id;
+    input.addEventListener('change', function () { S.context[q.label] = input.value; });
+    input.addEventListener('input', function () { S.context[q.label] = input.value; });
+    w.appendChild(input);
+    f.appendChild(w);
+  });
+}
+
+/* ---------------------------------------------------------------------------
+   Upload
+   --------------------------------------------------------------------------- */
+function goUpload() {
+  var eyebrow = { finding:'My scan found something', procedure:'A procedure has been advised', symptoms:'Symptoms and the report disagree' }[S.entry];
+  $('#up-eyebrow').textContent = eyebrow;
+  $('#up-h').textContent = S.entry === 'procedure' ? 'Upload what you were given.' : 'Let Uppi take a first look.';
+  show('upload');
+}
+function addFiles(list, kind) {
+  Array.prototype.slice.call(list).forEach(function (f) { S.files.push({ name: f.name, kind: kind }); });
+  renderFiles();
+}
+function renderFiles() {
+  var box = $('#files');
+  box.innerHTML = '';
+  S.files.forEach(function (f, i) {
+    var row = el('div', 'file');
+    row.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5E82E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg>'
+      + '<span class="nm">' + esc(f.name) + '</span><span class="st">Ready</span>';
+    var x = el('button', 'btn-link', 'Remove');
+    x.type = 'button';
+    x.addEventListener('click', function () { S.files.splice(i, 1); renderFiles(); });
+    row.appendChild(x);
+    box.appendChild(row);
+  });
+  var ok = S.files.length > 0;
+  var go = $('#up-go');
+  go.disabled = !ok;
+  go.style.opacity = ok ? '1' : '.45';
+}
+
+/* ---------------------------------------------------------------------------
+   The review.
+
+   Mocked, as the brief asks for a demonstrable prototype — but shaped exactly
+   like the response contract in §18, so swapping in a real /api/opee/review
+   is a change of one function and nothing else.
+   --------------------------------------------------------------------------- */
+function mockReview() {
+  var f = S.finding || FINDINGS[FINDINGS.length - 1];
+  var text = [S.context['Why was the scan performed?'] || '', S.context['What did your doctor tell you about the result?'] || ''].join(' ');
+  var urgent = URGENT.test(text);
+  var level = urgent ? 'urgent_assessment' : f.level;
+  /* symptoms that are getting worse nudge the level up, never down */
+  if (!urgent && S.context['Are they getting better, worse, or staying the same?'] === 'Getting worse' && level === 'worth_discussing') {
+    level = 'specialist_review';
+  }
+  S.level = level;
+  return {
+    status: 'complete',
+    opeeSummary: {
+      whatReportSays: f.says,
+      whatItMeans: f.means,
+      whatMayMatterNext: f.next,
+      whatCannotBeDetermined: f.cannot,
+      navigationLevel: level
+    },
+    specialistWouldReview: f.review,
+    recommendedSpecialist: f.specialist,
+    recommendedCTAs: ['video_consultation', 'in_person_consultation', 'callback', 'whatsapp']
+  };
+}
+
+var STAGES = ['Reading your report…', 'Uppi is organizing the important findings…', 'Your preliminary review is ready.'];
+
+function runReview() {
+  show('review');
+  $('#rev-out').hidden = true;
+  $('#rev-working').style.display = '';
+  var i = 0;
+  $('#rev-status').textContent = STAGES[0];
+  var t = setInterval(function () {
+    i++;
+    if (i < STAGES.length) { $('#rev-status').textContent = STAGES[i]; return; }
+    clearInterval(t);
+    $('#rev-working').style.display = 'none';
+    renderReview(mockReview());
+  }, 1100);
+}
+
+function fold(title, inner, open) {
+  var d = el('details', 'fold');
+  if (open) d.open = true;
+  d.innerHTML = '<summary>' + esc(title) + '</summary><div class="in">' + inner + '</div>';
+  return d;
+}
+
+function renderReview(r) {
+  var out = $('#rev-out');
+  out.hidden = false;
+  out.innerHTML = '';
+  var sum = r.opeeSummary;
+
+  if (sum.navigationLevel === 'urgent_assessment') {
+    var u = el('div', 'urgent');
+    u.innerHTML = '<span class="eyebrow" style="color:#A6362C">Safety check</span>'
+      + '<h2>This may need prompt medical assessment.</h2>'
+      + '<p>' + esc(LEVEL_COPY.urgent_assessment) + '</p>'
+      + '<p>Uppi has stopped the routine review here on purpose. This is not a diagnosis — it is a judgement that what you described should be looked at by a person now, not queued behind an online review.</p>'
+      + '<div class="row"><a class="btn btn-alert" href="tel:' + CONFIG.emergency + '">Call ' + CONFIG.emergency + '</a>'
+      + '<a class="btn btn-ghost" href="tel:' + CONFIG.callCentreDisplay.replace(/\s/g, '') + '">Yashoda ' + esc(CONFIG.callCentreDisplay) + '</a></div>';
+    out.appendChild(u);
+    return;
+  }
+
+  var says = el('div', 'says');
+  says.innerHTML = '<div class="mini" aria-hidden="true"></div>'
+    + '<div class="bubble"><div class="who"><b>Uppi</b><span>AI Lung Navigator</span></div>'
+    + '<p>Here is what I can see in what you shared. I have kept it to what the report actually says — I have not added anything it does not mention.</p></div>';
+  out.appendChild(says);
+  mountUppi(says.querySelector('.mini'));
+
+  var card = el('div', 'result');
+  card.innerHTML = '<span class="eyebrow">What your report says</span>'
+    + '<div class="finding"><span class="lbl">Key finding</span><p>' + esc(sum.whatReportSays) + '</p></div>';
+
+  card.appendChild(fold('What it means', '<p>' + esc(sum.whatItMeans) + '</p>', true));
+  card.appendChild(fold('What may matter next', '<ul>' + sum.whatMayMatterNext.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'));
+  card.appendChild(fold('What your report cannot tell us by itself', '<p>' + esc(sum.whatCannotBeDetermined) + '</p>'));
+  card.appendChild(fold('What a specialist may want to review', '<p>' + esc(r.specialistWouldReview) + '</p>'));
+
+  if (S.entry === 'procedure') {
+    card.appendChild(fold('Why might this procedure have been suggested?',
+      '<p>' + esc(S.procedure || 'The procedure you were advised') + ' is usually discussed when the team wants information the scan alone cannot give. The need for a procedure depends on the complete clinical picture and should be confirmed by your treating specialist.</p>'));
+    card.appendChild(fold('Questions you can ask before proceeding',
+      '<ul><li>What are you hoping this will tell you?</li><li>What would change depending on the result?</li><li>Is there an alternative, including waiting and repeating the scan?</li><li>What does the procedure involve, and what is the recovery?</li><li>Who will perform it, and how often do they do it?</li></ul>'));
+  }
+  if (S.entry === 'symptoms') {
+    card.appendChild(fold('What it may or may not explain',
+      '<p>A report describes what was seen on the images. It does not always account for how someone feels. Your symptoms — ' + esc(S.symptoms.join(', ') || 'the ones you selected') + ' — can sometimes be associated with the finding above, and can sometimes have a separate explanation that imaging does not show.</p>'));
+  }
+
+  var lvl = el('div', 'level ' + sum.navigationLevel);
+  lvl.innerHTML = '<b>' + esc(LEVEL_LABEL[sum.navigationLevel]) + '</b>';
+  card.appendChild(lvl);
+  card.appendChild(el('p', null, '<span style="font-size:14px;line-height:1.7;color:#4A4880;display:block;margin-top:12px">' + esc(LEVEL_COPY[sum.navigationLevel]) + '</span>'));
+
+  var onlyReport = S.files.every(function (f) { return f.kind !== 'scan'; });
+  card.appendChild(el('div', 'note', onlyReport
+    ? 'This explanation is based on the report you uploaded. A formal second opinion requires specialist review of the relevant images and clinical context.'
+    : 'Uppi can help organize the information, but a specialist should review the actual scan for a formal opinion.'));
+  out.appendChild(card);
+
+  /* §1: the credibility layer belongs BETWEEN the explanation and the CTA */
+  out.appendChild(expertiseModule(S.entry === 'procedure' ? 'procedure' : (S.finding && S.finding.id)));
+  out.appendChild(conversionPanel(S.entry === 'procedure' ? 'procedure' : (S.finding && S.finding.id)));
+}
+
+
+/* ---------------------------------------------------------------------------
+   Phase 2 — "Not another general AI chatbot" and the expertise module
+   --------------------------------------------------------------------------- */
+var PILLARS = [
+  { t:'Lung-specific', d:'Built specifically around pulmonary findings, chest imaging and lung-care questions.',
+    i:'<path d="M11 4v4c0 1.6-.8 2.4-1.8 3.2"></path><path d="M13 4v4c0 1.6.8 2.4 1.8 3.2"></path><path d="M10 10c-.6-2.4-2.4-3.4-4.4-2C3 9.8 1.9 14.4 2.2 18.4c.3 3 2 4.8 4.6 4.3 2.6-.5 3.2-3.8 3.2-6.6z"></path><path d="M14 10c.6-2.4 2.4-3.4 4.4-2 2.6 1.8 3.7 6.4 3.4 10.4-.3 3-2 4.8-4.6 4.3-2.6-.5-3.2-3.8-3.2-6.6z"></path>' },
+  { t:'Context-aware', d:'Designed to connect scan findings with symptoms, previous reports and the patient’s concern.',
+    i:'<path d="M4 6h16M4 12h10M4 18h7"></path><circle cx="18" cy="16" r="3.2"></circle><path d="m20.4 18.4 1.6 1.6"></path>' },
+  { t:'Specialist-connected', d:'Moves from AI explanation to the appropriate pulmonology, radiology or procedural team.',
+    i:'<circle cx="12" cy="7" r="3.2"></circle><path d="M5 20a7 7 0 0 1 14 0"></path><path d="m16.6 12.6 1.4 1.4 2.6-2.6"></path>' },
+  { t:'Care-connected', d:'Does not stop at information — connects patients to real specialist care.',
+    i:'<path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"></path>' }
+];
+
+function whyUppi() {
+  var w = el('section', 'why');
+  w.innerHTML = '<span class="tag">Uppi — Your AI Lung Navigator</span>'
+    + '<h2 class="h-lead" style="font-size:clamp(23px,2.9vw,33px)">Not another general AI chatbot.</h2>'
+    + '<p class="claim"><em>General AI knows medicine.</em> Uppi knows lung care.</p>'
+    + '<p class="lead-sub">Uppi is ŪPIRI’s specialized AI Lung Navigator, designed around lung-care knowledge, '
+    + 'condition-specific navigation, specialist workflows and the real clinical ecosystem behind ŪPIRI and Yashoda. '
+    + 'General AI gives you information. Uppi helps you navigate lung care.</p>';
+  var grid = el('div', 'pillars');
+  PILLARS.forEach(function (pl) {
+    var c = el('div', 'pillar');
+    c.innerHTML = '<span class="ico" aria-hidden="true"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" '
+      + 'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + pl.i + '</svg></span>'
+      + '<b>' + esc(pl.t) + '</b><span>' + esc(pl.d) + '</span>';
+    grid.appendChild(c);
+  });
+  w.appendChild(grid);
+  var chain = el('div', 'chain');
+  chain.innerHTML = ['Understand', 'Clarify', 'Navigate', 'Connect']
+    .map(function (x) { return '<i>' + x + '</i>'; }).join('<s>&rarr;</s>');
+  w.appendChild(chain);
+  return w;
+}
+
+/*
+ * The expertise module. Sits between Uppi's explanation and the booking
+ * options, and every part of it changes with the finding — that is the point.
+ */
+function expertiseModule(key) {
+  var x = EXPERTISE[key] || EXPERTISE.unknown;
+  var m = el('section', 'exp');
+  m.innerHTML = '<span class="eyebrow">Why specialist review may help</span>'
+    + '<p class="cond">' + esc(x.headline) + '</p>'
+    + (x.note ? '<p class="lead-sub" style="font-size:14.5px">' + esc(x.note) + '</p>' : '');
+
+  m.appendChild(el('h3', null, 'The team behind your care'));
+  m.appendChild(el('p', 'hint', 'These are the disciplines relevant to this particular finding. Not every patient needs all of them — a specialist decides what is actually useful for you.'));
+  var rail = el('div', 'rail');
+  rail.setAttribute('role', 'region');
+  rail.setAttribute('aria-label', 'Relevant specialist teams, horizontally scrollable');
+  x.team.forEach(function (k) {
+    var t = TEAMS[k];
+    if (!t) return;
+    var c = el('div', 'team');
+    c.innerHTML = '<span class="tick" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
+      + 'stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"></path></svg></span>'
+      + '<b>' + esc(t.n) + '</b><span>' + esc(t.d) + '</span>';
+    rail.appendChild(c);
+  });
+  m.appendChild(rail);
+
+  m.appendChild(el('h3', null, 'What this team can help with'));
+  var caps = el('div', 'caps');
+  x.caps.forEach(function (c) {
+    var pill = el('span', 'cap');
+    pill.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"></path></svg>' + esc(c);
+    caps.appendChild(pill);
+  });
+  m.appendChild(caps);
+
+  m.appendChild(el('h3', null, 'The expertise behind your care'));
+  var proof = el('div', 'proof');
+  if (VERIFIED_PROOF.published) {
+    [[VERIFIED_PROOF.relevantCases, 'Relevant cases reviewed'],
+     [VERIFIED_PROOF.procedures, 'Relevant procedures'],
+     [VERIFIED_PROOF.specialists, 'Specialists'],
+     [VERIFIED_PROOF.disciplines, 'Clinical disciplines']].forEach(function (pair) {
+      proof.appendChild(el('div', 'stat', '<b>' + esc(pair[0]) + '</b><span>' + esc(pair[1]) + '</span>'));
+    });
+  } else {
+    /* only what is already published on upiri.vercel.app is shown */
+    proof.appendChild(el('div', 'stat', '<b>' + PUBLISHED_FACTS.consultants + '</b><span>Pulmonology consultants at Yashoda</span>'));
+    proof.appendChild(el('div', 'stat', '<b>' + PUBLISHED_FACTS.branches + '</b><span>Hyderabad branches</span>'));
+    proof.appendChild(el('div', 'stat', '<b>' + x.team.length + '</b><span>Disciplines relevant to this finding</span>'));
+    proof.appendChild(el('div', 'stat', '<b>' + x.caps.length + '</b><span>Capabilities they can bring to it</span>'));
+    proof.style.gridTemplateColumns = 'repeat(4,1fr)';
+  }
+  m.appendChild(proof);
+  m.appendChild(el('p', 'empower', 'This finding can be complex. These are the specialists and capabilities relevant to it, and the options below are yours to take or leave — Uppi explains, a specialist decides, and nothing here is a diagnosis.'));
+
+  var foot = el('div', 'foot');
+  var go = el('button', 'btn btn-primary', esc(x.cta) + ' &rarr;');
+  go.type = 'button';
+  go.addEventListener('click', function () {
+    var panel = document.querySelector('.screen.on .convert');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  foot.appendChild(go);
+  var meet = el('a', 'btn-link', 'Meet the specialists behind this service &rarr;');
+  meet.href = 'https://upiri.vercel.app/doctors';
+  meet.target = '_blank'; meet.rel = 'noreferrer';
+  foot.appendChild(meet);
+  m.appendChild(foot);
+  return m;
+}
+
+/* ---------------------------------------------------------------------------
+   Conversion (§9, §10, §21)
+   --------------------------------------------------------------------------- */
+function conversionPanel(key) {
+  var x = EXPERTISE[key];
+  var c = el('div', 'convert');
+  c.innerHTML = '<span class="eyebrow">Next step</span>'
+    + '<h2 class="h-lead" style="font-size:clamp(22px,2.6vw,30px)">' + esc(x && x.ask ? x.ask : 'Want more certainty?') + '</h2>'
+    + '<p class="lead-sub">Uppi can explain what your report says. A specialist can review your case and advise what may make sense next.</p>';
+
+  var grid = el('div', 'offers');
+
+  grid.appendChild(offer({
+    lead: true, title: 'Book Video Consultation',
+    body: 'Speak to a Yashoda pulmonology specialist from home.',
+    now: CONFIG.video, was: CONFIG.regularConsult, cta: 'Book video consultation'
+  }));
+  grid.appendChild(offer({
+    title: 'Book In-Person Consultation',
+    body: 'Meet a pulmonology specialist at Yashoda Hospitals.',
+    now: CONFIG.inPerson, was: CONFIG.regularConsult, cta: 'Book in-person consultation'
+  }));
+  grid.appendChild(offer({
+    title: 'Expert Scan Review',
+    body: 'A specialist reviews the relevant report and images and gives a concise clinical interpretation and suggested next step. This is a clinician service, not an AI output.',
+    range: true, cta: 'Request expert scan review'
+  }));
+  grid.appendChild(offer({
+    title: 'Ask the Care Team to Call',
+    body: 'Share your contact details and our care team can help you choose the right specialist or appointment.',
+    plain: true, cta: 'Request a Callback', callback: true
+  }));
+
+  c.appendChild(grid);
+
+  var row = el('div', null, '');
+  row.style.cssText = 'display:flex;gap:11px;flex-wrap:wrap;align-items:center;margin-top:20px';
+  var wa = el('a', 'btn btn-ghost');
+  wa.href = 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent('Hi, I used ŪPIRI LungScan and would like help with specialist review.');
+  wa.target = '_blank'; wa.rel = 'noreferrer';
+  wa.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 15l-1.2 4.3 4.4-1.2A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.6.7.7-2.5-.2-.3A8 8 0 1 1 12 20z"></path></svg>Chat with the Care Team on WhatsApp';
+  row.appendChild(wa);
+  var quiet = el('button', 'btn-link', "I'll continue with the AI explanation");
+  quiet.type = 'button';
+  quiet.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  row.appendChild(quiet);
+  c.appendChild(row);
+
+  c.appendChild(el('div', 'note', 'Free AI Preliminary Review — ' + rupees(0) + '. Consultation prices are shown before you book. Uppi explains; a specialist decides.'));
+  return c;
+}
+
+function offer(o) {
+  var d = el('div', 'offer' + (o.lead ? ' lead' : ''));
+  d.appendChild(el('h4', null, esc(o.title)));
+  d.appendChild(el('p', null, esc(o.body)));
+  if (o.range) {
+    d.appendChild(el('div', 'price', '<span class="now tnum">' + rupees(CONFIG.scanReviewFrom) + '–' + CONFIG.scanReviewTo + '</span>'));
+  } else if (!o.plain) {
+    d.appendChild(el('div', 'price',
+      '<span class="now tnum">' + rupees(o.now) + '</span>'
+      + '<span class="was tnum">Regular ' + rupees(o.was) + '</span>'
+      + (o.was > o.now ? '<span class="save tnum">Save ' + rupees(o.was - o.now) + '</span>' : '')));
+  } else {
+    d.appendChild(el('div', 'price', '<span class="free">No charge</span>'));
+  }
+  var b = el('button', 'btn ' + (o.lead ? 'btn-primary' : 'btn-ghost') + ' btn-sm', esc(o.cta));
+  b.type = 'button';
+  b.style.alignSelf = 'flex-start';
+  b.addEventListener('click', function () { S.from = o.callback ? 'review' : 'review'; openCallback(o.title); });
+  d.appendChild(b);
+  return d;
+}
+
+function openCallback(what) {
+  $('#cb-ref').value = S.files.length ? S.files.map(function (f) { return f.name; }).join(', ') : 'No file uploaded';
+  var sel = $('#cb-type');
+  if (/Video/i.test(what)) sel.selectedIndex = 0;
+  else if (/In-Person/i.test(what)) sel.selectedIndex = 1;
+  else if (/Scan Review/i.test(what)) sel.selectedIndex = 2;
+  else sel.selectedIndex = 3;
+  $('#cb-form').hidden = false;
+  $('#cb-done').hidden = true;
+  show('callback');
+}
+
+/* ---------------------------------------------------------------------------
+   Wiring
+   --------------------------------------------------------------------------- */
+function init() {
+  $('#why-slot').appendChild(whyUppi());
+  mountUppi($('#hero-uppi'));
+  mountUppi($('#home-mini'));
+  buildFindings();
+  buildChoices($('#proc-opts'), PROCEDURES, function (t) {
+    S.procedure = t; S.entry = 'procedure'; S.from = 'procedure';
+    var b = $('#proc-next'); b.disabled = false; b.style.opacity = '1';
+  });
+  buildChoices($('#sym-opts'), SYMPTOMS, function (t, b) {
+    var on = b.getAttribute('aria-pressed') === 'true';
+    if (on) S.symptoms.push(t); else S.symptoms = S.symptoms.filter(function (x) { return x !== t; });
+    S.entry = 'symptoms'; S.from = 'symptoms';
+    var n = $('#sym-next'); var ok = S.symptoms.length > 0;
+    n.disabled = !ok; n.style.opacity = ok ? '1' : '.45';
+  }, true);
+  buildContext();
+
+  $$('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var to = b.getAttribute('data-go');
+      if (to === 'finding' || to === 'procedure' || to === 'symptoms') S.entry = to;
+      if (to === 'expert') { S.entry = 'expert'; renderExpert(); }
+      show(to);
+    });
+  });
+  $('#proc-next').addEventListener('click', function () { S.finding = FINDINGS[FINDINGS.length - 1]; goUpload(); });
+  $('#sym-next').addEventListener('click', function () { S.finding = FINDINGS[FINDINGS.length - 1]; goUpload(); });
+  $('#up-back').addEventListener('click', function () { show(S.from); });
+  $('#cb-back').addEventListener('click', function () { show(S.entry === 'expert' ? 'expert' : 'review'); });
+
+  var picker = $('#picker');
+  $$('[data-pick]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.kind = b.getAttribute('data-pick');
+      picker.removeAttribute('capture');
+      if (S.kind === 'photo') picker.setAttribute('capture', 'environment');
+      picker.accept = S.kind === 'scan' ? '.jpg,.jpeg,.png,.dcm' : '.pdf,.jpg,.jpeg,.png';
+      picker.click();
+    });
+  });
+  picker.addEventListener('change', function () { addFiles(picker.files, S.kind); picker.value = ''; });
+
+  var drop = $('#drop');
+  ['dragenter', 'dragover'].forEach(function (e) {
+    drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.add('hot'); });
+  });
+  ['dragleave', 'drop'].forEach(function (e) {
+    drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.remove('hot'); });
+  });
+  drop.addEventListener('drop', function (ev) {
+    if (ev.dataTransfer && ev.dataTransfer.files) addFiles(ev.dataTransfer.files, 'report');
+  });
+
+  $('#up-sample').addEventListener('click', function () {
+    S.files = [{ name: 'CT-Chest-Report.pdf', kind: 'report' }];
+    renderFiles();
+  });
+  $('#up-go').addEventListener('click', runReview);
+
+  $('#cb-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('#cb-form').hidden = true;
+    $('#cb-done').hidden = false;
+    $('#cb-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  $$('[data-review]').forEach(function (b) {
+    b.addEventListener('click', function () { openCallback(b.getAttribute('data-review')); });
+  });
+
+  $('#foot-note').innerHTML = 'Uppi’s navigation level is decided by rules in this prototype, not by the language model — the model phrases a decision, it never makes one. Prices, contact points and copy are constants: video ' + rupees(CONFIG.video) + ' against a regular ' + rupees(CONFIG.regularConsult) + ' (a saving of ' + rupees(saving) + ', computed rather than written down), in-person ' + rupees(CONFIG.inPerson) + ', expert scan review ' + rupees(CONFIG.scanReviewFrom) + '–' + CONFIG.scanReviewTo + '. The WhatsApp number is still a placeholder, as it is on the live site — no number has been supplied.';
+}
+
+function renderExpert() {
+  var host = $('#expert-convert');
+  host.innerHTML = '';
+  host.appendChild(conversionPanel());
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+})();
+</script>

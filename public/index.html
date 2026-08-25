@@ -2244,6 +2244,22 @@ x-dc [data-rail-docs]>*{flex-basis:224px}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
         </span>
       </a>
+      <!-- Someone who has just had a scan arrives here holding the report, not
+           looking for a procedure to read about. This is the door for them. -->
+      <a href="/lungscan" style="display:flex;width:100%;text-align:left;margin:0 0 26px;padding:28px 32px;border-radius:28px;border:1px solid rgba(94,130,232,0.3);background:linear-gradient(135deg,#EAF2FB,#F4F7FE);cursor:pointer;gap:22px;align-items:center;flex-wrap:wrap" style-hover="transform:translateY(-2px);color:#2C2A6B">
+        <span aria-hidden="true" style="flex:none;width:56px;height:56px;border-radius:18px;background:#2C4C9B;color:#fff;display:flex;align-items:center;justify-content:center">
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path><circle cx="11" cy="11" r="2.4"></circle></svg>
+        </span>
+        <span style="flex:1;min-width:220px">
+          <span style="display:block;font-size:11.5px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:#2C4C9B">ŪPIRI LungScan · free preliminary review</span>
+          <span style="display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;line-height:1.25;color:#1D1B4B;margin:7px 0 6px">Already had a scan? Let Uppi explain it.</span>
+          <span style="display:block;font-size:14px;line-height:1.6;color:#3A4E86">Upload your chest report or scan and Uppi explains what it says in plain language, then points you to the Yashoda team relevant to that finding.</span>
+        </span>
+        <span aria-hidden="true" style="flex:none;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:700;color:#fff;background:#2C4C9B">
+          Open LungScan
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+        </span>
+      </a>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
         <sc-for list="{{ procCards }}" as="x" hint-placeholder-count="9">
           <article style="display:flex;flex-direction:column;padding:26px;border-radius:26px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);box-shadow:0 24px 56px -28px rgba(29,27,75,0.3)">
@@ -3757,6 +3773,10 @@ x-dc [data-rail-docs]>*{flex-basis:224px}
           <a href="/doctors" onClick="{{ goFind }}" style="color:#C9D2E6;text-decoration:underline">Find a pulmonologist</a>
           <a href="/tests-and-procedures" onClick="{{ goProcs }}" style="color:#C9D2E6;text-decoration:underline">Tests &amp; procedures</a>
           <a href="/ecmo-and-air-ambulance" onClick="{{ goEcmo }}" style="color:#C9D2E6;text-decoration:underline">ECMO &amp; air ambulance</a>
+          <!-- A real file under public/, not a dc route, so no onClick handler:
+               the browser navigates and Vercel serves it from the filesystem
+               before the SPA rewrite runs. -->
+          <a href="/lungscan" style="color:#C9D2E6;text-decoration:underline">LungScan — understand your scan</a>
           <a href="/for-doctors" onClick="{{ goDoctors }}" style="color:#C9D2E6;text-decoration:underline">For doctors</a>
           <a href="/alumni" onClick="{{ goAlumni }}" style="color:#C9D2E6;text-decoration:underline">ŪPIRI Clinical Network</a>
         </nav>
@@ -4564,6 +4584,13 @@ class Component extends DCLogic {
       'Smoking Cessation': 'పొగ మానేయడం', 'Occupational Lung Disease': 'వృత్తిపరమైన ఊపిరితిత్తుల వ్యాధి',
       'Lung Transplantation': 'ఊపిరితిత్తుల మార్పిడి', 'Interventional Pulmonology': 'ఇంటర్వెన్షనల్ పల్మనాలజీ',
       'Bronchoscopy': 'బ్రాంకోస్కోపీ', 'Pulmonary Function Testing': 'ఊపిరితిత్తుల పనితీరు పరీక్ష',
+      /* LungScan — the door for someone holding a fresh report */
+      'LungScan — understand your scan': 'లంగ్‌స్కాన్ — మీ స్కాన్‌ను అర్థం చేసుకోండి',
+      'ŪPIRI LungScan · free preliminary review': 'ఊపిరి లంగ్‌స్కాన్ · ఉచిత ప్రాథమిక సమీక్ష',
+      'Already had a scan? Let Uppi explain it.': 'ఇప్పటికే స్కాన్ చేయించుకున్నారా? ఉప్పి వివరిస్తాడు.',
+      'Upload your chest report or scan and Uppi explains what it says in plain language, then points you to the Yashoda team relevant to that finding.':
+        'మీ ఛాతీ రిపోర్ట్ లేదా స్కాన్ అప్‌లోడ్ చేయండి — అందులో ఏముందో ఉప్పి సులభమైన భాషలో వివరిస్తాడు, ఆ ఫలితానికి సంబంధించిన యశోద బృందాన్ని చూపిస్తాడు.',
+      'Open LungScan': 'లంగ్‌స్కాన్ తెరవండి',
       /* the capability tags shown on a specialist card. EBUS keeps its acronym in
          every language, as the profiles themselves do. */
       'Cryobiopsy': 'క్రయోబయాప్సీ', 'Thoracoscopy': 'థొరాకోస్కోపీ',
@@ -4712,6 +4739,13 @@ class Component extends DCLogic {
       'Smoking Cessation': 'ಧೂಮಪಾನ ತ್ಯಜಿಸುವಿಕೆ', 'Occupational Lung Disease': 'ವೃತ್ತಿಪರ ಶ್ವಾಸಕೋಶ ಕಾಯಿಲೆ',
       'Lung Transplantation': 'ಶ್ವಾಸಕೋಶ ಕಸಿ', 'Interventional Pulmonology': 'ಇಂಟರ್ವೆನ್ಷನಲ್ ಪಲ್ಮನಾಲಜಿ',
       'Bronchoscopy': 'ಬ್ರಾಂಕೋಸ್ಕೋಪಿ', 'Pulmonary Function Testing': 'ಶ್ವಾಸಕೋಶ ಕಾರ್ಯ ಪರೀಕ್ಷೆ',
+      /* LungScan */
+      'LungScan — understand your scan': 'ಲಂಗ್‌ಸ್ಕ್ಯಾನ್ — ನಿಮ್ಮ ಸ್ಕ್ಯಾನ್ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ',
+      'ŪPIRI LungScan · free preliminary review': 'ಊಪಿರಿ ಲಂಗ್‌ಸ್ಕ್ಯಾನ್ · ಉಚಿತ ಪ್ರಾಥಮಿಕ ಪರಿಶೀಲನೆ',
+      'Already had a scan? Let Uppi explain it.': 'ಈಗಾಗಲೇ ಸ್ಕ್ಯಾನ್ ಮಾಡಿಸಿದ್ದೀರಾ? ಉಪ್ಪಿ ವಿವರಿಸುತ್ತಾನೆ.',
+      'Upload your chest report or scan and Uppi explains what it says in plain language, then points you to the Yashoda team relevant to that finding.':
+        'ನಿಮ್ಮ ಎದೆಯ ವರದಿ ಅಥವಾ ಸ್ಕ್ಯಾನ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ — ಅದರಲ್ಲಿ ಏನಿದೆ ಎಂಬುದನ್ನು ಉಪ್ಪಿ ಸರಳ ಭಾಷೆಯಲ್ಲಿ ವಿವರಿಸುತ್ತಾನೆ ಮತ್ತು ಆ ಫಲಿತಾಂಶಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಯಶೋದಾ ತಂಡವನ್ನು ತೋರಿಸುತ್ತಾನೆ.',
+      'Open LungScan': 'ಲಂಗ್‌ಸ್ಕ್ಯಾನ್ ತೆರೆಯಿರಿ',
       /* the capability tags shown on a specialist card */
       'Cryobiopsy': 'ಕ್ರಯೋಬಯಾಪ್ಸಿ', 'Thoracoscopy': 'ಥೊರಾಕೋಸ್ಕೋಪಿ',
       'Airway stenting': 'ಶ್ವಾಸನಾಳ ಸ್ಟೆಂಟಿಂಗ್', 'Bronchial thermoplasty': 'ಬ್ರಾಂಕಿಯಲ್ ಥರ್ಮೋಪ್ಲಾಸ್ಟಿ',
@@ -4851,6 +4885,13 @@ class Component extends DCLogic {
       'Smoking Cessation': 'ধূমপান ত্যাগ', 'Occupational Lung Disease': 'পেশাগত ফুসফুস রোগ',
       'Lung Transplantation': 'ফুসফুস প্রতিস্থাপন', 'Interventional Pulmonology': 'ইন্টারভেনশনাল পালমোনোলজি',
       'Bronchoscopy': 'ব্রঙ্কোস্কোপি', 'Pulmonary Function Testing': 'ফুসফুসের কার্যকারিতা পরীক্ষা',
+      /* LungScan */
+      'LungScan — understand your scan': 'লাংস্ক্যান — আপনার স্ক্যান বুঝুন',
+      'ŪPIRI LungScan · free preliminary review': 'ঊপিরি লাংস্ক্যান · বিনামূল্যে প্রাথমিক পর্যালোচনা',
+      'Already had a scan? Let Uppi explain it.': 'ইতিমধ্যে স্ক্যান করিয়েছেন? উপ্পি বুঝিয়ে দেবে।',
+      'Upload your chest report or scan and Uppi explains what it says in plain language, then points you to the Yashoda team relevant to that finding.':
+        'আপনার বুকের রিপোর্ট বা স্ক্যান আপলোড করুন — তাতে কী আছে উপ্পি সহজ ভাষায় বুঝিয়ে দেবে, আর সেই ফলাফলের সঙ্গে সম্পর্কিত যশোদা দলকে দেখিয়ে দেবে।',
+      'Open LungScan': 'লাংস্ক্যান খুলুন',
       /* the capability tags shown on a specialist card */
       'Cryobiopsy': 'ক্রায়োবায়োপসি', 'Thoracoscopy': 'থোরাকোস্কোপি',
       'Airway stenting': 'শ্বাসনালী স্টেন্টিং', 'Bronchial thermoplasty': 'ব্রঙ্কিয়াল থার্মোপ্লাস্টি',
