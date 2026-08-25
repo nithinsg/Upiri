@@ -44,6 +44,19 @@ export async function startServer(port) {
     }
     let file = normalize(join(ROOT, path));
     if (!file.startsWith(ROOT)) { res.statusCode = 403; res.end(); return; }
+    /*
+     * A directory holding its own index.html is a real page, not a miss.
+     *
+     * Vercel checks the filesystem BEFORE it applies a rewrite, so
+     * `/lungscan` is served from `dist/lungscan/index.html` and the SPA
+     * fallback never runs. Collapsing every directory into the fallback here
+     * made this harness disagree with production about a page that exists —
+     * the same class of mistake as a stub that does not model the browser.
+     */
+    if (existsSync(file) && statSync(file).isDirectory()) {
+      const nested = join(file, 'index.html');
+      if (existsSync(nested)) file = nested;
+    }
     /* the SPA rewrite, minus /api/ — the same rule vercel.json applies */
     if (!existsSync(file) || statSync(file).isDirectory()) file = join(ROOT, 'index.html');
     res.setHeader('content-type', MIME[extname(file)] || 'application/octet-stream');
