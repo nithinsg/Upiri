@@ -405,11 +405,7 @@ export class UppiChat {
     const unlock = () => {
       for (const e of EVENTS) document.removeEventListener(e, unlock, true);
       this.tts.unlock();
-      requestAnimationFrame(() => {
-        const held = this._held;
-        this._held = null;
-        if (held && this._heldStillCurrent()) this.speakAs(held);
-      });
+      requestAnimationFrame(() => this.deliverHeld());
     };
     for (const e of EVENTS) document.addEventListener(e, unlock, true);
 
@@ -473,6 +469,9 @@ export class UppiChat {
    */
   showBubble(text, ctaLabel, dismissAfter) {
     if (this.open) return;
+    /* the SOURCE line, not the rendered one: `speakAs` needs the untranslated
+       text to work out which language it can actually be spoken in */
+    this._bubbleText = text;
     if (this._bubbleTimer) { clearTimeout(this._bubbleTimer); this._bubbleTimer = null; }
     if (this.hint) { this.hint.remove(); this.hint = null; }
     this.bubble.hidden = false;
@@ -487,7 +486,12 @@ export class UppiChat {
     const x = elem('button', 'uppi-bubble-dismiss', '&times;');
     x.type = 'button';
     x.setAttribute('aria-label', 'Dismiss');
-    x.addEventListener('click', (e) => { e.stopPropagation(); this.dismissBubble(); });
+    x.addEventListener('click', (e) => {
+      e.stopPropagation();
+      /* turned away by hand — do not come back with it in a voice either */
+      this._refused = true;
+      this.dismissBubble();
+    });
     this.bubble.appendChild(x);
     requestAnimationFrame(() => this.bubble.classList.add('is-in'));
     this._bubbleTimer = setTimeout(() => this.dismissBubble(), dismissAfter || 13000);
@@ -503,6 +507,7 @@ export class UppiChat {
     if (this._bubbleTimer) { clearTimeout(this._bubbleTimer); this._bubbleTimer = null; }
     if (this.bubble.hidden) return;
     this.bubble.classList.remove('is-in');
+    this._bubbleText = null;
     setTimeout(() => { this.bubble.hidden = true; this.showHint(); }, 260);
   }
 
@@ -1153,19 +1158,49 @@ export class UppiChat {
   }
 
   /**
-   * Is the line Uppi was not allowed to say still the thing on screen?
+   * Say the line the browser would not let him say, now that it will.
    *
-   * A greeting read out ten minutes late, over the top of an answer, is worse
-   * than one never read at all — that is exactly what the browser's own queue
-   * was doing. So: the dock bubble is still up, or the panel has just opened
-   * with the greeting as its only message. Anything else and the moment passed.
+   * The first version of this required the greeting bubble to still be ON
+   * SCREEN, and that was wrong in the one case that matters most: a desktop
+   * reader. Scrolling is not a gesture — Chrome grants activation on click,
+   * key, pointerup and touchend and on nothing else — so someone who arrives,
+   * scrolls and reads gives no permission at all, and by the time they click
+   * anything the bubble has dismissed itself. He never spoke a word. On a phone
+   * the first tap lands while the bubble is still up, which is exactly why it
+   * worked there and not here.
+   *
+   * What this says is whatever is actually beside him. If an offer of help
+   * replaced the greeting while he was waiting for permission, the offer is
+   * what the visitor is reading, and a voice reading something else is the very
+   * mismatch this exists to prevent. If nothing is on screen any more, the
+   * greeting comes BACK with its bubble, so the words and the voice arrive
+   * together instead of a voice arriving on its own.
+   *
+   * Four things stop him, and each is a way of saying "the moment has passed":
+   * the visitor dismissed the bubble by hand, he is already speaking, the
+   * conversation has started (a greeting after that is just wrong), or it has
+   * been long enough that greeting them would be odd rather than warm.
    */
-  _heldStillCurrent() {
-    /* `is-in` rather than `hidden`: dismissing the bubble fades it for 260ms
-       before hiding it, and a bubble on its way out is already past. */
-    if (!this.bubble.hidden && this.bubble.classList.contains('is-in')) return true;
-    if (this.open && this.log.children.length === 1) return true;
-    return false;
+  HELD_TTL = 180_000;
+
+  deliverHeld() {
+    const held = this._held;
+    this._held = null;
+    if (this._refused || this.tts.speaking) return;
+    if (this.conversation.messages.length) return;
+    const fresh = held && Date.now() - held.at <= this.HELD_TTL;
+    if (this.open) {
+      if (fresh) this.speakAs(held.text);
+      return;
+    }
+    if (!this.bubble.hidden && this.bubble.classList.contains('is-in') && this._bubbleText) {
+      this.speakAs(this._bubbleText);
+      return;
+    }
+    if (fresh) {
+      this.showBubble(held.text, 'Tell Uppi', 14000);
+      this.speakAs(held.text);
+    }
   }
 
   speakAs(text) {
@@ -1183,11 +1218,14 @@ export class UppiChat {
      * hear, and the gesture listener says it at the first legal moment.
      */
     if (this.tts.blocked) {
-      this._held = text;
+      /* only the newest line is worth holding, and `shown` records what was on
+         screen at the time so a later nudge can supersede it */
+      this._held = { text, at: Date.now() };
       this.stopBtn.hidden = true;
       this.states.resolve();
       return;
     }
+    this._held = null;
     /*
      * Speak what is written, in a voice that can pronounce it.
      *
