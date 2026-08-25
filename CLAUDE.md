@@ -267,11 +267,24 @@ and then read out a greeting from minutes earlier over the top of a live answer.
   so his mouth is not miming a voice nobody can hear, and hands it to the
   gesture listener.
 - **The first gesture flushes the engine before priming it** (`unlock()` calls
-  `cancel()` first), then says the held line *if it is still current* —
-  `_heldStillCurrent()`: the dock bubble is still presented, or the panel has
-  just opened with the greeting as its only message. Anything else and the
-  moment has passed; a greeting read out ten minutes late is worse than one
-  never read at all.
+  `cancel()` first), then `deliverHeld()` says what is actually beside him.
+- **Scrolling is not a gesture, and that is the whole desktop bug.** Chrome
+  grants activation on click, key, `pointerup` and `touchend` and on nothing
+  else. The first version of `deliverHeld` required the greeting bubble to still
+  be ON SCREEN, so a desktop reader who arrived, scrolled and read gave no
+  permission at all — and by the time they clicked anything the bubble had
+  dismissed itself and he never spoke a word. A phone worked, because the first
+  tap lands while the bubble is still up. That asymmetry is the tell.
+- **So he says whatever is beside him, and brings it back if it has gone.** An
+  offer of help that replaced the greeting is what the visitor is reading, so
+  that is what he says; if nothing is on screen any more the greeting returns
+  WITH its bubble, so the words and the voice arrive together rather than a
+  voice arriving alone. `showBubble` records the SOURCE line in `_bubbleText`,
+  not the rendered one — `speakAs` needs the untranslated text to work out which
+  language it can be spoken in.
+- **Four things still stop him**, each a way of saying the moment has passed:
+  the visitor dismissed the bubble by hand (`_refused`), he is already speaking,
+  the conversation has started, or `HELD_TTL` (3 min) has run out.
 - **Listen on `pointerup`/`touchend`/`click`, never `pointerdown`.** On a touch
   screen activation is not granted until the finger lifts, so asking at
   `pointerdown` gets exactly the silence it was meant to fix.
@@ -482,7 +495,7 @@ npm run lint    # oxlint — keep it clean
 ```
 
 ```bash
-npm test              # 575 assertions across five suites (~15min)
+npm test              # 579 assertions across five suites (~15min)
 npm test conversation # one suite by name
 ```
 
@@ -524,7 +537,7 @@ Push with `git push -u origin claude/publish-html-repo-hcls2s`. Only open a PR w
 
 0. `node scripts/check-html.mjs` — catches the silent breakages first, in seconds
 1. `npm run lint`
-2. `npm test` — must report `all suites passed` (575 assertions)
+2. `npm test` — must report `all suites passed` (579 assertions)
 3. `npm run build` — must report `prerendered 89/89 routes`
 4. Load a **non-homepage** route (`/knowledge-hub`, `/doctors`) and confirm it renders
 5. Confirm no Uppi markup is baked into `dist/index.html`:

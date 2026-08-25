@@ -942,14 +942,42 @@ const heard = (page) => page.evaluate(() => window.__spoken.map((s) => s.text).f
 }
 
 {
-  /* a line whose moment has passed is not worth saying */
+  /*
+   * The desktop reader, which is the case that was still broken.
+   *
+   * Scrolling is not a gesture. Chrome grants activation on click, key,
+   * pointerup and touchend and on NOTHING else, so someone who arrives, scrolls
+   * and reads has given no permission at all — and by the time they click, the
+   * greeting bubble has dismissed itself. Requiring the bubble to still be on
+   * screen meant he never spoke a word on a desktop, while a phone (where the
+   * first tap lands early) worked fine.
+   */
   const { ctx, page } = await arrive();
+  for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, 420); await page.waitForTimeout(400); }
+  eq(await page.evaluate(() => navigator.userActivation.hasBeenActive), false,
+    'scrolling grants no activation, so the browser still will not let him speak');
+  eq((await heard(page)).length, 0, 'and he has still said nothing');
+
   await page.evaluate(() => window.__uppi.dismissBubble());
   await page.waitForTimeout(500);                 /* the fade-out is 260ms */
   await page.mouse.click(640, 760);
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(1200);
+  const late = await heard(page);
+  eq(late.length, 1, 'at their first click he finally speaks, rather than never');
+  ok(await page.evaluate(() => {
+    const b = document.querySelector('.uppi-bubble');
+    return !b.hidden && b.classList.contains('is-in');
+  }), 'and the words are back on screen beside him, so the voice is not alone');
+  await ctx.close();
+}
+
+{
+  /* turned away by hand means "not now" — for the voice as well as the bubble */
+  const { ctx, page } = await arrive();
+  await page.click('.uppi-bubble-dismiss');
+  await page.waitForTimeout(1200);
   eq((await heard(page)).length, 0,
-    'a greeting the visitor has already scrolled past is never read out late');
+    'a visitor who dismissed the bubble is not read to anyway');
   await ctx.close();
 }
 
